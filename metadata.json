@@ -1,0 +1,17 @@
+{
+  "name": "hello-platform-plugin",
+  "serviceType": "APIUI",
+  "description": "Minimal hello-world UI plugin for MEF.DEV",
+  "dependencies": [],
+  "config": {
+    "routesUI": [
+      {
+        "lang": "en",
+        "routerLink": "hello",
+        "label": "Hello world"
+      }
+    ]
+  },
+  "externalUrl": null,
+  "configuration": "{}"
+}

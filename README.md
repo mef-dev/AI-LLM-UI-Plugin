@@ -1,20 +1,33 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Hello Platform Plugin
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+Minimal Angular 16 MEF.DEV UI plugin using:
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+- `@natec/mef-dev-ui-kit`
+- `@natec/mef-dev-platform-connector`
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+## Local development
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+```bash
+npm start
+```
+
+Open `http://localhost:4200`.
+
+## Build plugin artifact
+
+```bash
+npm run generate-version-file
+npm run build:plugin
+```
+
+The production artifact is generated in `dist/hello-platform-plugin`.
+
+## Publish to MEF.DEV
+
+Set `bauth` and optionally `alias` in `src/environments/environment.ts`, or pass them as CLI arguments.
+
+```bash
+npm run publish:mef -- bauth=YOUR_NAME:YOUR_PASSWORD alias=YOUR_ALIAS
+```
+
+`metadata.json` contains the plugin menu route configuration used during publication.
