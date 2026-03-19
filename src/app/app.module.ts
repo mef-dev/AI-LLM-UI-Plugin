@@ -1,22 +1,67 @@
-import { NgModule } from '@angular/core';
+import { inject, NgModule, provideAppInitializer } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HelloPageComponent } from './hello-page.component';
+import {
+  HTTP_INTERCEPTORS,
+  HttpClient,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
+import {
+  MefDevAuthInterceptor,
+  PlatformHelper,
+  UiProfileViewModel,
+} from '@natec/mef-dev-platform-connector';
+import { catchError, map } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { APP_BASE_HREF } from '@angular/common';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HelloPageComponent
+  declarations: [AppComponent, HelloPageComponent],
+  imports: [BrowserModule, BrowserAnimationsModule, AppRoutingModule],
+  providers: [
+    {
+      provide: APP_BASE_HREF,
+      useFactory: PlatformHelper.getAppBasePath,
+    },
+    provideAppInitializer(loadPluginData),
+    provideHttpClient(withInterceptorsFromDi()),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: MefDevAuthInterceptor,
+      multi: true,
+    },
   ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AppRoutingModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
+
+function loadPluginData() {
+  const http = inject(HttpClient);
+
+  return PlatformHelper.loadPlatformOptions().pipe(
+    map((data: UiProfileViewModel) => {
+      console.warn('✅ Platform data loaded');
+      return data;
+    }),
+    catchError((err) => {
+      console.warn('⚠️ Platform data not detected');
+      if (environment.production) {
+        throw err;
+      }
+      return PlatformHelper.setOptions({
+        httpClient: http as any,
+        alias: (environment as any).alias ?? 'ai',
+        apiUrl: (environment as any).apiUrl ?? 'https://sandbox.mef.dev',
+        pluginName: 'hello-platform-plugin',
+        headers: {
+          Authorization: `Basic ${btoa((environment as any).bauth)}`,
+        },
+      });
+    }),
+  );
+}

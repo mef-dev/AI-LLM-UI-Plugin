@@ -1,13 +1,13 @@
 {
   "name": "hello-platform-plugin",
-  "version": "0.1.2",
+  "version": "0.1.5",
   "pluginMefName": "hello-platform-plugin",
   "scripts": {
     "start": "ng serve",
     "generate-version-file": "npx generate-version-file",
     "publish": "npx mef-dev-publish",
     "build:plugin": "npm run generate-version-file && ng build --configuration production --output-hashing none --single-bundle",
-    "publish-kuber": "npm run publish apiUrl=https://api.mef.dev debug=true updateConfiguration=true"
+    "publish-kuber": "npm run publish apiUrl=https://api.mef.dev"
   },
   "private": true,
   "dependencies": {

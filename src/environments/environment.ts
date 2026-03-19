@@ -4,6 +4,6 @@ export const environment = {
   production: false,
   version: PLUGIN_VERSION.version,
   alias: 'ai',
-  bauth: '',
-  apiUrl: 'https://api.mef.dev'
+  apiUrl: 'https://api.mef.dev',
+  bauth: ''
 };

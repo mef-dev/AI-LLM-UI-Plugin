@@ -1,1 +1,5 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'node_modules/@natec/mef-dev-ui-kit/src/lib/styles/global.scss';
+
+hello-platform-plugin {
+  @import "node_modules/@natec/mef-dev-ui-kit/src/lib/styles/core.scss";
+}

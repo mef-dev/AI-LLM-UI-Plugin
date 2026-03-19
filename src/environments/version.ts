@@ -1,14 +1,14 @@
 export const PLUGIN_VERSION = {
     "dirty": true,
-    "raw": "3a18cbf-dirty",
-    "hash": "3a18cbf",
+    "raw": "ceba54f-dirty",
+    "hash": "ceba54f",
     "distance": null,
     "tag": null,
     "semver": null,
-    "suffix": "3a18cbf-dirty",
+    "suffix": "ceba54f-dirty",
     "semverString": null,
     "name": "hello-platform-plugin",
-    "version": "0.1.2",
+    "version": "0.1.5",
     "pluginMefName": "hello-platform-plugin",
     "main": "main.js"
 };
