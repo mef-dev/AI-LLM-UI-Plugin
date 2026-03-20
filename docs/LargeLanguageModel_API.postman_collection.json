@@ -1,0 +1,1172 @@
+{
+	"info": {
+		"_postman_id": "llm-api-0.4.0.3",
+		"name": "LargeLanguageModel API v0.4.0.3",
+		"description": "Full API collection for LargeLanguageModel service.\nCovers: Chat, Embeddings, LLM Registry, Document RAG, Vector, Database Migration.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://stage-api.mef.dev/api/v2/ai",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "YOUR_API_KEY_HERE",
+			"type": "string"
+		},
+		{
+			"key": "collection_name",
+			"value": "my-collection",
+			"type": "string"
+		},
+		{
+			"key": "document_id",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string"
+		},
+		{
+			"key": "chunk_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "llm_id",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string"
+		},
+		{
+			"key": "vector_table_name",
+			"value": "my_vectors",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "key",
+				"value": "ApiKey",
+				"type": "string"
+			},
+			{
+				"key": "value",
+				"value": "{{api_key}}",
+				"type": "string"
+			},
+			{
+				"key": "in",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "1. Chat API",
+			"item": [
+				{
+					"name": "POST Chat Completions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model\": \"meta-llama/Llama-3.1-8B-Instruct\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a helpful assistant.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Hello, how are you?\"\n    }\n  ],\n  \"stream\": false,\n  \"tag\": null,\n  \"stream_interval\": 0.1,\n  \"diversity_penalty\": 0.0,\n  \"do_sample\": true,\n  \"early_stopping\": false,\n  \"length_penalty\": 1.0,\n  \"max_tokens\": 1024,\n  \"min_length\": 0,\n  \"no_repeat_ngram_size\": 0,\n  \"num_beams\": 1,\n  \"num_return_sequences\": 1,\n  \"past_present_share_buffer\": false,\n  \"repetition_penalty\": 1.0,\n  \"temperature\": 0.7,\n  \"top_k\": 50,\n  \"top_p\": 0.9\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/chat/completions",
+							"host": ["{{base_url}}"],
+							"path": ["chat", "completions"]
+						},
+						"description": "Generate chat model response (chat completions). Supports streaming."
+					}
+				},
+				{
+					"name": "POST Chat Completions (Streaming)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model\": \"meta-llama/Llama-3.1-8B-Instruct\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Explain quantum computing in simple terms.\"\n    }\n  ],\n  \"stream\": true,\n  \"max_tokens\": 512,\n  \"temperature\": 0.7,\n  \"top_p\": 0.9\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/chat/completions",
+							"host": ["{{base_url}}"],
+							"path": ["chat", "completions"]
+						},
+						"description": "Generate chat model response with SSE streaming enabled."
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Embeddings API",
+			"item": [
+				{
+					"name": "POST Generate Embeddings",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model\": \"gte-base\",\n  \"input\": \"Your text string goes here\",\n  \"chunk_length\": 512\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/embeddings",
+							"host": ["{{base_url}}"],
+							"path": ["embeddings"]
+						},
+						"description": "Generate embeddings for input text."
+					}
+				},
+				{
+					"name": "POST Generate Embeddings (Array input)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model\": \"gte-base\",\n  \"input\": [\n    \"First text to embed\",\n    \"Second text to embed\"\n  ],\n  \"chunk_length\": 512\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/embeddings",
+							"host": ["{{base_url}}"],
+							"path": ["embeddings"]
+						},
+						"description": "Generate embeddings for an array of texts."
+					}
+				}
+			]
+		},
+		{
+			"name": "3. LLM Registry API",
+			"item": [
+				{
+					"name": "GET List LLM Models",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/llm?status=VALIDATED&modelName=",
+							"host": ["{{base_url}}"],
+							"path": ["llm"],
+							"query": [
+								{
+									"key": "status",
+									"value": "VALIDATED",
+									"description": "Filter by status: DRAFT, VALIDATED, DISABLED"
+								},
+								{
+									"key": "modelName",
+									"value": "",
+									"description": "Filter by model name"
+								}
+							]
+						},
+						"description": "Get list of registered LLM models (tenant-scoped)."
+					}
+				},
+				{
+					"name": "GET LLM Model by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/llm/{{llm_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["llm", "{{llm_id}}"]
+						},
+						"description": "Get LLM model details by ID."
+					}
+				},
+				{
+					"name": "POST Create LLM Model",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_name\": \"meta-llama/Llama-3.1-8B-Instruct\",\n  \"display_name\": \"Llama 3.1 8B\",\n  \"device\": \"cuda\",\n  \"access_mode\": \"direct\",\n  \"is_required\": false,\n  \"url\": \"http://localhost:8080\",\n  \"api_key\": \"\",\n  \"headers\": {\n    \"Authorization\": \"Bearer token\"\n  },\n  \"version\": \"3.1\",\n  \"capabilities\": {\n    \"chat\": true,\n    \"embeddings\": false\n  },\n  \"config\": {\n    \"max_context\": 4096\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/llm",
+							"host": ["{{base_url}}"],
+							"path": ["llm"]
+						},
+						"description": "Register a new LLM model."
+					}
+				},
+				{
+					"name": "PUT Update LLM Model",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_name\": \"meta-llama/Llama-3.1-8B-Instruct\",\n  \"display_name\": \"Llama 3.1 8B (Updated)\",\n  \"device\": \"cuda\",\n  \"access_mode\": \"internal_service\",\n  \"is_required\": true,\n  \"url\": \"http://localhost:8080\",\n  \"api_key\": \"\",\n  \"headers\": {},\n  \"version\": \"3.1.1\",\n  \"status\": \"VALIDATED\",\n  \"capabilities\": {\n    \"chat\": true,\n    \"embeddings\": true\n  },\n  \"config\": {\n    \"max_context\": 8192\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/llm/{{llm_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["llm", "{{llm_id}}"]
+						},
+						"description": "Update an existing LLM model."
+					}
+				},
+				{
+					"name": "POST Validate LLM Model",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/llm/{{llm_id}}/validate",
+							"host": ["{{base_url}}"],
+							"path": ["llm", "{{llm_id}}", "validate"]
+						},
+						"description": "Validate a registered model (check availability)."
+					}
+				},
+				{
+					"name": "DELETE LLM Model",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/llm/{{llm_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["llm", "{{llm_id}}"]
+						},
+						"description": "Delete a registered LLM model."
+					}
+				},
+				{
+					"name": "POST Upload LLM Model File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "ZIP archive with model files"
+								},
+								{
+									"key": "device",
+									"value": "cuda",
+									"type": "text",
+									"description": "Target device: cpu, cuda"
+								},
+								{
+									"key": "version",
+									"value": "1.0",
+									"type": "text",
+									"description": "Model version"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/llm/{{llm_id}}/upload",
+							"host": ["{{base_url}}"],
+							"path": ["llm", "{{llm_id}}", "upload"]
+						},
+						"description": "Upload model file (ZIP archive) to server."
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Document RAG API",
+			"item": [
+				{
+					"name": "4.1 Collections",
+					"item": [
+						{
+							"name": "POST Create Collection",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"my-collection\",\n  \"description\": \"A collection for storing knowledge base documents\",\n  \"model\": \"gte-base\",\n  \"chunk_length\": 512,\n  \"chunk_overlap\": 50,\n  \"provider\": \"Pgvector\",\n  \"vector_search\": {\n    \"algorithms\": [\n      {\n        \"name\": \"my_hnsw\",\n        \"kind\": \"hnsw\",\n        \"hnsw_parameters\": {\n          \"m\": 16,\n          \"ef_construction\": 200,\n          \"ef_search\": 100,\n          \"metric\": \"cosine\"\n        }\n      }\n    ],\n    \"profiles\": [\n      {\n        \"name\": \"default_profile\",\n        \"algorithm\": \"my_hnsw\"\n      }\n    ]\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/document/collection",
+									"host": ["{{base_url}}"],
+									"path": ["document", "collection"]
+								},
+								"description": "Create a new document collection."
+							}
+						},
+						{
+							"name": "GET List Collections",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/document/collection?page=1&pageSize=20",
+									"host": ["{{base_url}}"],
+									"path": ["document", "collection"],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "Page number"
+										},
+										{
+											"key": "pageSize",
+											"value": "20",
+											"description": "Page size"
+										}
+									]
+								},
+								"description": "Get list of collections (paginated)."
+							}
+						},
+						{
+							"name": "GET Collection Details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/document/collection/{{collection_name}}",
+									"host": ["{{base_url}}"],
+									"path": ["document", "collection", "{{collection_name}}"]
+								},
+								"description": "Get collection details with document and chunk counts."
+							}
+						},
+						{
+							"name": "PUT Update Collection",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"description\": \"Updated collection description\",\n  \"chunk_length\": 1024,\n  \"chunk_overlap\": 100\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/document/collection/{{collection_name}}",
+									"host": ["{{base_url}}"],
+									"path": ["document", "collection", "{{collection_name}}"]
+								},
+								"description": "Update a collection."
+							}
+						},
+						{
+							"name": "DELETE Collection",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/document/collection/{{collection_name}}",
+									"host": ["{{base_url}}"],
+									"path": ["document", "collection", "{{collection_name}}"]
+								},
+								"description": "Delete a collection with all documents and chunks."
+							}
+						}
+					]
+				},
+				{
+					"name": "4.2 Documents",
+					"item": [
+						{
+							"name": "POST Create Document",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Getting Started Guide\",\n  \"content\": \"This is the full text content of the document that will be chunked and embedded automatically.\",\n  \"source\": \"https://docs.example.com/getting-started\",\n  \"tags\": [\"guide\", \"onboarding\"],\n  \"metadata\": {\n    \"author\": \"John Doe\",\n    \"category\": \"documentation\"\n  },\n  \"chunk_length\": 512,\n  \"chunk_overlap\": 50\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents"]
+								},
+								"description": "Create a document in a collection. Automatically chunks and generates embeddings."
+							}
+						},
+						{
+							"name": "GET List Documents",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents?page=1&pageSize=20&search=&tags=&sortBy=created_at&sortOrder=desc",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents"],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "pageSize",
+											"value": "20"
+										},
+										{
+											"key": "search",
+											"value": "",
+											"description": "Search by title"
+										},
+										{
+											"key": "tags",
+											"value": "",
+											"description": "Filter by tags (comma-separated)"
+										},
+										{
+											"key": "sortBy",
+											"value": "created_at",
+											"description": "Sort field"
+										},
+										{
+											"key": "sortOrder",
+											"value": "desc",
+											"description": "Sort direction: asc or desc"
+										}
+									]
+								},
+								"description": "Get list of documents in a collection."
+							}
+						},
+						{
+							"name": "POST Batch Create Documents",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"documents\": [\n    {\n      \"title\": \"Document 1\",\n      \"content\": \"Content of the first document.\",\n      \"source\": \"source-1\",\n      \"tags\": [\"batch\", \"test\"],\n      \"metadata\": {}\n    },\n    {\n      \"title\": \"Document 2\",\n      \"content\": \"Content of the second document.\",\n      \"source\": \"source-2\",\n      \"tags\": [\"batch\"],\n      \"metadata\": {}\n    }\n  ],\n  \"chunk_length\": 512,\n  \"chunk_overlap\": 50\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/batch",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "batch"]
+								},
+								"description": "Batch create multiple documents at once."
+							}
+						},
+						{
+							"name": "POST Upload Document File",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "",
+											"description": "Document file to upload"
+										},
+										{
+											"key": "title",
+											"value": "Uploaded Document",
+											"type": "text",
+											"description": "Document title (defaults to filename)"
+										},
+										{
+											"key": "tags",
+											"value": "[\"uploaded\", \"file\"]",
+											"type": "text",
+											"description": "Tags (JSON string)"
+										},
+										{
+											"key": "metadata",
+											"value": "{\"source_type\": \"file_upload\"}",
+											"type": "text",
+											"description": "Metadata (JSON string)"
+										},
+										{
+											"key": "chunk_length",
+											"value": "512",
+											"type": "text",
+											"description": "Chunk length"
+										},
+										{
+											"key": "chunk_overlap",
+											"value": "50",
+											"type": "text",
+											"description": "Chunk overlap"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/upload",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "upload"]
+								},
+								"description": "Upload a document from a file."
+							}
+						},
+						{
+							"name": "GET Document Details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/{{document_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "{{document_id}}"]
+								},
+								"description": "Get document details with chunks."
+							}
+						},
+						{
+							"name": "PUT Update Document",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Updated Document Title\",\n  \"content\": \"Updated content - chunks and embeddings will be regenerated.\",\n  \"source\": \"https://docs.example.com/updated\",\n  \"tags\": [\"updated\", \"v2\"],\n  \"metadata\": {\n    \"version\": 2\n  },\n  \"chunk_length\": 1024,\n  \"chunk_overlap\": 100\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/{{document_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "{{document_id}}"]
+								},
+								"description": "Update a document. Regenerates chunks and embeddings if content changed."
+							}
+						},
+						{
+							"name": "DELETE Document",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/{{document_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "{{document_id}}"]
+								},
+								"description": "Delete a document with all its chunks."
+							}
+						}
+					]
+				},
+				{
+					"name": "4.3 Chunks",
+					"item": [
+						{
+							"name": "GET List Chunks",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/{{document_id}}/chunks",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "{{document_id}}", "chunks"]
+								},
+								"description": "Get all chunks of a document."
+							}
+						},
+						{
+							"name": "POST Create Chunk",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"content\": \"This is the content of a manually created chunk.\",\n  \"chunk_index\": 0,\n  \"metadata\": {\n    \"source_page\": 1\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/{{document_id}}/chunks",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "{{document_id}}", "chunks"]
+								},
+								"description": "Create a new chunk for a document."
+							}
+						},
+						{
+							"name": "GET Chunk by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/{{document_id}}/chunks/{{chunk_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "{{document_id}}", "chunks", "{{chunk_id}}"]
+								},
+								"description": "Get a specific chunk by ID."
+							}
+						},
+						{
+							"name": "PUT Update Chunk",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"content\": \"Updated chunk content with new information.\",\n  \"metadata\": {\n    \"updated\": true\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/{{document_id}}/chunks/{{chunk_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "{{document_id}}", "chunks", "{{chunk_id}}"]
+								},
+								"description": "Update a chunk."
+							}
+						},
+						{
+							"name": "DELETE Chunk",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/documents/{{document_id}}/chunks/{{chunk_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "documents", "{{document_id}}", "chunks", "{{chunk_id}}"]
+								},
+								"description": "Delete a chunk."
+							}
+						}
+					]
+				},
+				{
+					"name": "4.4 Search",
+					"item": [
+						{
+							"name": "POST Semantic Search",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"How to configure authentication?\",\n  \"top_k\": 5,\n  \"metric\": \"cosine\",\n  \"score_mode\": \"similarity\",\n  \"tags\": [],\n  \"min_score\": 0.7,\n  \"include_content\": true,\n  \"include_metadata\": true,\n  \"select\": null,\n  \"search_fields\": null,\n  \"decorators\": {}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/search",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "search"]
+								},
+								"description": "Semantic search across collection documents."
+							}
+						},
+						{
+							"name": "POST Semantic Search (with tag filter)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"deployment instructions\",\n  \"top_k\": 10,\n  \"tags\": [\"guide\", \"deployment\"],\n  \"min_score\": 0.5,\n  \"include_content\": true,\n  \"include_metadata\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/document/{{collection_name}}/search",
+									"host": ["{{base_url}}"],
+									"path": ["document", "{{collection_name}}", "search"]
+								},
+								"description": "Semantic search with tag filtering."
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "5. Vector API",
+			"item": [
+				{
+					"name": "POST Get Table Structure",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/{{vector_table_name}}/table",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "{{vector_table_name}}", "table"]
+						},
+						"description": "Get table structure."
+					}
+				},
+				{
+					"name": "POST Get Table Data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"select\": \"id, content, embedding\",\n  \"embedding\": \"embedding\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/{{vector_table_name}}/get",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "{{vector_table_name}}", "get"]
+						},
+						"description": "Get data from a vector table."
+					}
+				},
+				{
+					"name": "POST Create Vector Database",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"database_name\": \"my_vector_db\",\n  \"description\": \"Vector database for document embeddings\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/db",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "db"]
+						},
+						"description": "Create a new vector database."
+					}
+				},
+				{
+					"name": "POST Execute SQL (Non-Query)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"database_name\": \"my_vector_db\",\n  \"query\": \"CREATE INDEX idx_embedding ON my_vectors USING hnsw (embedding vector_cosine_ops)\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/execute",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "execute"]
+						},
+						"description": "Execute a SQL query (non-query, e.g. CREATE INDEX)."
+					}
+				},
+				{
+					"name": "POST Execute SQL (Reader)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"database_name\": \"my_vector_db\",\n  \"query\": \"SELECT id, content FROM my_vectors LIMIT 10\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/execute-reader",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "execute-reader"]
+						},
+						"description": "Execute a SQL query that returns data."
+					}
+				},
+				{
+					"name": "POST Create Vector Table",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"name\": \"my_vectors\",\n  \"fields\": [\n    {\n      \"name\": \"id\",\n      \"type\": \"bigint\",\n      \"key\": true,\n      \"auto_increment\": true\n    },\n    {\n      \"name\": \"content\",\n      \"type\": \"text\"\n    },\n    {\n      \"name\": \"metadata\",\n      \"type\": \"jsonb\"\n    },\n    {\n      \"name\": \"embedding\",\n      \"type\": \"vector\",\n      \"dimensions\": 768,\n      \"vector_search_profile\": \"default_profile\"\n    }\n  ],\n  \"vector_search\": {\n    \"algorithms\": [\n      {\n        \"name\": \"my_hnsw\",\n        \"kind\": \"hnsw\",\n        \"hnsw_parameters\": {\n          \"m\": 16,\n          \"ef_construction\": 200,\n          \"ef_search\": 100,\n          \"metric\": \"cosine\"\n        }\n      }\n    ],\n    \"profiles\": [\n      {\n        \"name\": \"default_profile\",\n        \"algorithm\": \"my_hnsw\"\n      }\n    ]\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/create",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "create"]
+						},
+						"description": "Create a new vector table with field definitions and search configuration."
+					}
+				},
+				{
+					"name": "PUT Update Vector Table",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"name\": \"my_vectors\",\n  \"fields\": [\n    {\n      \"name\": \"id\",\n      \"type\": \"bigint\",\n      \"key\": true,\n      \"auto_increment\": true\n    },\n    {\n      \"name\": \"content\",\n      \"type\": \"text\"\n    },\n    {\n      \"name\": \"metadata\",\n      \"type\": \"jsonb\"\n    },\n    {\n      \"name\": \"embedding\",\n      \"type\": \"vector\",\n      \"dimensions\": 1024,\n      \"vector_search_profile\": \"default_profile\"\n    }\n  ],\n  \"vector_search\": {\n    \"algorithms\": [\n      {\n        \"name\": \"my_hnsw\",\n        \"kind\": \"hnsw\",\n        \"hnsw_parameters\": {\n          \"m\": 32,\n          \"ef_construction\": 400,\n          \"ef_search\": 200,\n          \"metric\": \"cosine\"\n        }\n      }\n    ],\n    \"profiles\": [\n      {\n        \"name\": \"default_profile\",\n        \"algorithm\": \"my_hnsw\"\n      }\n    ]\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/{{vector_table_name}}/update",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "{{vector_table_name}}", "update"]
+						},
+						"description": "Update a vector table structure."
+					}
+				},
+				{
+					"name": "POST Upload Documents to Vector Table",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"model\": \"BAAI/bge-m3\",\n  \"value\": [\n    {\n      \"content\": \"First text to embed and store\",\n      \"metadata\": {\n        \"source\": \"doc1\"\n      }\n    },\n    {\n      \"content\": \"Second text to embed and store\",\n      \"metadata\": {\n        \"source\": \"doc2\"\n      }\n    }\n  ],\n  \"chunk_length\": 512\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/{{vector_table_name}}/upload",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "{{vector_table_name}}", "upload"]
+						},
+						"description": "Upload documents to a vector table. Generates embeddings automatically."
+					}
+				},
+				{
+					"name": "POST Vector Search",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"model\": \"BAAI/bge-m3\",\n  \"search\": \"How to deploy the application?\",\n  \"select\": \"id, content\",\n  \"search_fields\": \"content\",\n  \"embedding\": \"embedding\",\n  \"vector_queries\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/{{vector_table_name}}/search",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "{{vector_table_name}}", "search"]
+						},
+						"description": "Vector search in a table."
+					}
+				},
+				{
+					"name": "POST Vector Search (with vector query)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"model\": \"BAAI/bge-m3\",\n  \"search\": \"query text\",\n  \"select\": \"id, content\",\n  \"search_fields\": \"content\",\n  \"embedding\": \"embedding\",\n  \"vector_queries\": [\n    {\n      \"vector\": [0.1, 0.2, 0.3],\n      \"fields\": \"embedding\",\n      \"k\": 10,\n      \"metric\": \"cosine\",\n      \"decorators\": {}\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/{{vector_table_name}}/search",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "{{vector_table_name}}", "search"]
+						},
+						"description": "Vector search with explicit vector query."
+					}
+				},
+				{
+					"name": "DELETE Vector Table Records",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"delete_field\": \"id\",\n  \"value\": 42\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/{{vector_table_name}}/delete",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "{{vector_table_name}}", "delete"]
+						},
+						"description": "Delete records from a vector table by condition."
+					}
+				},
+				{
+					"name": "DELETE Drop Vector Table",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"Pgvector\",\n  \"delete_field\": \"\",\n  \"value\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vector/{{vector_table_name}}/drop",
+							"host": ["{{base_url}}"],
+							"path": ["vector", "{{vector_table_name}}", "drop"]
+						},
+						"description": "Drop (delete) a vector table completely."
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Database Migration API",
+			"item": [
+				{
+					"name": "GET Run Migrations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/llm-db/migrate",
+							"host": ["{{base_url}}"],
+							"path": ["llm-db", "migrate"]
+						},
+						"description": "Run database migrations manually."
+					}
+				}
+			]
+		}
+	]
+}
