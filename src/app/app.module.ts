@@ -25,6 +25,7 @@ import { HelloPageComponent } from './hello-page.component';
 import { LlmDbPageComponent } from './llm-db-page.component';
 import { LlmPageComponent } from './llm-page.component';
 import { ModulePageComponent } from './module-page.component';
+import { PluginShellComponent } from './plugin-shell.component';
 import { VectorPageComponent } from './vector-page.component';
 
 @NgModule({
@@ -32,6 +33,7 @@ import { VectorPageComponent } from './vector-page.component';
     AppComponent,
     HelloPageComponent,
     ModulePageComponent,
+    PluginShellComponent,
     ChatPageComponent,
     LlmDbPageComponent,
     DocumentPageComponent,
