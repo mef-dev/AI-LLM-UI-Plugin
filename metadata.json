@@ -1,7 +1,7 @@
 {
   "name": "ai-llm-ui",
   "serviceType": "UI",
-  "description": "Minimal hello-world UI plugin for MEF.DEV",
+  "description": "AI LLM UI plugin for interacting with the ai backend module on MEF.DEV",
   "dependencies": [],
   "config": {
     "routesUI": [
