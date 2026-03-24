@@ -1,6 +1,6 @@
-# Hello Platform Plugin
+# AI LLM UI Plugin
 
-Minimal Angular 16 MEF.DEV UI plugin using:
+Angular MEF.DEV UI plugin for the `ai` backend module using:
 
 - `@natec/mef-dev-ui-kit`
 - `@natec/mef-dev-platform-connector`
