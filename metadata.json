@@ -1,14 +1,39 @@
 {
-  "name": "hello-platform-plugin",
-  "serviceType": "APIUI",
+  "name": "ai-llm-ui",
+  "serviceType": "UI",
   "description": "Minimal hello-world UI plugin for MEF.DEV",
   "dependencies": [],
   "config": {
     "routesUI": [
       {
         "lang": "en",
-        "routerLink": "hello",
-        "label": "Hello world"
+        "routerLink": "chat",
+        "label": "Chat"
+      },
+      {
+        "lang": "en",
+        "routerLink": "llm-db",
+        "label": "LLM DB"
+      },
+      {
+        "lang": "en",
+        "routerLink": "document",
+        "label": "Document"
+      },
+      {
+        "lang": "en",
+        "routerLink": "embeddings",
+        "label": "Embeddings"
+      },
+      {
+        "lang": "en",
+        "routerLink": "llm",
+        "label": "LLM"
+      },
+      {
+        "lang": "en",
+        "routerLink": "vector",
+        "label": "Vector"
       }
     ]
   },

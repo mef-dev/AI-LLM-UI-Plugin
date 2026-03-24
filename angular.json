@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "hello-platform-plugin": {
+    "ai-llm-ui": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "ngx-build-plus:browser",
           "options": {
-            "outputPath": "dist/hello-platform-plugin",
+            "outputPath": "dist/ai-llm-ui",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -71,10 +71,10 @@
           "builder": "ngx-build-plus:dev-server:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "hello-platform-plugin:build:production"
+              "buildTarget": "ai-llm-ui:build:production"
             },
             "development": {
-              "buildTarget": "hello-platform-plugin:build:development"
+              "buildTarget": "ai-llm-ui:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -82,7 +82,7 @@
         "extract-i18n": {
           "builder": "ngx-build-plus:extract-i18n",
           "options": {
-            "buildTarget": "hello-platform-plugin:build"
+            "buildTarget": "ai-llm-ui:build"
           }
         },
         "test": {

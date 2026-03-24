@@ -1,1 +1,27 @@
-<router-outlet></router-outlet>
+<div class="app-shell">
+  <aside class="side-panel">
+    <p class="eyebrow">AI LLM UI</p>
+    <h1>Swagger modules</h1>
+    <p class="intro">
+      Six frontend pages mapped to the backend areas from Swagger so the plugin
+      structure matches the API structure.
+    </p>
+
+    <nav class="module-nav" aria-label="Module navigation">
+      <a
+        *ngFor="let item of navigationItems"
+        class="module-link"
+        routerLinkActive="module-link--active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        [routerLink]="item.path"
+      >
+        <span class="module-link__name">{{ item.label }}</span>
+        <span class="module-link__hint">{{ item.hint }}</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="page-panel">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -20,7 +20,7 @@ npm run generate-version-file
 npm run build:plugin
 ```
 
-The production artifact is generated in `dist/hello-platform-plugin`.
+The production artifact is generated in `dist/ai-llm-ui`.
 
 ## Publish to MEF.DEV
 

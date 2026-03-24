@@ -1,0 +1,33 @@
+<section class="module-page" *ngIf="config">
+  <header class="module-hero">
+    <p class="module-hero__eyebrow">API module</p>
+    <div class="module-hero__headline">
+      <h2>{{ config.name }}</h2>
+      <span class="module-badge">Ready for routing</span>
+    </div>
+    <p class="module-hero__subtitle">{{ config.subtitle }}</p>
+    <p class="module-hero__purpose">{{ config.purpose }}</p>
+  </header>
+
+  <div class="module-grid">
+    <article class="module-card">
+      <h3>What it covers</h3>
+      <div class="section-list">
+        <section class="section-item" *ngFor="let section of config.sections">
+          <h4>{{ section.title }}</h4>
+          <p>{{ section.text }}</p>
+        </section>
+      </div>
+    </article>
+
+    <article class="module-card module-card--accent">
+      <h3>Suggested frontend actions</h3>
+      <ul class="action-list">
+        <li *ngFor="let action of config.actions">
+          <strong>{{ action.label }}</strong>
+          <span>{{ action.description }}</span>
+        </li>
+      </ul>
+    </article>
+  </div>
+</section>
