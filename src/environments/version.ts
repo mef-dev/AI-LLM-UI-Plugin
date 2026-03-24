@@ -1,14 +1,14 @@
 export const PLUGIN_VERSION = {
     "dirty": true,
-    "raw": "ceba54f-dirty",
-    "hash": "ceba54f",
+    "raw": "4199960-dirty",
+    "hash": "4199960",
     "distance": null,
     "tag": null,
     "semver": null,
-    "suffix": "ceba54f-dirty",
+    "suffix": "4199960-dirty",
     "semverString": null,
     "name": "ai-llm-ui",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "pluginMefName": "ai-llm-ui",
     "main": "main.js"
 };
