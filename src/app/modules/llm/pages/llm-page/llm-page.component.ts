@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ModulePageConfig } from './module-page.component';
+import { ModulePageConfig } from '../../../../shared/components/module-page/module-page.component';
 
 @Component({
   selector: 'app-llm-page',

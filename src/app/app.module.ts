@@ -8,32 +8,30 @@ import {
 import { inject, NgModule, provideAppInitializer } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { catchError, map } from 'rxjs';
-import { environment } from 'src/environments/environment';
-
 import {
   MefDevAuthInterceptor,
   PlatformHelper,
   UiProfileViewModel,
 } from '@natec/mef-dev-platform-connector';
+import { catchError, map } from 'rxjs';
+import { environment } from 'src/environments/environment';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ChatPageComponent } from './chat-page.component';
-import { DocumentPageComponent } from './document-page.component';
-import { EmbeddingsPageComponent } from './embeddings-page.component';
-import { HelloPageComponent } from './hello-page.component';
-import { LlmDbPageComponent } from './llm-db-page.component';
-import { LlmPageComponent } from './llm-page.component';
-import { ModulePageComponent } from './module-page.component';
-import { PluginShellComponent } from './plugin-shell.component';
-import { VectorPageComponent } from './vector-page.component';
+import { PluginShellComponent } from './container/plugin-shell/plugin-shell.component';
+import { ChatPageComponent } from './modules/chat/pages/chat-page/chat-page.component';
+import { DocumentPageComponent } from './modules/document/pages/document-page/document-page.component';
+import { EmbeddingsPageComponent } from './modules/embeddings/pages/embeddings-page/embeddings-page.component';
+import { LlmDbPageComponent } from './modules/llm-db/pages/llm-db-page/llm-db-page.component';
+import { LlmPageComponent } from './modules/llm/pages/llm-page/llm-page.component';
+import { VectorPageComponent } from './modules/vector/pages/vector-page/vector-page.component';
+import { ModulePageComponent } from './shared/components/module-page/module-page.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HelloPageComponent,
-    ModulePageComponent,
     PluginShellComponent,
+    ModulePageComponent,
     ChatPageComponent,
     LlmDbPageComponent,
     DocumentPageComponent,

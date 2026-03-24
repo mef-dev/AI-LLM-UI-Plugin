@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PlatformHelper } from '@natec/mef-dev-platform-connector';
-import { ChatPageComponent } from './chat-page.component';
-import { DocumentPageComponent } from './document-page.component';
-import { EmbeddingsPageComponent } from './embeddings-page.component';
-import { LlmDbPageComponent } from './llm-db-page.component';
-import { LlmPageComponent } from './llm-page.component';
-import { PluginShellComponent } from './plugin-shell.component';
-import { VectorPageComponent } from './vector-page.component';
+import { PluginShellComponent } from './container/plugin-shell/plugin-shell.component';
+import { ChatPageComponent } from './modules/chat/pages/chat-page/chat-page.component';
+import { DocumentPageComponent } from './modules/document/pages/document-page/document-page.component';
+import { EmbeddingsPageComponent } from './modules/embeddings/pages/embeddings-page/embeddings-page.component';
+import { LlmDbPageComponent } from './modules/llm-db/pages/llm-db-page/llm-db-page.component';
+import { LlmPageComponent } from './modules/llm/pages/llm-page/llm-page.component';
+import { VectorPageComponent } from './modules/vector/pages/vector-page/vector-page.component';
 
 const routes: Routes = PlatformHelper.updatePluginsRoutes([
   {
