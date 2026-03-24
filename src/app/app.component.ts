@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'ai-llm-ui',
+  selector: 'hello-platform-plugin',
   standalone: false,
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
