@@ -8,7 +8,7 @@ export const PLUGIN_VERSION = {
     "suffix": "4199960-dirty",
     "semverString": null,
     "name": "ai-llm-ui",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "pluginMefName": "ai-llm-ui",
     "main": "main.js"
 };
