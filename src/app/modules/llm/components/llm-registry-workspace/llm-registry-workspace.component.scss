@@ -7,8 +7,7 @@
   gap: 20px;
 }
 
-.llm-hero,
-.toolbar-card {
+.llm-hero {
   padding: 24px;
   border: 1px solid rgba(27, 31, 59, 0.09);
   border-radius: 24px;
@@ -54,41 +53,13 @@
   gap: 10px;
 }
 
-.toolbar-card,
 .content-grid {
   display: grid;
   gap: 16px;
 }
 
-.toolbar-card {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .content-grid {
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-}
-
-.field {
-  display: grid;
-  gap: 8px;
-}
-
-.field span {
-  font-size: 13px;
-  font-weight: 600;
-  color: #30385a;
-}
-
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid rgba(27, 31, 59, 0.14);
-  border-radius: 14px;
-  font: inherit;
-  color: #1b1f3b;
-  background: #fff;
 }
 
 .primary-button,
@@ -120,9 +91,5 @@
 @media (max-width: 800px) {
   .llm-hero {
     display: grid;
-  }
-
-  .toolbar-card {
-    grid-template-columns: 1fr;
   }
 }

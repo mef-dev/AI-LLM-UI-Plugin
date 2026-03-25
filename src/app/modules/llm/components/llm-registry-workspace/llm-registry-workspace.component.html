@@ -20,25 +20,11 @@
     </div>
   </header>
 
-  <section class="toolbar-card">
-    <label class="field">
-      <span>Status</span>
-      <select [(ngModel)]="filters.status" (ngModelChange)="loadModels()">
-        <option value="">All statuses</option>
-        <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
-      </select>
-    </label>
-
-    <label class="field field--search">
-      <span>Model name</span>
-      <input
-        type="text"
-        [(ngModel)]="filters.modelName"
-        (ngModelChange)="loadModels()"
-        placeholder="Search by model or display name"
-      />
-    </label>
-  </section>
+  <app-llm-registry-filters
+    [filters]="filters"
+    [statuses]="statuses"
+    (filtersChanged)="loadModels()"
+  ></app-llm-registry-filters>
 
   <div class="content-grid">
     <app-llm-registry-list

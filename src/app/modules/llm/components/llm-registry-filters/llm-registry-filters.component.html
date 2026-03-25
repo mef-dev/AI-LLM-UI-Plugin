@@ -1,0 +1,19 @@
+<section class="toolbar-card">
+  <label class="field">
+    <span>Status</span>
+    <select [(ngModel)]="filters.status" (ngModelChange)="filtersChanged.emit()">
+      <option value="">All statuses</option>
+      <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+    </select>
+  </label>
+
+  <label class="field">
+    <span>Model name</span>
+    <input
+      type="text"
+      [(ngModel)]="filters.modelName"
+      (ngModelChange)="filtersChanged.emit()"
+      placeholder="Search by model or display name"
+    />
+  </label>
+</section>

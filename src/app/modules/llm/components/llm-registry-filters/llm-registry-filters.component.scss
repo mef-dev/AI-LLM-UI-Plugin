@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.toolbar-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid rgba(27, 31, 59, 0.09);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 20px 48px rgba(27, 31, 59, 0.08);
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #30385a;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(27, 31, 59, 0.14);
+  border-radius: 14px;
+  font: inherit;
+  color: #1b1f3b;
+  background: #fff;
+}
+
+@media (max-width: 800px) {
+  .toolbar-card {
+    grid-template-columns: 1fr;
+  }
+}
