@@ -1,24 +1,8 @@
 <section class="chat-page">
-  <header class="chat-hero">
-    <div>
-      <p class="chat-hero__eyebrow">Chat completions</p>
-      <h2>Mocked `POST /chat/completions`</h2>
-      <p class="chat-hero__subtitle">
-        This page uses the documented request body shape from
-        <code>API_DOCUMENTATION.md</code> and sends it to a fake service. The UI
-        behaves as if a real chat completion endpoint exists.
-      </p>
-    </div>
-
-    <div class="chat-hero__actions">
-      <button type="button" class="ghost-button" (click)="resetConversation()">
-        Reset conversation
-      </button>
-      <button type="button" class="primary-button" (click)="sendCompletion()">
-        Send mocked request
-      </button>
-    </div>
-  </header>
+  <app-chat-playground-hero
+    (reset)="resetConversation()"
+    (send)="sendCompletion()"
+  ></app-chat-playground-hero>
 
   <app-chat-request-settings [request]="request"></app-chat-request-settings>
 

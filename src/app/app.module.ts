@@ -21,6 +21,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PluginShellComponent } from './container/plugin-shell/plugin-shell.component';
 import { PluginSidebarComponent } from './container/plugin-sidebar/plugin-sidebar.component';
+import { ChatPlaygroundHeroComponent } from './modules/chat/components/chat-playground-hero/chat-playground-hero.component';
 import { ChatMessagesEditorComponent } from './modules/chat/components/chat-messages-editor/chat-messages-editor.component';
 import { ChatPlaygroundComponent } from './modules/chat/components/chat-playground/chat-playground.component';
 import { ChatRequestSettingsComponent } from './modules/chat/components/chat-request-settings/chat-request-settings.component';
@@ -45,6 +46,7 @@ import { ModulePageComponent } from './shared/components/module-page/module-page
     PluginSidebarComponent,
     ModulePageComponent,
     ChatMessagesEditorComponent,
+    ChatPlaygroundHeroComponent,
     ChatPlaygroundComponent,
     ChatPageComponent,
     ChatRequestSettingsComponent,
