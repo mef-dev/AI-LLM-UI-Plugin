@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ModulePageConfig } from '../../../../shared/components/module-page/module-page.component';
+import { ModulePageConfig } from '../../../../shared/models/module-page.models';
 
 @Component({
   selector: 'app-embeddings-page',

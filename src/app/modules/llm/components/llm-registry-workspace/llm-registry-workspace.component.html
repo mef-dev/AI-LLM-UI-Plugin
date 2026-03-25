@@ -1,0 +1,70 @@
+<section class="llm-page">
+  <header class="llm-hero">
+    <div>
+      <p class="llm-hero__eyebrow">LLM registry</p>
+      <h2>Mocked model management</h2>
+      <p class="llm-hero__subtitle">
+        This page works against a fake in-memory API service that returns
+        Swagger-shaped LLM registry data. The UI can be built now and the real
+        HTTP service can replace it later.
+      </p>
+    </div>
+
+    <div class="llm-hero__actions">
+      <button type="button" class="ghost-button" (click)="resetFilters()">
+        Reset filters
+      </button>
+      <button type="button" class="primary-button" (click)="startCreate()">
+        Register model
+      </button>
+    </div>
+  </header>
+
+  <section class="toolbar-card">
+    <label class="field">
+      <span>Status</span>
+      <select [(ngModel)]="filters.status" (ngModelChange)="loadModels()">
+        <option value="">All statuses</option>
+        <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+      </select>
+    </label>
+
+    <label class="field field--search">
+      <span>Model name</span>
+      <input
+        type="text"
+        [(ngModel)]="filters.modelName"
+        (ngModelChange)="loadModels()"
+        placeholder="Search by model or display name"
+      />
+    </label>
+  </section>
+
+  <div class="content-grid">
+    <app-llm-registry-list
+      [models]="models"
+      [loading]="loading"
+      [errorMessage]="errorMessage"
+      [selectedModelId]="selectedModel?.model_id || null"
+      (selected)="selectModel($event)"
+    ></app-llm-registry-list>
+
+    <app-llm-registry-details
+      [model]="selectedModel"
+      (edit)="startEdit($event)"
+      (validate)="validateSelected($event)"
+      (delete)="deleteSelected($event)"
+    ></app-llm-registry-details>
+  </div>
+
+  <app-llm-registry-form
+    [form]="form"
+    [editingModelId]="editingModelId"
+    [statuses]="statuses"
+    [devices]="devices"
+    [accessModes]="accessModes"
+    [saveMessage]="saveMessage"
+    (reset)="resetEditor()"
+    (submitForm)="submitForm()"
+  ></app-llm-registry-form>
+</section>

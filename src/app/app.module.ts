@@ -6,6 +6,7 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { inject, NgModule, provideAppInitializer } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
@@ -19,9 +20,18 @@ import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PluginShellComponent } from './container/plugin-shell/plugin-shell.component';
+import { PluginSidebarComponent } from './container/plugin-sidebar/plugin-sidebar.component';
+import { ChatMessagesEditorComponent } from './modules/chat/components/chat-messages-editor/chat-messages-editor.component';
+import { ChatPlaygroundComponent } from './modules/chat/components/chat-playground/chat-playground.component';
+import { ChatRequestSettingsComponent } from './modules/chat/components/chat-request-settings/chat-request-settings.component';
+import { ChatResponsePreviewComponent } from './modules/chat/components/chat-response-preview/chat-response-preview.component';
 import { ChatPageComponent } from './modules/chat/pages/chat-page/chat-page.component';
 import { DocumentPageComponent } from './modules/document/pages/document-page/document-page.component';
 import { EmbeddingsPageComponent } from './modules/embeddings/pages/embeddings-page/embeddings-page.component';
+import { LlmRegistryDetailsComponent } from './modules/llm/components/llm-registry-details/llm-registry-details.component';
+import { LlmRegistryFormComponent } from './modules/llm/components/llm-registry-form/llm-registry-form.component';
+import { LlmRegistryListComponent } from './modules/llm/components/llm-registry-list/llm-registry-list.component';
+import { LlmRegistryWorkspaceComponent } from './modules/llm/components/llm-registry-workspace/llm-registry-workspace.component';
 import { LlmDbPageComponent } from './modules/llm-db/pages/llm-db-page/llm-db-page.component';
 import { LlmPageComponent } from './modules/llm/pages/llm-page/llm-page.component';
 import { VectorPageComponent } from './modules/vector/pages/vector-page/vector-page.component';
@@ -31,15 +41,24 @@ import { ModulePageComponent } from './shared/components/module-page/module-page
   declarations: [
     AppComponent,
     PluginShellComponent,
+    PluginSidebarComponent,
     ModulePageComponent,
+    ChatMessagesEditorComponent,
+    ChatPlaygroundComponent,
     ChatPageComponent,
+    ChatRequestSettingsComponent,
+    ChatResponsePreviewComponent,
     LlmDbPageComponent,
     DocumentPageComponent,
     EmbeddingsPageComponent,
+    LlmRegistryDetailsComponent,
+    LlmRegistryFormComponent,
+    LlmRegistryListComponent,
+    LlmRegistryWorkspaceComponent,
     LlmPageComponent,
     VectorPageComponent,
   ],
-  imports: [BrowserModule, BrowserAnimationsModule, AppRoutingModule],
+  imports: [BrowserModule, BrowserAnimationsModule, FormsModule, AppRoutingModule],
   providers: [
     {
       provide: APP_BASE_HREF,

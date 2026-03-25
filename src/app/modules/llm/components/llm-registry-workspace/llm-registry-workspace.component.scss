@@ -1,0 +1,128 @@
+:host {
+  display: block;
+}
+
+.llm-page {
+  display: grid;
+  gap: 20px;
+}
+
+.llm-hero,
+.toolbar-card {
+  padding: 24px;
+  border: 1px solid rgba(27, 31, 59, 0.09);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 20px 48px rgba(27, 31, 59, 0.08);
+}
+
+.llm-hero {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  background:
+    linear-gradient(135deg, rgba(255, 249, 242, 0.96), rgba(247, 250, 255, 0.96)),
+    #fff;
+}
+
+.llm-hero__eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9b3d24;
+}
+
+.llm-hero h2,
+.section-heading h3 {
+  margin: 0;
+  color: #1b1f3b;
+}
+
+.llm-hero__subtitle {
+  margin: 12px 0 0;
+  color: #54607d;
+  line-height: 1.6;
+}
+
+.llm-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.toolbar-card,
+.content-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.toolbar-card {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.content-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #30385a;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(27, 31, 59, 0.14);
+  border-radius: 14px;
+  font: inherit;
+  color: #1b1f3b;
+  background: #fff;
+}
+
+.primary-button,
+.ghost-button {
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: #1b1f3b;
+  color: #fff8f2;
+}
+
+.ghost-button {
+  background: transparent;
+  border-color: rgba(27, 31, 59, 0.14);
+  color: #1b1f3b;
+}
+
+@media (max-width: 1100px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .llm-hero {
+    display: grid;
+  }
+
+  .toolbar-card {
+    grid-template-columns: 1fr;
+  }
+}

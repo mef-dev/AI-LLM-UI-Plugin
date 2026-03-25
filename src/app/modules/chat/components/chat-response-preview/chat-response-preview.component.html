@@ -1,0 +1,48 @@
+<section class="response-card">
+  <div class="section-heading">
+    <h3>Mocked response</h3>
+    <span *ngIf="response">{{ response.object }}</span>
+  </div>
+
+  <p *ngIf="loading" class="state-message">Generating fake completion...</p>
+  <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
+
+  <div *ngIf="response as result" class="response-content">
+    <div class="meta-grid">
+      <div>
+        <span class="meta-label">Completion ID</span>
+        <p>{{ result.id }}</p>
+      </div>
+      <div>
+        <span class="meta-label">Model</span>
+        <p>{{ result.model }}</p>
+      </div>
+      <div>
+        <span class="meta-label">Prompt tokens</span>
+        <p>{{ result.usage.prompt_tokens }}</p>
+      </div>
+      <div>
+        <span class="meta-label">Completion tokens</span>
+        <p>{{ result.usage.completion_tokens }}</p>
+      </div>
+    </div>
+
+    <div class="assistant-block">
+      <span class="meta-label">Assistant message</span>
+      <pre>{{ result.choices[0].message.content }}</pre>
+    </div>
+
+    <div class="assistant-block">
+      <span class="meta-label">Raw response preview</span>
+      <pre>{{ formatJson(result) }}</pre>
+    </div>
+  </div>
+</section>
+
+<section class="payload-card">
+  <div class="section-heading">
+    <h3>Request preview</h3>
+    <span>What the fake API receives</span>
+  </div>
+  <pre>{{ formatJson(request) }}</pre>
+</section>

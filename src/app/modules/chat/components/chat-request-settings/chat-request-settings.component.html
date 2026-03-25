@@ -1,0 +1,48 @@
+<section class="parameters-card">
+  <div class="section-heading">
+    <h3>Request settings</h3>
+    <span>Swagger-aligned request body</span>
+  </div>
+
+  <div class="parameter-grid">
+    <label class="field">
+      <span>Model</span>
+      <input type="text" [(ngModel)]="request.model" />
+    </label>
+
+    <label class="field">
+      <span>Tag</span>
+      <input type="text" [(ngModel)]="request.tag" placeholder="demo-chat-run" />
+    </label>
+
+    <label class="field">
+      <span>Temperature</span>
+      <input type="number" step="0.1" [(ngModel)]="request.temperature" />
+    </label>
+
+    <label class="field">
+      <span>Top P</span>
+      <input type="number" step="0.1" [(ngModel)]="request.top_p" />
+    </label>
+
+    <label class="field">
+      <span>Top K</span>
+      <input type="number" [(ngModel)]="request.top_k" />
+    </label>
+
+    <label class="field">
+      <span>Max tokens</span>
+      <input type="number" [(ngModel)]="request.max_tokens" />
+    </label>
+
+    <label class="field">
+      <span>Stream interval</span>
+      <input type="number" step="0.1" [(ngModel)]="request.stream_interval" />
+    </label>
+
+    <label class="field field--toggle">
+      <input type="checkbox" [(ngModel)]="request.stream" />
+      <span>Stream</span>
+    </label>
+  </div>
+</section>

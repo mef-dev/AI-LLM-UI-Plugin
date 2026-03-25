@@ -1,0 +1,94 @@
+<section class="editor-card">
+  <div class="section-heading">
+    <h3>{{ editingModelId ? 'Edit mocked LLM' : 'Create mocked LLM' }}</h3>
+    <span>{{ editingModelId ? 'PUT /llm/{id}' : 'POST /llm' }}</span>
+  </div>
+
+  <p class="editor-note">
+    This form writes only to the fake service. The fields match the API
+    documentation so the same UI can later talk to the real backend.
+  </p>
+
+  <p *ngIf="saveMessage" class="state-message state-message--success">{{ saveMessage }}</p>
+
+  <div class="form-grid">
+    <label class="field">
+      <span>Model name</span>
+      <input
+        type="text"
+        [(ngModel)]="form.model_name"
+        placeholder="meta-llama/Llama-3.1-8B-Instruct"
+      />
+    </label>
+
+    <label class="field">
+      <span>Display name</span>
+      <input type="text" [(ngModel)]="form.display_name" placeholder="Friendly name" />
+    </label>
+
+    <label class="field">
+      <span>Device</span>
+      <select [(ngModel)]="form.device">
+        <option value="">Not set</option>
+        <option *ngFor="let device of devices" [value]="device">{{ device }}</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Access mode</span>
+      <select [(ngModel)]="form.access_mode">
+        <option *ngFor="let accessMode of accessModes" [value]="accessMode">
+          {{ accessMode }}
+        </option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Version</span>
+      <input type="text" [(ngModel)]="form.version" placeholder="1.0.0" />
+    </label>
+
+    <label class="field">
+      <span>URL</span>
+      <input type="text" [(ngModel)]="form.url" placeholder="https://endpoint.example/llm" />
+    </label>
+
+    <label class="field field--checkbox">
+      <input type="checkbox" [(ngModel)]="form.is_required" />
+      <span>Required model</span>
+    </label>
+
+    <label class="field" *ngIf="editingModelId">
+      <span>Status</span>
+      <select [(ngModel)]="form.status">
+        <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="json-grid">
+    <label class="field">
+      <span>Headers JSON</span>
+      <textarea [(ngModel)]="form.headersJson"></textarea>
+    </label>
+
+    <label class="field">
+      <span>Capabilities JSON</span>
+      <textarea [(ngModel)]="form.capabilitiesJson"></textarea>
+    </label>
+
+    <label class="field">
+      <span>Config JSON</span>
+      <textarea [(ngModel)]="form.configJson"></textarea>
+    </label>
+  </div>
+
+  <div class="editor-actions">
+    <button type="button" class="ghost-button" (click)="reset.emit()">
+      Clear form
+    </button>
+    <button type="button" class="primary-button" (click)="submitForm.emit()">
+      {{ editingModelId ? 'Save changes' : 'Create model' }}
+    </button>
+  </div>
+</section>

@@ -1,0 +1,135 @@
+:host {
+  display: block;
+}
+
+.list-card {
+  padding: 24px;
+  border: 1px solid rgba(27, 31, 59, 0.09);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 20px 48px rgba(27, 31, 59, 0.08);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-heading h3 {
+  margin: 0;
+  color: #1b1f3b;
+}
+
+.section-heading span {
+  color: #6b7390;
+  font-size: 14px;
+}
+
+.state-message {
+  margin: 12px 0 0;
+  color: #54607d;
+  line-height: 1.6;
+}
+
+.state-message--error {
+  color: #9e2f2f;
+}
+
+.list-table {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.model-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid rgba(27, 31, 59, 0.1);
+  border-radius: 18px;
+  background: #f9fafc;
+  text-align: left;
+  cursor: pointer;
+}
+
+.model-row--active {
+  border-color: #9b3d24;
+  background: #fff7f2;
+}
+
+.model-row__main,
+.model-row__meta {
+  display: grid;
+  gap: 6px;
+}
+
+.model-row__main strong {
+  font-size: 16px;
+}
+
+.model-row__main span,
+.model-row__meta span {
+  margin: 0;
+  color: #4f5875;
+}
+
+.model-row__meta {
+  justify-items: end;
+  font-size: 13px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.badge--draft {
+  background: #fff2cc;
+  color: #8f5d00;
+}
+
+.badge--validated {
+  background: #d8f5df;
+  color: #17663a;
+}
+
+.badge--disabled {
+  background: #ffe0df;
+  color: #9e2f2f;
+}
+
+.empty-state {
+  padding: 30px;
+  text-align: center;
+  border: 1px dashed rgba(27, 31, 59, 0.16);
+  border-radius: 18px;
+  margin-top: 18px;
+}
+
+.empty-state p {
+  margin: 12px 0 0;
+  color: #54607d;
+  line-height: 1.6;
+}
+
+@media (max-width: 800px) {
+  .section-heading,
+  .model-row {
+    display: grid;
+  }
+
+  .model-row__meta {
+    justify-items: start;
+  }
+}
