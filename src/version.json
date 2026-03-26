@@ -1,14 +1,14 @@
 {
     "dirty": true,
-    "raw": "9ee4c83-dirty",
-    "hash": "9ee4c83",
+    "raw": "7e406a2-dirty",
+    "hash": "7e406a2",
     "distance": null,
     "tag": null,
     "semver": null,
-    "suffix": "9ee4c83-dirty",
+    "suffix": "7e406a2-dirty",
     "semverString": null,
     "name": "ai-llm-ui",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "pluginMefName": "ai-llm-ui",
     "main": "main.js"
 }
