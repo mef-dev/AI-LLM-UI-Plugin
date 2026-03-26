@@ -11,6 +11,7 @@ export class LlmRegistryDetailsComponent {
   @Input() model: LlmRegistryLocator | null = null;
 
   @Output() edit = new EventEmitter<LlmRegistryLocator>();
+  @Output() upload = new EventEmitter<LlmRegistryLocator>();
   @Output() validate = new EventEmitter<LlmRegistryLocator>();
   @Output() delete = new EventEmitter<LlmRegistryLocator>();
 

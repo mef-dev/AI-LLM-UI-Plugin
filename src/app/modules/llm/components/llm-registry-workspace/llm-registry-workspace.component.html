@@ -38,10 +38,23 @@
     <app-llm-registry-details
       [model]="selectedModel"
       (edit)="startEdit($event)"
+      (upload)="startUpload($event)"
       (validate)="validateSelected($event)"
       (delete)="deleteSelected($event)"
     ></app-llm-registry-details>
   </div>
+
+  <app-llm-registry-upload
+    [model]="uploadModelTarget"
+    [form]="uploadForm"
+    [devices]="devices"
+    [fileName]="selectedUploadFile?.name || ''"
+    (fileSelected)="setUploadFile($event)"
+    (reset)="resetUpload()"
+    (submitUpload)="submitUpload()"
+  ></app-llm-registry-upload>
+
+  <p *ngIf="uploadMessage" class="upload-message">{{ uploadMessage }}</p>
 
   <app-llm-registry-form
     [form]="form"

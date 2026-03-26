@@ -33,6 +33,7 @@ import { LlmRegistryFiltersComponent } from './modules/llm/components/llm-regist
 import { LlmRegistryDetailsComponent } from './modules/llm/components/llm-registry-details/llm-registry-details.component';
 import { LlmRegistryFormComponent } from './modules/llm/components/llm-registry-form/llm-registry-form.component';
 import { LlmRegistryListComponent } from './modules/llm/components/llm-registry-list/llm-registry-list.component';
+import { LlmRegistryUploadComponent } from './modules/llm/components/llm-registry-upload/llm-registry-upload.component';
 import { LlmRegistryWorkspaceComponent } from './modules/llm/components/llm-registry-workspace/llm-registry-workspace.component';
 import { LlmDbPageComponent } from './modules/llm-db/pages/llm-db-page/llm-db-page.component';
 import { LlmPageComponent } from './modules/llm/pages/llm-page/llm-page.component';
@@ -58,6 +59,7 @@ import { ModulePageComponent } from './shared/components/module-page/module-page
     LlmRegistryFiltersComponent,
     LlmRegistryFormComponent,
     LlmRegistryListComponent,
+    LlmRegistryUploadComponent,
     LlmRegistryWorkspaceComponent,
     LlmPageComponent,
     VectorPageComponent,

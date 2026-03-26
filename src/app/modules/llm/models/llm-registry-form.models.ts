@@ -14,3 +14,8 @@ export interface LlmRegistryFormValue {
   capabilitiesJson: string;
   configJson: string;
 }
+
+export interface LlmRegistryUploadValue {
+  device: LlmDevice | '';
+  version: string;
+}

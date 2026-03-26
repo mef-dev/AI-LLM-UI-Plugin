@@ -1,0 +1,41 @@
+<section class="upload-card" *ngIf="model as current">
+  <div class="section-heading">
+    <h3>Upload mocked model archive</h3>
+    <span>{{ current.display_name || current.model_name }}</span>
+  </div>
+
+  <p class="upload-note">
+    This simulates `POST /llm/{{ '{' }}id{{ '}' }}/upload`. It does not send a real file, but it
+    updates the mocked model as if an archive upload happened.
+  </p>
+
+  <div class="upload-grid">
+    <label class="field">
+      <span>ZIP archive</span>
+      <input type="file" accept=".zip" (change)="onFileChange($event)" />
+      <small *ngIf="fileName">Selected: {{ fileName }}</small>
+    </label>
+
+    <label class="field">
+      <span>Device</span>
+      <select [(ngModel)]="form.device">
+        <option value="">Keep current</option>
+        <option *ngFor="let device of devices" [value]="device">{{ device }}</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Version</span>
+      <input type="text" [(ngModel)]="form.version" placeholder="2.0.0" />
+    </label>
+  </div>
+
+  <div class="upload-actions">
+    <button type="button" class="ghost-button" (click)="reset.emit()">
+      Clear upload
+    </button>
+    <button type="button" class="primary-button" (click)="submitUpload.emit()" [disabled]="!fileName">
+      Upload mocked ZIP
+    </button>
+  </div>
+</section>

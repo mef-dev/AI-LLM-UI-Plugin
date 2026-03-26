@@ -10,7 +10,10 @@ import {
   LlmStatus,
   LlmUpdateRequest,
 } from '../../models/llm-registry.models';
-import { LlmRegistryFormValue } from '../../models/llm-registry-form.models';
+import {
+  LlmRegistryFormValue,
+  LlmRegistryUploadValue,
+} from '../../models/llm-registry-form.models';
 import { LlmFakeApiService } from '../../services/llm-fake-api.service';
 
 @Component({
@@ -31,12 +34,16 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
 
   models: LlmRegistryLocator[] = [];
   selectedModel: LlmRegistryLocator | null = null;
+  uploadModelTarget: LlmRegistryLocator | null = null;
   editingModelId: string | null = null;
   loading = false;
   errorMessage = '';
   saveMessage = '';
+  uploadMessage = '';
+  selectedUploadFile: File | null = null;
 
   form: LlmRegistryFormValue = this.createEmptyForm();
+  uploadForm: LlmRegistryUploadValue = this.createEmptyUploadForm();
 
   constructor(private readonly llmApi: LlmFakeApiService) {}
 
@@ -122,6 +129,67 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
     }
 
     this.startCreate();
+  }
+
+  startUpload(model: LlmRegistryLocator): void {
+    this.uploadModelTarget = model;
+    this.uploadMessage = '';
+    this.selectedUploadFile = null;
+    this.uploadForm = {
+      device: model.device ?? '',
+      version: model.version ?? '',
+    };
+  }
+
+  setUploadFile(file: File | null): void {
+    this.selectedUploadFile = file;
+  }
+
+  resetUpload(): void {
+    if (this.selectedModel) {
+      this.startUpload(this.selectedModel);
+      return;
+    }
+
+    this.uploadModelTarget = null;
+    this.uploadMessage = '';
+    this.selectedUploadFile = null;
+    this.uploadForm = this.createEmptyUploadForm();
+  }
+
+  submitUpload(): void {
+    this.errorMessage = '';
+    this.uploadMessage = '';
+
+    if (!this.uploadModelTarget) {
+      this.errorMessage = 'Select a model before uploading.';
+      return;
+    }
+
+    if (!this.selectedUploadFile) {
+      this.errorMessage = 'Select a ZIP file first.';
+      return;
+    }
+
+    this.llmApi
+      .uploadModel(
+        this.uploadModelTarget.model_id,
+        this.selectedUploadFile.name,
+        this.normalizeEnum(this.uploadForm.device),
+        this.normalizeText(this.uploadForm.version)
+      )
+      .subscribe({
+        next: (uploaded) => {
+          this.selectedModel = uploaded;
+          this.uploadModelTarget = uploaded;
+          this.uploadMessage = `${uploaded.display_name || uploaded.model_name} received mocked archive ${this.selectedUploadFile?.name}.`;
+          this.startEdit(uploaded);
+          this.loadModels();
+        },
+        error: (error: Error) => {
+          this.errorMessage = error.message;
+        },
+      });
   }
 
   validateSelected(model: LlmRegistryLocator): void {
@@ -273,6 +341,13 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       headersJson: '{\n  "Authorization": "Bearer demo-token"\n}',
       capabilitiesJson: '{\n  "chat": true,\n  "embeddings": false\n}',
       configJson: '{\n  "max_context": 4096\n}',
+    };
+  }
+
+  private createEmptyUploadForm(): LlmRegistryUploadValue {
+    return {
+      device: '',
+      version: '',
     };
   }
 }

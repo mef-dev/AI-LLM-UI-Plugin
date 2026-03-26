@@ -3,6 +3,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import {
   LlmCreateRequest,
+  LlmDevice,
   LlmListFilters,
   LlmRegistryLocator,
   LlmUpdateRequest,
@@ -163,6 +164,27 @@ export class LlmFakeApiService {
 
     this.models = this.models.map((item) => (item.model_id === id ? validated : item));
     return this.respond(validated);
+  }
+
+  uploadModel(id: string, fileName: string, device?: LlmDevice, version?: string): Observable<LlmRegistryLocator> {
+    const model = this.models.find((item) => item.model_id === id);
+    if (!model) {
+      return this.fail(`LLM model with id ${id} was not found.`);
+    }
+
+    const uploaded: LlmRegistryLocator = {
+      ...model,
+      device: device ?? model.device,
+      version: version ?? model.version,
+      updatedAt: new Date().toISOString(),
+      config: {
+        ...(model.config ?? {}),
+        last_uploaded_archive: fileName,
+      },
+    };
+
+    this.models = this.models.map((item) => (item.model_id === id ? uploaded : item));
+    return this.respond(uploaded);
   }
 
   private respond<T>(value: T): Observable<T> {
