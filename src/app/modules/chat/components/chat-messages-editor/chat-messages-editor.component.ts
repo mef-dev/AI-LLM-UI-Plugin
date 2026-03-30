@@ -11,7 +11,9 @@ export class ChatMessagesEditorComponent {
   @Input({ required: true }) messages: ChatCompletionsRequestMessage[] = [];
   @Input({ required: true }) roles: ChatMessageRole[] = [];
   @Input() errorMessage = '';
+  @Input() loading = false;
 
   @Output() addUserMessage = new EventEmitter<void>();
   @Output() removeMessage = new EventEmitter<number>();
+  @Output() send = new EventEmitter<void>();
 }

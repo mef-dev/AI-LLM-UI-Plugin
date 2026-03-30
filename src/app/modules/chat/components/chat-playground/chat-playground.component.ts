@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   ChatCompletionResponse,
   ChatCompletionsRequest,
   ChatMessageRole,
 } from '../../models/chat-completions.models';
 import { ChatFakeApiService } from '../../services/chat-fake-api.service';
+import { LlmRegistryLocator } from '../../../llm/models/llm-registry.models';
+import { LlmFakeApiService } from '../../../llm/services/llm-fake-api.service';
 
 @Component({
   selector: 'app-chat-playground',
@@ -12,16 +14,36 @@ import { ChatFakeApiService } from '../../services/chat-fake-api.service';
   templateUrl: './chat-playground.component.html',
   styleUrls: ['./chat-playground.component.scss']
 })
-export class ChatPlaygroundComponent {
+export class ChatPlaygroundComponent implements OnInit {
   readonly roles: ChatMessageRole[] = ['system', 'user', 'assistant'];
 
   request: ChatCompletionsRequest = this.createInitialRequest();
   response: ChatCompletionResponse | null = null;
+  availableModels: LlmRegistryLocator[] = [];
   loading = false;
   errorMessage = '';
   successMessage = '';
 
-  constructor(private readonly chatApi: ChatFakeApiService) {}
+  constructor(
+    private readonly chatApi: ChatFakeApiService,
+    private readonly llmApi: LlmFakeApiService
+  ) {}
+
+  ngOnInit(): void {
+    this.llmApi.getModels().subscribe({
+      next: (models) => {
+        this.availableModels = models;
+
+        const currentModelExists = models.some((model) => model.model_name === this.request.model);
+        if (!currentModelExists && models.length) {
+          this.request.model = models[0].model_name;
+        }
+      },
+      error: (error: Error) => {
+        this.errorMessage = error.message;
+      },
+    });
+  }
 
   addUserMessage(): void {
     this.request.messages = [...this.request.messages, { role: 'user', content: '' }];
@@ -36,7 +58,7 @@ export class ChatPlaygroundComponent {
   }
 
   resetConversation(): void {
-    this.request = this.createInitialRequest();
+    this.request = this.createInitialRequest(this.request.model || this.availableModels[0]?.model_name || '');
     this.response = null;
     this.loading = false;
     this.errorMessage = '';
@@ -69,9 +91,9 @@ export class ChatPlaygroundComponent {
     return JSON.stringify(value, null, 2);
   }
 
-  private createInitialRequest(): ChatCompletionsRequest {
+  private createInitialRequest(model = 'meta-llama/Llama-3.1-8B-Instruct'): ChatCompletionsRequest {
     return {
-      model: 'meta-llama/Llama-3.1-8B-Instruct',
+      model,
       messages: [
         {
           role: 'system',

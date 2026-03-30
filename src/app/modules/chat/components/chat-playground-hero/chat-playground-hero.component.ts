@@ -8,5 +8,4 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class ChatPlaygroundHeroComponent {
   @Output() reset = new EventEmitter<void>();
-  @Output() send = new EventEmitter<void>();
 }

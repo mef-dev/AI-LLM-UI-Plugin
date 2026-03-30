@@ -11,15 +11,19 @@
 }
 
 .section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  gap: 8px;
 }
 
 .section-heading h3 {
   margin: 0;
   color: #1b1f3b;
+}
+
+.section-heading p {
+  margin: 0;
+  color: #6b7390;
+  line-height: 1.6;
 }
 
 .state-message {
@@ -64,6 +68,11 @@
   color: #30385a;
 }
 
+.field small {
+  color: #6b7390;
+  line-height: 1.5;
+}
+
 .field select,
 .field textarea {
   width: 100%;
@@ -75,9 +84,20 @@
   background: #fff;
 }
 
+.field select {
+  min-width: 220px;
+}
+
 .field textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+.conversation-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
 }
 
 .ghost-button {
@@ -90,9 +110,26 @@
   cursor: pointer;
 }
 
+.primary-button {
+  padding: 11px 18px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #1740d1, #1c6bf2);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 16px 32px rgba(23, 64, 209, 0.22);
+}
+
+.primary-button:disabled,
+.ghost-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 @media (max-width: 800px) {
-  .section-heading,
-  .message-card__toolbar {
+  .message-card__toolbar,
+  .conversation-actions {
     display: grid;
   }
 }

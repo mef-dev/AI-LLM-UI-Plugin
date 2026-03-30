@@ -44,6 +44,17 @@
     ></app-llm-registry-details>
   </div>
 
+  <app-llm-registry-form
+    [form]="form"
+    [editingModelId]="editingModelId"
+    [statuses]="statuses"
+    [devices]="devices"
+    [accessModes]="accessModes"
+    [saveMessage]="saveMessage"
+    (reset)="resetEditor()"
+    (submitForm)="submitForm()"
+  ></app-llm-registry-form>
+
   <app-llm-registry-upload
     [model]="uploadModelTarget"
     [form]="uploadForm"
@@ -55,15 +66,4 @@
   ></app-llm-registry-upload>
 
   <p *ngIf="uploadMessage" class="upload-message">{{ uploadMessage }}</p>
-
-  <app-llm-registry-form
-    [form]="form"
-    [editingModelId]="editingModelId"
-    [statuses]="statuses"
-    [devices]="devices"
-    [accessModes]="accessModes"
-    [saveMessage]="saveMessage"
-    (reset)="resetEditor()"
-    (submitForm)="submitForm()"
-  ></app-llm-registry-form>
 </section>

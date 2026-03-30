@@ -1,18 +1,20 @@
 <section class="chat-page">
-  <app-chat-playground-hero
-    (reset)="resetConversation()"
-    (send)="sendCompletion()"
-  ></app-chat-playground-hero>
+  <app-chat-playground-hero (reset)="resetConversation()"></app-chat-playground-hero>
 
-  <app-chat-request-settings [request]="request"></app-chat-request-settings>
+  <app-chat-request-settings
+    [request]="request"
+    [availableModels]="availableModels"
+  ></app-chat-request-settings>
 
   <div class="content-grid">
     <app-chat-messages-editor
       [messages]="request.messages"
       [roles]="roles"
       [errorMessage]="errorMessage"
+      [loading]="loading"
       (addUserMessage)="addUserMessage()"
       (removeMessage)="removeMessage($event)"
+      (send)="sendCompletion()"
     ></app-chat-messages-editor>
 
     <app-chat-response-preview

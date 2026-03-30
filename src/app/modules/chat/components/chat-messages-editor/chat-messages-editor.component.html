@@ -1,9 +1,7 @@
 <section class="conversation-card">
   <div class="section-heading">
     <h3>Messages array</h3>
-    <button type="button" class="ghost-button" (click)="addUserMessage.emit()">
-      Add user message
-    </button>
+    <p>The message list is the main request body for chat completions.</p>
   </div>
 
   <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
@@ -16,6 +14,7 @@
           <select [(ngModel)]="message.role">
             <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
           </select>
+          <small>Use the same role types as the backend contract: system, user, or assistant.</small>
         </label>
 
         <button
@@ -31,7 +30,17 @@
       <label class="field">
         <span>Content</span>
         <textarea [(ngModel)]="message.content"></textarea>
+        <small>Write the exact text that will be sent in this entry of the `messages` array.</small>
       </label>
     </article>
+  </div>
+
+  <div class="conversation-actions">
+    <button type="button" class="ghost-button" (click)="addUserMessage.emit()">
+      Add user message
+    </button>
+    <button type="button" class="primary-button" (click)="send.emit()" [disabled]="loading">
+      {{ loading ? 'Sending...' : 'Send mocked request' }}
+    </button>
   </div>
 </section>

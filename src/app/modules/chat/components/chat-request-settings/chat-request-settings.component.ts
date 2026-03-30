@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { ChatCompletionsRequest } from '../../models/chat-completions.models';
+import { LlmRegistryLocator } from '../../../llm/models/llm-registry.models';
 
 @Component({
   selector: 'app-chat-request-settings',
@@ -9,4 +10,5 @@ import { ChatCompletionsRequest } from '../../models/chat-completions.models';
 })
 export class ChatRequestSettingsComponent {
   @Input({ required: true }) request!: ChatCompletionsRequest;
+  @Input() availableModels: LlmRegistryLocator[] = [];
 }
