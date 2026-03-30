@@ -28,6 +28,7 @@ import { ChatRequestSettingsComponent } from './modules/chat/components/chat-req
 import { ChatResponsePreviewComponent } from './modules/chat/components/chat-response-preview/chat-response-preview.component';
 import { ChatPageComponent } from './modules/chat/pages/chat-page/chat-page.component';
 import { DocumentPageComponent } from './modules/document/pages/document-page/document-page.component';
+import { EmbeddingsWorkspaceComponent } from './modules/embeddings/components/embeddings-workspace/embeddings-workspace.component';
 import { EmbeddingsPageComponent } from './modules/embeddings/pages/embeddings-page/embeddings-page.component';
 import { LlmRegistryFiltersComponent } from './modules/llm/components/llm-registry-filters/llm-registry-filters.component';
 import { LlmRegistryDetailsComponent } from './modules/llm/components/llm-registry-details/llm-registry-details.component';
@@ -38,6 +39,7 @@ import { LlmRegistryWorkspaceComponent } from './modules/llm/components/llm-regi
 import { LlmDbPageComponent } from './modules/llm-db/pages/llm-db-page/llm-db-page.component';
 import { LlmPageComponent } from './modules/llm/pages/llm-page/llm-page.component';
 import { VectorPageComponent } from './modules/vector/pages/vector-page/vector-page.component';
+import { VectorWorkspaceComponent } from './modules/vector/components/vector-workspace/vector-workspace.component';
 import { ModulePageComponent } from './shared/components/module-page/module-page.component';
 
 @NgModule({
@@ -54,6 +56,7 @@ import { ModulePageComponent } from './shared/components/module-page/module-page
     ChatResponsePreviewComponent,
     LlmDbPageComponent,
     DocumentPageComponent,
+    EmbeddingsWorkspaceComponent,
     EmbeddingsPageComponent,
     LlmRegistryDetailsComponent,
     LlmRegistryFiltersComponent,
@@ -62,6 +65,7 @@ import { ModulePageComponent } from './shared/components/module-page/module-page
     LlmRegistryUploadComponent,
     LlmRegistryWorkspaceComponent,
     LlmPageComponent,
+    VectorWorkspaceComponent,
     VectorPageComponent,
   ],
   imports: [BrowserModule, BrowserAnimationsModule, FormsModule, AppRoutingModule],

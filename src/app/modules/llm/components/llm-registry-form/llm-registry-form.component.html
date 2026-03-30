@@ -1,7 +1,12 @@
 <section class="editor-card">
   <div class="section-heading">
-    <h3>{{ editingModelId ? 'Edit mocked LLM' : 'Create mocked LLM' }}</h3>
-    <span>{{ editingModelId ? 'PUT /llm/{id}' : 'POST /llm' }}</span>
+    <div>
+      <h3>{{ editingModelId ? 'Edit mocked LLM' : 'Create mocked LLM' }}</h3>
+      <span>{{ editingModelId ? 'PUT /llm/{id}' : 'POST /llm' }}</span>
+    </div>
+    <button type="button" class="icon-button" (click)="close.emit()" aria-label="Close editor">
+      Close
+    </button>
   </div>
 
   <p class="editor-note">

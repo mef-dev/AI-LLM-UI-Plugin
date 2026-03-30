@@ -14,9 +14,6 @@
       <button type="button" class="ghost-button" (click)="resetFilters()">
         Reset filters
       </button>
-      <button type="button" class="primary-button" (click)="startCreate()">
-        Register model
-      </button>
     </div>
   </header>
 
@@ -37,6 +34,7 @@
 
     <app-llm-registry-details
       [model]="selectedModel"
+      (create)="startCreate()"
       (edit)="startEdit($event)"
       (upload)="startUpload($event)"
       (validate)="validateSelected($event)"
@@ -44,26 +42,36 @@
     ></app-llm-registry-details>
   </div>
 
-  <app-llm-registry-form
-    [form]="form"
-    [editingModelId]="editingModelId"
-    [statuses]="statuses"
-    [devices]="devices"
-    [accessModes]="accessModes"
-    [saveMessage]="saveMessage"
-    (reset)="resetEditor()"
-    (submitForm)="submitForm()"
-  ></app-llm-registry-form>
+  <div class="modal-layer" *ngIf="formVisible" (click)="closeEditor()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <app-llm-registry-form
+        [form]="form"
+        [editingModelId]="editingModelId"
+        [statuses]="statuses"
+        [devices]="devices"
+        [accessModes]="accessModes"
+        [saveMessage]="saveMessage"
+        (close)="closeEditor()"
+        (reset)="resetEditor()"
+        (submitForm)="submitForm()"
+      ></app-llm-registry-form>
+    </div>
+  </div>
 
-  <app-llm-registry-upload
-    [model]="uploadModelTarget"
-    [form]="uploadForm"
-    [devices]="devices"
-    [fileName]="selectedUploadFile?.name || ''"
-    (fileSelected)="setUploadFile($event)"
-    (reset)="resetUpload()"
-    (submitUpload)="submitUpload()"
-  ></app-llm-registry-upload>
+  <div class="modal-layer" *ngIf="uploadVisible" (click)="closeUpload()">
+    <div class="modal-panel modal-panel--narrow" (click)="$event.stopPropagation()">
+      <app-llm-registry-upload
+        [model]="uploadModelTarget"
+        [form]="uploadForm"
+        [devices]="devices"
+        [fileName]="selectedUploadFile?.name || ''"
+        (close)="closeUpload()"
+        (fileSelected)="setUploadFile($event)"
+        (reset)="resetUpload()"
+        (submitUpload)="submitUpload()"
+      ></app-llm-registry-upload>
+    </div>
+  </div>
 
   <p *ngIf="uploadMessage" class="upload-message">{{ uploadMessage }}</p>
 </section>

@@ -10,6 +10,7 @@ import { LlmRegistryLocator } from '../../models/llm-registry.models';
 export class LlmRegistryDetailsComponent {
   @Input() model: LlmRegistryLocator | null = null;
 
+  @Output() create = new EventEmitter<void>();
   @Output() edit = new EventEmitter<LlmRegistryLocator>();
   @Output() upload = new EventEmitter<LlmRegistryLocator>();
   @Output() validate = new EventEmitter<LlmRegistryLocator>();

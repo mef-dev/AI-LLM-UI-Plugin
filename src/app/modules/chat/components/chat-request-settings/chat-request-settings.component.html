@@ -5,57 +5,97 @@
   </div>
 
   <div class="parameter-grid">
-    <label class="field">
-      <span>Model</span>
+    <label class="field field--wide">
+      <span class="field-label">
+        <span>Model</span>
+        <span class="hint-badge">
+          ?
+          <span class="hint-tooltip">Select a mocked model from the fake `/llm` endpoint response.</span>
+        </span>
+      </span>
       <select [(ngModel)]="request.model">
         <option *ngFor="let model of availableModels" [value]="model.model_name">
           {{ model.display_name || model.model_name }} ({{ model.status }})
         </option>
       </select>
-      <small>Select a mocked model from the fake `/llm` endpoint response.</small>
     </label>
 
     <label class="field">
-      <span>Tag</span>
+      <span class="field-label">
+        <span>Tag</span>
+        <span class="hint-badge">
+          ?
+          <span class="hint-tooltip">Optional identifier for tracking one run in logs or future history.</span>
+        </span>
+      </span>
       <input type="text" [(ngModel)]="request.tag" placeholder="demo-chat-run" />
-      <small>Optional identifier for tracking one run in logs or future history.</small>
     </label>
 
     <label class="field">
-      <span>Temperature</span>
+      <span class="field-label">
+        <span>Temperature</span>
+        <span class="hint-badge">
+          ?
+          <span class="hint-tooltip">Higher values make the answer more varied; lower values make it steadier.</span>
+        </span>
+      </span>
       <input type="number" step="0.1" [(ngModel)]="request.temperature" />
-      <small>Higher values make the answer more varied; lower values make it steadier.</small>
     </label>
 
     <label class="field">
-      <span>Top P</span>
+      <span class="field-label">
+        <span>Top P</span>
+        <span class="hint-badge">
+          ?
+          <span class="hint-tooltip">Limits token sampling to the most likely probability mass.</span>
+        </span>
+      </span>
       <input type="number" step="0.1" [(ngModel)]="request.top_p" />
-      <small>Limits token sampling to the most likely probability mass.</small>
     </label>
 
     <label class="field">
-      <span>Top K</span>
+      <span class="field-label">
+        <span>Top K</span>
+        <span class="hint-badge">
+          ?
+          <span class="hint-tooltip">Restricts the next-token choice to the top K candidates.</span>
+        </span>
+      </span>
       <input type="number" [(ngModel)]="request.top_k" />
-      <small>Restricts the next-token choice to the top K candidates.</small>
     </label>
 
     <label class="field">
-      <span>Max tokens</span>
+      <span class="field-label">
+        <span>Max tokens</span>
+        <span class="hint-badge">
+          ?
+          <span class="hint-tooltip">Caps how long the generated assistant response can be.</span>
+        </span>
+      </span>
       <input type="number" [(ngModel)]="request.max_tokens" />
-      <small>Caps how long the generated assistant response can be.</small>
     </label>
 
     <label class="field">
-      <span>Stream interval</span>
+      <span class="field-label">
+        <span>Stream interval</span>
+        <span class="hint-badge">
+          ?
+          <span class="hint-tooltip">Mocked delay between streamed chunks when streaming is enabled.</span>
+        </span>
+      </span>
       <input type="number" step="0.1" [(ngModel)]="request.stream_interval" />
-      <small>Mocked delay between streamed chunks when streaming is enabled.</small>
     </label>
 
     <label class="field field--toggle">
       <input type="checkbox" [(ngModel)]="request.stream" />
       <div>
-        <span>Stream</span>
-        <small>Keep this on to imitate chunked responses from the real endpoint.</small>
+        <span class="field-label">
+          <span>Stream</span>
+          <span class="hint-badge">
+            ?
+            <span class="hint-tooltip">Keep this on to imitate chunked responses from the real endpoint.</span>
+          </span>
+        </span>
       </div>
     </label>
   </div>

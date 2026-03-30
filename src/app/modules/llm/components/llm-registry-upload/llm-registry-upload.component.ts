@@ -14,6 +14,7 @@ export class LlmRegistryUploadComponent {
   @Input({ required: true }) devices: LlmDevice[] = [];
   @Input() fileName = '';
 
+  @Output() close = new EventEmitter<void>();
   @Output() fileSelected = new EventEmitter<File | null>();
   @Output() reset = new EventEmitter<void>();
   @Output() submitUpload = new EventEmitter<void>();

@@ -36,6 +36,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   selectedModel: LlmRegistryLocator | null = null;
   uploadModelTarget: LlmRegistryLocator | null = null;
   editingModelId: string | null = null;
+  formVisible = false;
+  uploadVisible = false;
   loading = false;
   errorMessage = '';
   saveMessage = '';
@@ -101,6 +103,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
     this.editingModelId = null;
     this.saveMessage = '';
     this.form = this.createEmptyForm();
+    this.uploadVisible = false;
+    this.formVisible = true;
   }
 
   startEdit(model: LlmRegistryLocator): void {
@@ -120,6 +124,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       capabilitiesJson: this.stringifyJson(model.capabilities),
       configJson: this.stringifyJson(model.config),
     };
+    this.uploadVisible = false;
+    this.formVisible = true;
   }
 
   resetEditor(): void {
@@ -139,6 +145,12 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       device: model.device ?? '',
       version: model.version ?? '',
     };
+    this.formVisible = false;
+    this.uploadVisible = true;
+  }
+
+  closeEditor(): void {
+    this.formVisible = false;
   }
 
   setUploadFile(file: File | null): void {
@@ -155,6 +167,10 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
     this.uploadMessage = '';
     this.selectedUploadFile = null;
     this.uploadForm = this.createEmptyUploadForm();
+  }
+
+  closeUpload(): void {
+    this.uploadVisible = false;
   }
 
   submitUpload(): void {
@@ -184,6 +200,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
           this.uploadModelTarget = uploaded;
           this.uploadMessage = `${uploaded.display_name || uploaded.model_name} received mocked archive ${this.selectedUploadFile?.name}.`;
           this.startEdit(uploaded);
+          this.formVisible = false;
+          this.uploadVisible = false;
           this.loadModels();
         },
         error: (error: Error) => {
@@ -259,7 +277,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
         next: (created) => {
           this.saveMessage = `${created.display_name || created.model_name} was created in the fake registry.`;
           this.selectedModel = created;
-          this.startEdit(created);
+          this.formVisible = false;
+          this.editingModelId = created.model_id;
           this.loadModels();
         },
         error: (error: Error) => {
@@ -278,7 +297,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       next: (updated) => {
         this.saveMessage = `${updated.display_name || updated.model_name} was updated in the fake registry.`;
         this.selectedModel = updated;
-        this.startEdit(updated);
+        this.formVisible = false;
+        this.editingModelId = updated.model_id;
         this.loadModels();
       },
       error: (error: Error) => {

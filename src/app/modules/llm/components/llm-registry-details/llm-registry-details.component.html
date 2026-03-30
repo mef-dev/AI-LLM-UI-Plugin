@@ -17,58 +17,70 @@
     </div>
   </div>
 
-  <div class="detail-grid">
-    <div>
-      <span class="detail-label">Display name</span>
-      <p>{{ current.display_name || 'n/a' }}</p>
-    </div>
-    <div>
-      <span class="detail-label">Model name</span>
-      <p>{{ current.model_name }}</p>
-    </div>
-    <div>
-      <span class="detail-label">Status</span>
-      <p>{{ current.status }}</p>
-    </div>
-    <div>
-      <span class="detail-label">Access mode</span>
-      <p>{{ current.access_mode }}</p>
-    </div>
-    <div>
-      <span class="detail-label">Device</span>
-      <p>{{ current.device || 'n/a' }}</p>
-    </div>
-    <div>
-      <span class="detail-label">Version</span>
-      <p>{{ current.version || 'n/a' }}</p>
-    </div>
-    <div>
-      <span class="detail-label">Required</span>
-      <p>{{ current.is_required ? 'Yes' : 'No' }}</p>
-    </div>
-    <div>
-      <span class="detail-label">Tenant</span>
-      <p>{{ current.tenantId }}</p>
-    </div>
-  </div>
+  <div class="details-layout">
+    <div class="details-pane details-pane--summary">
+      <div class="detail-grid">
+        <div>
+          <span class="detail-label">Display name</span>
+          <p>{{ current.display_name || 'n/a' }}</p>
+        </div>
+        <div>
+          <span class="detail-label">Model name</span>
+          <p>{{ current.model_name }}</p>
+        </div>
+        <div>
+          <span class="detail-label">Status</span>
+          <p>{{ current.status }}</p>
+        </div>
+        <div>
+          <span class="detail-label">Access mode</span>
+          <p>{{ current.access_mode }}</p>
+        </div>
+        <div>
+          <span class="detail-label">Device</span>
+          <p>{{ current.device || 'n/a' }}</p>
+        </div>
+        <div>
+          <span class="detail-label">Version</span>
+          <p>{{ current.version || 'n/a' }}</p>
+        </div>
+        <div>
+          <span class="detail-label">Required</span>
+          <p>{{ current.is_required ? 'Yes' : 'No' }}</p>
+        </div>
+        <div>
+          <span class="detail-label">Tenant</span>
+          <p>{{ current.tenantId }}</p>
+        </div>
+      </div>
 
-  <div class="detail-block">
-    <span class="detail-label">URL</span>
-    <p>{{ current.url || 'n/a' }}</p>
-  </div>
+      <div class="detail-block">
+        <span class="detail-label">URL</span>
+        <p>{{ current.url || 'n/a' }}</p>
+      </div>
 
-  <div class="detail-block">
-    <span class="detail-label">Headers</span>
-    <pre>{{ formatJson(current.headers) }}</pre>
-  </div>
+      <div class="summary-actions">
+        <button type="button" class="primary-button" (click)="create.emit()">
+          Register model
+        </button>
+      </div>
+    </div>
 
-  <div class="detail-block">
-    <span class="detail-label">Capabilities</span>
-    <pre>{{ formatJson(current.capabilities) }}</pre>
-  </div>
+    <div class="details-pane details-pane--technical">
+      <div class="detail-block">
+        <span class="detail-label">Headers</span>
+        <pre>{{ formatJson(current.headers) }}</pre>
+      </div>
 
-  <div class="detail-block">
-    <span class="detail-label">Config</span>
-    <pre>{{ formatJson(current.config) }}</pre>
+      <div class="detail-block">
+        <span class="detail-label">Capabilities</span>
+        <pre>{{ formatJson(current.capabilities) }}</pre>
+      </div>
+
+      <div class="detail-block">
+        <span class="detail-label">Config</span>
+        <pre>{{ formatJson(current.config) }}</pre>
+      </div>
+    </div>
   </div>
 </section>

@@ -10,11 +10,10 @@
     <article class="message-card" *ngFor="let message of messages; let i = index">
       <div class="message-card__toolbar">
         <label class="field">
-          <span>Role</span>
+          <span class="field-label">Role</span>
           <select [(ngModel)]="message.role">
             <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
           </select>
-          <small>Use the same role types as the backend contract: system, user, or assistant.</small>
         </label>
 
         <button
@@ -28,9 +27,8 @@
       </div>
 
       <label class="field">
-        <span>Content</span>
+        <span class="field-label">Content</span>
         <textarea [(ngModel)]="message.content"></textarea>
-        <small>Write the exact text that will be sent in this entry of the `messages` array.</small>
       </label>
     </article>
   </div>

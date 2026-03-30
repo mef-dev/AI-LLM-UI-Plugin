@@ -38,7 +38,8 @@
 }
 
 .list-table {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 18px;
 }
@@ -48,8 +49,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  width: 100%;
-  padding: 16px;
+  flex: 1 1 300px;
+  min-width: 280px;
+  padding: 14px 16px;
   border: 1px solid rgba(27, 31, 59, 0.1);
   border-radius: 18px;
   background: #f9fafc;
@@ -65,7 +67,7 @@
 .model-row__main,
 .model-row__meta {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .model-row__main strong {
@@ -79,7 +81,11 @@
 }
 
 .model-row__meta {
-  justify-items: end;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
   font-size: 13px;
 }
 
@@ -92,6 +98,16 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(27, 31, 59, 0.06);
+  color: #4f5875;
+  white-space: nowrap;
 }
 
 .badge--draft {
@@ -124,12 +140,15 @@
 }
 
 @media (max-width: 800px) {
-  .section-heading,
+  .section-heading {
+    display: grid;
+  }
+
   .model-row {
     display: grid;
   }
 
   .model-row__meta {
-    justify-items: start;
+    justify-content: start;
   }
 }

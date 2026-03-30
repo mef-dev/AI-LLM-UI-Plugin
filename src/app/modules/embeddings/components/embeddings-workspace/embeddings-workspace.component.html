@@ -1,0 +1,94 @@
+<section class="embeddings-page">
+  <header class="embeddings-hero">
+    <div>
+      <p class="embeddings-hero__eyebrow">Embeddings</p>
+      <h2>Mocked vectorization workspace</h2>
+      <p class="embeddings-hero__subtitle">
+        Prepare source text, choose an embedding model, and preview the vector payload the backend
+        would return.
+      </p>
+    </div>
+  </header>
+
+  <div class="workspace-grid">
+    <section class="panel-card">
+      <div class="section-heading">
+        <h3>Embedding request</h3>
+        <span>Frontend form before real API wiring</span>
+      </div>
+
+      <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
+
+      <div class="form-grid">
+        <label class="field field--wide">
+          <span>Source text</span>
+          <textarea [(ngModel)]="sourceText"></textarea>
+        </label>
+
+        <label class="field">
+          <span>Model</span>
+          <select [(ngModel)]="selectedModel">
+            <option *ngFor="let model of models" [value]="model">{{ model }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Chunk label</span>
+          <input type="text" [(ngModel)]="chunkLabel" />
+        </label>
+
+        <label class="field">
+          <span>Chunk strategy</span>
+          <select [(ngModel)]="chunkStrategy">
+            <option value="sentence_window">sentence_window</option>
+            <option value="paragraph">paragraph</option>
+            <option value="document">document</option>
+          </select>
+        </label>
+
+        <label class="field field--toggle">
+          <input type="checkbox" [(ngModel)]="normalized" />
+          <span>Normalize vector output</span>
+        </label>
+      </div>
+
+      <div class="panel-actions">
+        <button type="button" class="primary-button" (click)="generateEmbedding()">
+          Generate mocked embedding
+        </button>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <div class="section-heading">
+        <h3>Preview</h3>
+        <span>What the fake API returns</span>
+      </div>
+
+      <div class="summary-grid">
+        <article class="summary-item">
+          <span class="summary-label">Dimensions</span>
+          <strong>{{ preview.dimensions }}</strong>
+        </article>
+        <article class="summary-item">
+          <span class="summary-label">Text length</span>
+          <strong>{{ preview.textLength }}</strong>
+        </article>
+        <article class="summary-item">
+          <span class="summary-label">Strategy</span>
+          <strong>{{ preview.chunkStrategy }}</strong>
+        </article>
+        <article class="summary-item">
+          <span class="summary-label">Normalized</span>
+          <strong>{{ preview.normalized ? 'Yes' : 'No' }}</strong>
+        </article>
+      </div>
+
+      <div class="vector-strip">
+        <span *ngFor="let value of preview.vector">{{ value }}</span>
+      </div>
+
+      <pre class="code-panel">{{ previewJson }}</pre>
+    </section>
+  </div>
+</section>

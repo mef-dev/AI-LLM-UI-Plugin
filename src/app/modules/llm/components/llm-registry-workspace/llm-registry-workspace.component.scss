@@ -55,24 +55,45 @@
 
 .content-grid {
   display: grid;
-  gap: 16px;
-}
-
-.content-grid {
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-}
-
-.content-grid > * {
-  min-height: 0;
-  max-height: 72vh;
-  overflow: auto;
-  scrollbar-gutter: stable;
+  gap: 18px;
+  grid-template-columns: 1fr;
 }
 
 .upload-message {
   margin: 0;
   color: #17663a;
   line-height: 1.6;
+}
+
+.modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(20, 24, 47, 0.22);
+  backdrop-filter: blur(10px);
+  animation: modal-fade 320ms ease;
+}
+
+.modal-panel {
+  width: min(1080px, calc(100vw - 48px));
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-width: none;
+  border-radius: 32px;
+  animation: modal-rise 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modal-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-panel--narrow {
+  width: min(880px, calc(100vw - 48px));
 }
 
 .primary-button,
@@ -99,15 +120,40 @@
   .content-grid {
     grid-template-columns: 1fr;
   }
-
-  .content-grid > * {
-    max-height: none;
-    overflow: visible;
-  }
 }
 
 @media (max-width: 800px) {
   .llm-hero {
     display: grid;
+  }
+
+  .modal-layer {
+    padding: 16px;
+  }
+
+  .modal-panel,
+  .modal-panel--narrow {
+    width: 100%;
+    max-height: calc(100dvh - 32px);
+  }
+}
+
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

@@ -24,8 +24,8 @@
         <span class="badge" [class]="'badge--' + model.status.toLowerCase()">
           {{ model.status }}
         </span>
-        <span>{{ model.device || 'n/a' }}</span>
-        <span>{{ model.access_mode }}</span>
+        <span class="meta-chip">{{ model.device || 'n/a' }}</span>
+        <span class="meta-chip">{{ model.access_mode }}</span>
       </div>
     </button>
   </div>

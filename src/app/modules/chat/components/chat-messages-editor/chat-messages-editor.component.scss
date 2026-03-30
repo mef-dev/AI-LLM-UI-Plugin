@@ -68,9 +68,10 @@
   color: #30385a;
 }
 
-.field small {
-  color: #6b7390;
-  line-height: 1.5;
+.field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .field select,
@@ -85,7 +86,15 @@
 }
 
 .field select {
+  appearance: none;
   min-width: 220px;
+  padding-right: 42px;
+  background:
+    linear-gradient(180deg, rgba(255, 251, 247, 0.98), rgba(244, 247, 252, 0.98)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3.25 5.25 7 9l3.75-3.75' fill='none' stroke='%239b3d24' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, right 14px center;
+  background-size: auto, 14px;
 }
 
 .field textarea {
@@ -114,11 +123,11 @@
   padding: 11px 18px;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(135deg, #1740d1, #1c6bf2);
-  color: #fff;
+  background: linear-gradient(135deg, #1b1f3b, #314171);
+  color: #fff8f2;
   font: inherit;
   cursor: pointer;
-  box-shadow: 0 16px 32px rgba(23, 64, 209, 0.22);
+  box-shadow: 0 16px 32px rgba(27, 31, 59, 0.2);
 }
 
 .primary-button:disabled,

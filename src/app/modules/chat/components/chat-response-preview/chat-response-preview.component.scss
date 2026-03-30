@@ -29,6 +29,14 @@
   font-size: 14px;
 }
 
+.section-heading__actions,
+.block-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .state-message {
   margin: 12px 0 0;
   color: #54607d;
@@ -81,8 +89,120 @@ pre {
   word-break: break-word;
 }
 
+.message-panel {
+  padding: 18px 20px;
+  border: 1px solid rgba(27, 31, 59, 0.08);
+  background: linear-gradient(180deg, #f4f7fc, #edf2fb);
+  color: #31415f;
+  font-family: 'SFMono-Regular', 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 16px 36px rgba(27, 31, 59, 0.08);
+}
+
+.json-preview {
+  display: block;
+  padding: 18px 0;
+  border: 1px solid rgba(19, 24, 42, 0.08);
+  background:
+    linear-gradient(180deg, rgba(18, 24, 42, 0.98), rgba(24, 31, 54, 0.98)),
+    radial-gradient(circle at top right, rgba(65, 111, 255, 0.16), transparent 28%);
+  color: #dce6ff;
+  font-family: 'SFMono-Regular', 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 20px 44px rgba(18, 24, 42, 0.16);
+}
+
+.copy-button {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(27, 31, 59, 0.12);
+  background: rgba(244, 246, 252, 0.92);
+  color: #1b1f3b;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+:host ::ng-deep .json-preview .json-key {
+  color: #ffb86c;
+}
+
+:host ::ng-deep .json-preview .json-string {
+  color: #a5ff90;
+}
+
+:host ::ng-deep .json-preview .json-number {
+  color: #8be9fd;
+}
+
+:host ::ng-deep .json-preview .json-boolean {
+  color: #bd93f9;
+}
+
+:host ::ng-deep .json-preview .json-null {
+  color: #ff79c6;
+}
+
+:host ::ng-deep .json-preview .json-punctuation {
+  color: #7f8fb3;
+}
+
+:host ::ng-deep .json-preview .json-bracket {
+  color: #e6edf8;
+}
+
+:host ::ng-deep .json-preview .json-comma {
+  color: #8ea0c8;
+}
+
+:host ::ng-deep .json-preview .json-line {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  align-items: start;
+  min-height: 24px;
+}
+
+:host ::ng-deep .json-preview .json-line-number {
+  padding: 0 14px 0 0;
+  text-align: right;
+  color: #7583a6;
+  user-select: none;
+  border-right: 1px solid rgba(138, 150, 180, 0.14);
+}
+
+:host ::ng-deep .json-preview .json-line-code {
+  position: relative;
+  display: block;
+  padding: 0 18px 0 calc(18px + (var(--indent) * 18px));
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+:host ::ng-deep .json-preview .json-line-code::before {
+  content: '';
+  position: absolute;
+  inset: 2px auto 2px 18px;
+  width: calc(var(--indent) * 18px);
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent 16px,
+    rgba(160, 170, 194, 0.11) 16px,
+    rgba(160, 170, 194, 0.11) 17px
+  );
+  pointer-events: none;
+}
+
 @media (max-width: 800px) {
   .section-heading,
+  .section-heading__actions,
+  .block-heading,
   .meta-grid {
     display: grid;
   }

@@ -1,0 +1,68 @@
+<section class="vector-page">
+  <header class="vector-hero">
+    <div>
+      <p class="vector-hero__eyebrow">Vector search</p>
+      <h2>Mocked semantic retrieval</h2>
+      <p class="vector-hero__subtitle">
+        Search a mocked vector collection and preview the matches that would later feed RAG and
+        chat flows.
+      </p>
+    </div>
+  </header>
+
+  <div class="workspace-grid">
+    <section class="panel-card">
+      <div class="section-heading">
+        <h3>Search request</h3>
+        <span>Mocked `/vector/search` input</span>
+      </div>
+
+      <div class="form-grid">
+        <label class="field field--wide">
+          <span>Query</span>
+          <textarea [(ngModel)]="query"></textarea>
+        </label>
+
+        <label class="field">
+          <span>Collection</span>
+          <select [(ngModel)]="collection">
+            <option *ngFor="let item of collections" [value]="item">{{ item }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Limit</span>
+          <input type="number" min="1" max="10" [(ngModel)]="limit" />
+        </label>
+      </div>
+
+      <div class="panel-actions">
+        <button type="button" class="primary-button" (click)="runSearch()">
+          Run similarity search
+        </button>
+      </div>
+
+      <pre class="code-panel">{{ requestJson }}</pre>
+    </section>
+
+    <section class="panel-card">
+      <div class="section-heading">
+        <h3>Retrieved matches</h3>
+        <span>{{ results.length }} result(s)</span>
+      </div>
+
+      <div class="results-list">
+        <article class="result-card" *ngFor="let result of results">
+          <div class="result-card__header">
+            <div>
+              <h4>{{ result.title }}</h4>
+              <span>{{ result.source }}</span>
+            </div>
+            <strong>{{ result.score | number: '1.2-2' }}</strong>
+          </div>
+          <p>{{ result.snippet }}</p>
+        </article>
+      </div>
+    </section>
+  </div>
+</section>

@@ -36,6 +36,11 @@
 .field {
   display: grid;
   gap: 8px;
+  min-width: 0;
+}
+
+.field--wide {
+  grid-column: span 2;
 }
 
 .field span {
@@ -44,9 +49,56 @@
   color: #30385a;
 }
 
-.field small {
-  color: #6b7390;
+.field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hint-badge {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(27, 31, 59, 0.08);
+  color: #5d6784;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: help;
+}
+
+.hint-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  width: 220px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(27, 31, 59, 0.94);
+  color: #fff8f2;
+  font-size: 12px;
+  font-weight: 500;
   line-height: 1.5;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(6px);
+  transition: opacity 180ms ease, transform 180ms ease;
+  box-shadow: 0 20px 40px rgba(18, 23, 46, 0.22);
+  z-index: 4;
+  display: block;
+  color: #fff8f2 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+.hint-badge:hover .hint-tooltip,
+.hint-badge:focus-within .hint-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .field input,
@@ -58,6 +110,28 @@
   font: inherit;
   color: #1b1f3b;
   background: #fff;
+}
+
+.field input[type='number'] {
+  appearance: textfield;
+}
+
+.field input[type='number']::-webkit-outer-spin-button,
+.field input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.field select {
+  appearance: none;
+  padding-right: 42px;
+  font-size: 15px;
+  background:
+    linear-gradient(180deg, rgba(255, 251, 247, 0.98), rgba(244, 247, 252, 0.98)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3.25 5.25 7 9l3.75-3.75' fill='none' stroke='%239b3d24' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, right 14px center;
+  background-size: auto, 14px;
 }
 
 .field--toggle {
@@ -80,11 +154,19 @@
 
 @media (max-width: 1100px) {
   .parameter-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 800px) {
+  .parameter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field--wide {
+    grid-column: span 1;
+  }
+
   .section-heading {
     display: grid;
   }

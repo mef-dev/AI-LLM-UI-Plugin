@@ -1,12 +1,13 @@
 :host {
   display: block;
-  min-height: 100vh;
+  height: 100dvh;
 }
 
 .app-shell {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
-  min-height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background:
     radial-gradient(circle at top left, rgba(192, 55, 26, 0.18), transparent 30%),
     radial-gradient(circle at bottom right, rgba(224, 170, 88, 0.2), transparent 28%),
@@ -15,14 +16,30 @@
 
 .page-panel {
   padding: 28px;
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.page-stage {
+  position: relative;
+  min-height: calc(100dvh - 56px);
 }
 
 @media (max-width: 900px) {
   .app-shell {
     grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
   }
 
   .page-panel {
     padding: 18px;
+    height: auto;
+    overflow: visible;
+  }
+
+  .page-stage {
+    min-height: auto;
   }
 }

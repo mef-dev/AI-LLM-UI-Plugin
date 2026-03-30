@@ -16,6 +16,7 @@ export class LlmRegistryFormComponent {
   @Input({ required: true }) accessModes: LlmAccessMode[] = [];
   @Input() saveMessage = '';
 
+  @Output() close = new EventEmitter<void>();
   @Output() reset = new EventEmitter<void>();
   @Output() submitForm = new EventEmitter<void>();
 }

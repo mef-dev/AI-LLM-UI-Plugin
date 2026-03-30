@@ -29,12 +29,17 @@
 
     <div class="assistant-block">
       <span class="meta-label">Assistant message</span>
-      <pre>{{ result.choices[0].message.content }}</pre>
+      <pre class="message-panel">{{ result.choices[0].message.content }}</pre>
     </div>
 
     <div class="assistant-block">
-      <span class="meta-label">Raw response preview</span>
-      <pre>{{ formatJson(result) }}</pre>
+      <div class="block-heading">
+        <span class="meta-label">Raw response preview</span>
+        <button type="button" class="copy-button" (click)="copyJson(result, 'response')">
+          {{ copiedTarget === 'response' ? 'Copied' : 'Copy JSON' }}
+        </button>
+      </div>
+      <pre class="json-preview" [innerHTML]="formatJsonHtml(result)"></pre>
     </div>
   </div>
 </section>
@@ -42,7 +47,12 @@
 <section class="payload-card">
   <div class="section-heading">
     <h3>Request preview</h3>
-    <span>What the fake API receives</span>
+    <div class="section-heading__actions">
+      <span>What the fake API receives</span>
+      <button type="button" class="copy-button" (click)="copyJson(request, 'request')">
+        {{ copiedTarget === 'request' ? 'Copied' : 'Copy JSON' }}
+      </button>
+    </div>
   </div>
-  <pre>{{ formatJson(request) }}</pre>
+  <pre class="json-preview" [innerHTML]="formatJsonHtml(request)"></pre>
 </section>
