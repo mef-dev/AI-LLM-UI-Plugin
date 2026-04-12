@@ -46,8 +46,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   saveMessageVisible = false;
   uploadMessage = '';
   selectedUploadFile: File | null = null;
-  private saveMessageHideTimeoutId: ReturnType<typeof window.setTimeout> | null = null;
-  private saveMessageClearTimeoutId: ReturnType<typeof window.setTimeout> | null = null;
+  private saveMessageHideTimeoutId: number | null = null;
+  private saveMessageClearTimeoutId: number | null = null;
 
   form: LlmRegistryFormValue = this.createEmptyForm();
   uploadForm: LlmRegistryUploadValue = this.createEmptyUploadForm();
