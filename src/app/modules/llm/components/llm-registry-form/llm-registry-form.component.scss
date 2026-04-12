@@ -12,9 +12,21 @@
 
 .section-heading {
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.section-heading__content {
+  display: grid;
+  gap: 8px;
+}
+
+.section-heading__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
 .section-heading h3 {
@@ -22,9 +34,16 @@
   color: #1b1f3b;
 }
 
-.section-heading span {
+.request-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(244, 246, 252, 0.92);
   color: #6b7390;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .icon-button {
@@ -37,15 +56,23 @@
   cursor: pointer;
 }
 
-.editor-note,
-.state-message {
-  margin: 12px 0 0;
+.editor-note {
+  margin: 0;
   color: #54607d;
+  line-height: 1.6;
+}
+
+.state-message {
+  margin: 14px 0 0;
   line-height: 1.6;
 }
 
 .state-message--success {
   color: #17663a;
+}
+
+.state-message--error {
+  color: #9f1f35;
 }
 
 .form-grid,
@@ -56,6 +83,10 @@
 
 .form-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid--secondary {
+  margin-top: 12px;
 }
 
 .json-grid {
@@ -74,6 +105,17 @@
   color: #30385a;
 }
 
+.field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.required-mark {
+  color: #b54708;
+  font-size: 14px;
+}
+
 .field input,
 .field select,
 .field textarea {
@@ -84,6 +126,17 @@
   font: inherit;
   color: #1b1f3b;
   background: #fff;
+}
+
+.field-hint {
+  color: #8f4516;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.field-control--invalid {
+  border-color: rgba(181, 71, 8, 0.28) !important;
+  box-shadow: 0 0 0 2px rgba(181, 71, 8, 0.06);
 }
 
 .field select {
@@ -123,7 +176,7 @@
 .field--checkbox {
   grid-template-columns: auto 1fr;
   align-items: center;
-  padding-top: 30px;
+  min-height: 56px;
 }
 
 .field--checkbox input {
@@ -136,11 +189,97 @@
   margin: 0;
 }
 
-.editor-actions {
+.advanced-section {
+  margin-top: 20px;
+  border: 1px solid rgba(27, 31, 59, 0.08);
+  border-radius: 22px;
+  background: rgba(248, 250, 253, 0.88);
+}
+
+.advanced-toggle {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 16px;
+  padding: 16px 18px;
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.advanced-toggle__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1b1f3b;
+}
+
+.advanced-toggle__description {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #66708e;
+}
+
+.advanced-toggle__state {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: #9b3d24;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.advanced-section .json-grid {
+  padding: 0 18px 18px;
+  margin-top: 0;
+}
+
+.editor-footer {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(27, 31, 59, 0.08);
+}
+
+.editor-footer__meta {
+  display: grid;
+  gap: 8px;
+}
+
+.editor-footer__actions {
+  display: flex;
+  align-items: center;
   gap: 10px;
-  margin-top: 18px;
+}
+
+.editor-actions__hint {
+  margin: 0;
+  color: #6b7390;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.reset-button {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #6b7390;
+  font: inherit;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  color: #1b1f3b;
+}
+
+.primary-button-wrapper {
+  display: inline-flex;
 }
 
 .primary-button,
@@ -155,6 +294,12 @@
 .primary-button {
   background: linear-gradient(135deg, #1b1f3b, #314171);
   color: #fff8f2;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
 }
 
 .ghost-button {
@@ -172,7 +317,17 @@
 
 @media (max-width: 800px) {
   .section-heading,
-  .form-grid {
+  .editor-footer {
     display: grid;
+  }
+
+  .advanced-toggle {
+    grid-template-columns: 1fr;
+  }
+
+  .advanced-toggle__state {
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: start;
   }
 }

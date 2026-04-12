@@ -2,11 +2,10 @@
   <header class="llm-hero">
     <div>
       <p class="llm-hero__eyebrow">LLM registry</p>
-      <h2>Mocked model management</h2>
+      <h2>Model management</h2>
       <p class="llm-hero__subtitle">
-        This page works against a fake in-memory API service that returns
-        Swagger-shaped LLM registry data. The UI can be built now and the real
-        HTTP service can replace it later.
+        This page is now connected to the real stage LLM registry API for list,
+        create, update, delete, and validate operations.
       </p>
     </div>
 
@@ -16,6 +15,17 @@
       </button>
     </div>
   </header>
+
+  <div class="state-toast-layer" aria-live="polite">
+    <p
+      *ngIf="saveMessage"
+      class="state-toast state-toast--success"
+      [class.state-toast--visible]="saveMessageVisible"
+      [class.state-toast--hiding]="!saveMessageVisible"
+    >
+      {{ saveMessage }}
+    </p>
+  </div>
 
   <app-llm-registry-filters
     [filters]="filters"
@@ -50,6 +60,7 @@
         [statuses]="statuses"
         [devices]="devices"
         [accessModes]="accessModes"
+        [errorMessage]="errorMessage"
         [saveMessage]="saveMessage"
         (close)="closeEditor()"
         (reset)="resetEditor()"

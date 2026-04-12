@@ -1,12 +1,7 @@
 <section class="chat-page">
   <app-chat-playground-hero (reset)="resetConversation()"></app-chat-playground-hero>
 
-  <app-chat-request-settings
-    [request]="request"
-    [availableModels]="availableModels"
-  ></app-chat-request-settings>
-
-  <div class="content-grid">
+  <div class="workspace-grid">
     <app-chat-messages-editor
       [messages]="request.messages"
       [roles]="roles"
@@ -17,11 +12,18 @@
       (send)="sendCompletion()"
     ></app-chat-messages-editor>
 
-    <app-chat-response-preview
-      [request]="request"
-      [response]="response"
-      [loading]="loading"
-      [successMessage]="successMessage"
-    ></app-chat-response-preview>
+    <div class="workspace-sidebar">
+      <app-chat-request-settings
+        [request]="request"
+        [availableModels]="availableModels"
+      ></app-chat-request-settings>
+
+      <app-chat-response-preview
+        [request]="request"
+        [response]="response"
+        [loading]="loading"
+        [successMessage]="successMessage"
+      ></app-chat-response-preview>
+    </div>
   </div>
 </section>

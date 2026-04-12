@@ -1,17 +1,24 @@
 <section class="conversation-card">
   <div class="section-heading">
-    <h3>Messages array</h3>
-    <p>The message list is the main request body for chat completions.</p>
+    <div>
+      <h3>Conversation</h3>
+      <p>Shape the thread on the left, then use the control rail to tune the preview behavior.</p>
+    </div>
   </div>
 
   <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
 
-  <div class="message-list">
-    <article class="message-card" *ngFor="let message of messages; let i = index">
-      <div class="message-card__toolbar">
-        <label class="field">
+  <section class="system-panel" *ngIf="messages[0] && messages[0].role === 'system'">
+    <div class="system-panel__header">
+      <div>
+        <p class="system-panel__eyebrow">System guidance</p>
+        <p class="system-panel__caption">Sets the assistant behavior for the rest of the thread.</p>
+      </div>
+
+      <div class="message-toolbar">
+        <label class="field field--compact">
           <span class="field-label">Role</span>
-          <select [(ngModel)]="message.role">
+          <select [(ngModel)]="messages[0].role">
             <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
           </select>
         </label>
@@ -19,26 +26,86 @@
         <button
           type="button"
           class="ghost-button"
-          (click)="removeMessage.emit(i)"
+          (click)="removeMessage.emit(0)"
           [disabled]="messages.length === 1"
         >
           Remove
         </button>
       </div>
+    </div>
 
-      <label class="field">
-        <span class="field-label">Content</span>
-        <textarea [(ngModel)]="message.content"></textarea>
-      </label>
-    </article>
+    <label class="field">
+      <span class="field-label">Instruction</span>
+      <textarea class="message-textarea message-textarea--system" [(ngModel)]="messages[0].content"></textarea>
+    </label>
+  </section>
+
+  <div class="thread-header">
+    <div>
+      <h4>Prompt thread</h4>
+      <p>User inputs and preview replies appear here in order.</p>
+    </div>
+
+    <button type="button" class="ghost-button ghost-button--inline" (click)="addUserMessage.emit()">
+      Add user prompt
+    </button>
+  </div>
+
+  <div class="message-list">
+    <ng-container *ngFor="let message of messages; let i = index">
+      <article
+        *ngIf="!(i === 0 && messages[0]?.role === 'system')"
+        class="message-card"
+        [class.message-card--system]="message.role === 'system'"
+        [class.message-card--user]="message.role === 'user'"
+        [class.message-card--assistant]="message.role === 'assistant'"
+      >
+        <div class="message-card__header">
+          <div class="message-card__meta">
+            <span
+              class="role-chip"
+              [class.role-chip--system]="message.role === 'system'"
+              [class.role-chip--user]="message.role === 'user'"
+              [class.role-chip--assistant]="message.role === 'assistant'"
+            >
+              {{ message.role }}
+            </span>
+            <span class="message-card__index">Message {{ i + 1 }}</span>
+          </div>
+        </div>
+
+        <label class="field field--content">
+          <span class="field-label">Content</span>
+          <textarea class="message-textarea" [(ngModel)]="message.content"></textarea>
+        </label>
+
+        <div class="message-card__footer">
+          <label class="field field--compact">
+            <span class="field-label">Role</span>
+            <select [(ngModel)]="message.role">
+              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            class="ghost-button"
+            (click)="removeMessage.emit(i)"
+            [disabled]="messages.length === 1"
+          >
+            Remove
+          </button>
+        </div>
+      </article>
+    </ng-container>
   </div>
 
   <div class="conversation-actions">
-    <button type="button" class="ghost-button" (click)="addUserMessage.emit()">
-      Add user message
-    </button>
+    <p class="conversation-actions__hint">
+      Each preview appends the assistant reply to the thread so you can keep iterating.
+    </p>
     <button type="button" class="primary-button" (click)="send.emit()" [disabled]="loading">
-      {{ loading ? 'Sending...' : 'Send mocked request' }}
+      {{ loading ? 'Generating preview...' : 'Run preview' }}
     </button>
   </div>
 </section>

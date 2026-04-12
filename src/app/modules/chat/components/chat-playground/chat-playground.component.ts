@@ -6,7 +6,7 @@ import {
 } from '../../models/chat-completions.models';
 import { ChatFakeApiService } from '../../services/chat-fake-api.service';
 import { LlmRegistryLocator } from '../../../llm/models/llm-registry.models';
-import { LlmFakeApiService } from '../../../llm/services/llm-fake-api.service';
+import { LlmApiService } from '../../../llm/services/llm-api.service';
 
 @Component({
   selector: 'app-chat-playground',
@@ -26,7 +26,7 @@ export class ChatPlaygroundComponent implements OnInit {
 
   constructor(
     private readonly chatApi: ChatFakeApiService,
-    private readonly llmApi: LlmFakeApiService
+    private readonly llmApi: LlmApiService
   ) {}
 
   ngOnInit(): void {
@@ -74,7 +74,7 @@ export class ChatPlaygroundComponent implements OnInit {
       next: (response) => {
         this.response = response;
         this.loading = false;
-        this.successMessage = 'Mock completion returned successfully.';
+        this.successMessage = 'Preview reply generated successfully.';
         const assistantMessage = response.choices[0]?.message;
         if (assistantMessage) {
           this.request.messages = [...this.request.messages, assistantMessage];

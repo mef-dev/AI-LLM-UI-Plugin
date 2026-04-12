@@ -5,10 +5,10 @@ export type PluginNavigationItem = {
 };
 
 export const PLUGIN_NAVIGATION_ITEMS: PluginNavigationItem[] = [
-  { path: 'chat', label: 'chat', hint: 'Conversation loop and assistant responses.' },
-  { path: 'llm-db', label: 'llm-db', hint: 'Storage and retrieval around model data.' },
-  { path: 'document', label: 'document', hint: 'Upload, parse, and inspect document flows.' },
-  { path: 'embeddings', label: 'embeddings', hint: 'Turn text into vectors for semantic use.' },
-  { path: 'llm', label: 'llm', hint: 'Model capabilities, prompts, and outputs.' },
-  { path: 'vector', label: 'vector', hint: 'Similarity search and nearest-neighbor results.' }
+  { path: 'chat', label: 'Chat', hint: 'Test prompts and review assistant responses.' },
+  { path: 'llm-db', label: 'LLM DB', hint: 'Review stored AI-related data and state.' },
+  { path: 'document', label: 'Documents', hint: 'Upload and inspect knowledge sources.' },
+  { path: 'embeddings', label: 'Embeddings', hint: 'Work with text vector generation flows.' },
+  { path: 'llm', label: 'Models', hint: 'Register, validate, and manage available LLMs.' },
+  { path: 'vector', label: 'Vector Search', hint: 'Explore retrieval and similarity search tools.' }
 ];

@@ -1,13 +1,19 @@
 import { Injectable } from '@angular/core';
 import { PlatformHelper } from '@natec/mef-dev-platform-connector';
+import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class EndpointService {
   private get pluginData() {
-    return PlatformHelper.PluginDataSync;
+    return PlatformHelper.PluginDataSync as
+      | { apiUrl?: string; alias?: string }
+      | undefined;
   }
 
   get baseUrl(): string {
-    return `${this.pluginData.apiUrl}/api/v2/${this.pluginData.alias}`;
+    const apiUrl = this.pluginData?.apiUrl ?? environment.apiUrl;
+    const alias = this.pluginData?.alias ?? environment.alias;
+
+    return `${apiUrl}/api/v2/${alias}`;
   }
 }

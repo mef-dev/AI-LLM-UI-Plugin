@@ -1,58 +1,76 @@
 <section class="response-card">
   <div class="section-heading">
-    <h3>Mocked response</h3>
-    <span *ngIf="response">{{ response.object }}</span>
+    <div>
+      <h3>Assistant preview</h3>
+      <p>Inspect the latest reply shape while live stage completions are still blocked.</p>
+    </div>
+    <span *ngIf="response" class="response-badge">{{ response.object }}</span>
   </div>
 
-  <p *ngIf="loading" class="state-message">Generating fake completion...</p>
+  <p *ngIf="loading" class="state-message">Generating preview reply...</p>
   <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
 
-  <div *ngIf="response as result" class="response-content">
-    <div class="meta-grid">
-      <div>
-        <span class="meta-label">Completion ID</span>
-        <p>{{ result.id }}</p>
+  <div *ngIf="response as result; else emptyState" class="response-content">
+    <div class="assistant-block assistant-block--primary">
+      <div class="block-heading block-heading--stacked">
+        <div>
+          <span class="meta-label">Assistant message</span>
+          <p class="assistant-caption">Latest preview generated from the current thread.</p>
+        </div>
       </div>
-      <div>
-        <span class="meta-label">Model</span>
-        <p>{{ result.model }}</p>
-      </div>
-      <div>
-        <span class="meta-label">Prompt tokens</span>
-        <p>{{ result.usage.prompt_tokens }}</p>
-      </div>
-      <div>
-        <span class="meta-label">Completion tokens</span>
-        <p>{{ result.usage.completion_tokens }}</p>
-      </div>
-    </div>
-
-    <div class="assistant-block">
-      <span class="meta-label">Assistant message</span>
       <pre class="message-panel">{{ result.choices[0].message.content }}</pre>
     </div>
 
-    <div class="assistant-block">
-      <div class="block-heading">
-        <span class="meta-label">Raw response preview</span>
-        <button type="button" class="copy-button" (click)="copyJson(result, 'response')">
-          {{ copiedTarget === 'response' ? 'Copied' : 'Copy JSON' }}
-        </button>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <span class="meta-label">Model</span>
+        <p>{{ result.model }}</p>
       </div>
-      <pre class="json-preview" [innerHTML]="formatJsonHtml(result)"></pre>
+      <div class="meta-item">
+        <span class="meta-label">Prompt tokens</span>
+        <p>{{ result.usage.prompt_tokens }}</p>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Completion tokens</span>
+        <p>{{ result.usage.completion_tokens }}</p>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Completion ID</span>
+        <p>{{ result.id }}</p>
+      </div>
     </div>
-  </div>
-</section>
 
-<section class="payload-card">
-  <div class="section-heading">
-    <h3>Request preview</h3>
-    <div class="section-heading__actions">
-      <span>What the fake API receives</span>
-      <button type="button" class="copy-button" (click)="copyJson(request, 'request')">
-        {{ copiedTarget === 'request' ? 'Copied' : 'Copy JSON' }}
-      </button>
-    </div>
+    <details class="diagnostics-panel">
+      <summary>Diagnostics</summary>
+
+      <div class="diagnostics-panel__content">
+        <div class="assistant-block">
+          <div class="block-heading">
+            <span class="meta-label">Raw response preview</span>
+            <button type="button" class="copy-button" (click)="copyJson(result, 'response')">
+              {{ copiedTarget === 'response' ? 'Copied' : 'Copy JSON' }}
+            </button>
+          </div>
+          <pre class="json-preview" [innerHTML]="formatJsonHtml(result)"></pre>
+        </div>
+
+        <div class="assistant-block">
+          <div class="block-heading">
+            <span class="meta-label">Request preview</span>
+            <button type="button" class="copy-button" (click)="copyJson(request, 'request')">
+              {{ copiedTarget === 'request' ? 'Copied' : 'Copy JSON' }}
+            </button>
+          </div>
+          <pre class="json-preview" [innerHTML]="formatJsonHtml(request)"></pre>
+        </div>
+      </div>
+    </details>
   </div>
-  <pre class="json-preview" [innerHTML]="formatJsonHtml(request)"></pre>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <h4>No preview yet</h4>
+      <p>Run the conversation once to inspect the assistant answer, token usage, and request diagnostics.</p>
+    </div>
+  </ng-template>
 </section>

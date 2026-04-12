@@ -13,9 +13,9 @@ export class LlmRegistryListComponent {
   @Input() errorMessage = '';
   @Input() selectedModelId: string | null = null;
 
-  @Output() selected = new EventEmitter<string>();
+  @Output() selected = new EventEmitter<LlmRegistryLocator>();
 
-  selectModel(id: string): void {
-    this.selected.emit(id);
+  selectModel(model: LlmRegistryLocator): void {
+    this.selected.emit(model);
   }
 }

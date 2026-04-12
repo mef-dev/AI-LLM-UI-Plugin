@@ -1,94 +1,218 @@
 <section class="embeddings-page">
   <header class="embeddings-hero">
-    <div>
-      <p class="embeddings-hero__eyebrow">Embeddings</p>
-      <h2>Mocked vectorization workspace</h2>
+    <div class="embeddings-hero__content">
+      <p class="embeddings-hero__eyebrow">Embeddings workspace</p>
+      <div class="embeddings-hero__title-row">
+        <h2>Text indexing preview</h2>
+        <span class="status-chip status-chip--pending">Backend model pending</span>
+      </div>
       <p class="embeddings-hero__subtitle">
-        Prepare source text, choose an embedding model, and preview the vector payload the backend
-        would return.
+        Prepare source text for search and retrieval, then preview how the request would be shaped once stage embeddings are available.
       </p>
     </div>
   </header>
 
   <div class="workspace-grid">
-    <section class="panel-card">
-      <div class="section-heading">
-        <h3>Embedding request</h3>
-        <span>Frontend form before real API wiring</span>
-      </div>
+    <div class="workspace-main">
+      <section class="panel-card panel-card--primary">
+        <div class="section-heading">
+          <div>
+            <h3>Input workspace</h3>
+            <p>Switch between single-text and batch input to match the real embeddings contract.</p>
+          </div>
+        </div>
 
-      <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
+        <div class="mode-switch" role="tablist" aria-label="Embedding input mode">
+          <button
+            *ngFor="let mode of inputModes"
+            type="button"
+            class="mode-switch__button"
+            [class.mode-switch__button--active]="inputMode === mode"
+            (click)="setInputMode(mode)"
+          >
+            {{ mode === 'single' ? 'Single text' : 'Batch input' }}
+          </button>
+        </div>
 
-      <div class="form-grid">
         <label class="field field--wide">
-          <span>Source text</span>
-          <textarea [(ngModel)]="sourceText"></textarea>
+          <span>{{ inputMode === 'single' ? 'Source text' : 'Batch input' }}</span>
+          <textarea
+            *ngIf="inputMode === 'single'; else batchInput"
+            [(ngModel)]="sourceText"
+            (ngModelChange)="syncPreview()"
+          ></textarea>
+          <ng-template #batchInput>
+            <textarea
+              [(ngModel)]="batchSourceText"
+              (ngModelChange)="syncPreview()"
+              placeholder="One text item per line"
+            ></textarea>
+          </ng-template>
+          <small class="field-hint" *ngIf="inputMode === 'batch'">
+            Use one line per input item. The real API accepts an array on the same endpoint.
+          </small>
         </label>
 
-        <label class="field">
-          <span>Model</span>
-          <select [(ngModel)]="selectedModel">
-            <option *ngFor="let model of models" [value]="model">{{ model }}</option>
-          </select>
-        </label>
+        <div class="chunk-preview">
+          <div class="section-heading section-heading--inline">
+            <div>
+              <h3>Chunk preview</h3>
+              <p>Quick view of how the current text would be split before embedding.</p>
+            </div>
+          </div>
 
-        <label class="field">
-          <span>Chunk label</span>
-          <input type="text" [(ngModel)]="chunkLabel" />
-        </label>
+          <div class="summary-grid">
+            <article class="summary-item">
+              <span class="summary-label">Input mode</span>
+              <strong>{{ preview.inputMode === 'single' ? 'Single text' : 'Batch input' }}</strong>
+            </article>
+            <article class="summary-item">
+              <span class="summary-label">Items</span>
+              <strong>{{ preview.itemCount }}</strong>
+            </article>
+            <article class="summary-item">
+              <span class="summary-label">Chunks</span>
+              <strong>{{ preview.chunkCount }}</strong>
+            </article>
+            <article class="summary-item">
+              <span class="summary-label">Characters</span>
+              <strong>{{ preview.textLength }}</strong>
+            </article>
+          </div>
 
-        <label class="field">
-          <span>Chunk strategy</span>
-          <select [(ngModel)]="chunkStrategy">
-            <option value="sentence_window">sentence_window</option>
-            <option value="paragraph">paragraph</option>
-            <option value="document">document</option>
-          </select>
-        </label>
+          <div class="chunk-list" *ngIf="preview.chunkPreviews.length; else emptyChunkState">
+            <article class="chunk-card" *ngFor="let chunk of preview.chunkPreviews | slice:0:4; let i = index">
+              <span class="chunk-card__index">Chunk {{ i + 1 }}</span>
+              <p>{{ chunk }}</p>
+            </article>
+          </div>
 
-        <label class="field field--toggle">
-          <input type="checkbox" [(ngModel)]="normalized" />
-          <span>Normalize vector output</span>
-        </label>
-      </div>
+          <ng-template #emptyChunkState>
+            <div class="empty-state">
+              <h4>No chunk preview yet</h4>
+              <p>Add text to see how the current strategy would break it into embedding-ready pieces.</p>
+            </div>
+          </ng-template>
+        </div>
+      </section>
 
-      <div class="panel-actions">
-        <button type="button" class="primary-button" (click)="generateEmbedding()">
-          Generate mocked embedding
-        </button>
-      </div>
-    </section>
+      <section class="panel-card">
+        <div class="section-heading">
+          <div>
+            <h3>Embedding preview</h3>
+            <p>Result summary first, with raw payload details tucked away below.</p>
+          </div>
+        </div>
 
-    <section class="panel-card">
-      <div class="section-heading">
-        <h3>Preview</h3>
-        <span>What the fake API returns</span>
-      </div>
+        <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
 
-      <div class="summary-grid">
-        <article class="summary-item">
-          <span class="summary-label">Dimensions</span>
-          <strong>{{ preview.dimensions }}</strong>
-        </article>
-        <article class="summary-item">
-          <span class="summary-label">Text length</span>
-          <strong>{{ preview.textLength }}</strong>
-        </article>
-        <article class="summary-item">
-          <span class="summary-label">Strategy</span>
-          <strong>{{ preview.chunkStrategy }}</strong>
-        </article>
-        <article class="summary-item">
-          <span class="summary-label">Normalized</span>
-          <strong>{{ preview.normalized ? 'Yes' : 'No' }}</strong>
-        </article>
-      </div>
+        <div class="summary-grid summary-grid--preview">
+          <article class="summary-item">
+            <span class="summary-label">Model</span>
+            <strong>{{ preview.model }}</strong>
+          </article>
+          <article class="summary-item">
+            <span class="summary-label">Dimensions</span>
+            <strong>{{ preview.dimensions }}</strong>
+          </article>
+          <article class="summary-item">
+            <span class="summary-label">Strategy</span>
+            <strong>{{ preview.chunkStrategy }}</strong>
+          </article>
+          <article class="summary-item">
+            <span class="summary-label">Normalized</span>
+            <strong>{{ preview.normalized ? 'Yes' : 'No' }}</strong>
+          </article>
+        </div>
 
-      <div class="vector-strip">
-        <span *ngFor="let value of preview.vector">{{ value }}</span>
-      </div>
+        <div class="vector-sample">
+          <div class="vector-sample__heading">
+            <span class="summary-label">Sample values</span>
+            <p>Small preview of the mocked vector output.</p>
+          </div>
+          <div class="vector-strip">
+            <span *ngFor="let value of sampleVector">{{ value }}</span>
+          </div>
+        </div>
 
-      <pre class="code-panel">{{ previewJson }}</pre>
-    </section>
+        <details class="diagnostics-panel">
+          <summary>Diagnostics</summary>
+
+          <div class="diagnostics-panel__content">
+            <div class="code-block">
+              <span class="summary-label">Preview payload</span>
+              <pre class="code-panel">{{ previewJson }}</pre>
+            </div>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <aside class="workspace-sidebar">
+      <section class="panel-card panel-card--sidebar">
+        <div class="section-heading">
+          <div>
+            <h3>Controls</h3>
+            <p>Settings for the next preview run.</p>
+          </div>
+        </div>
+
+        <div class="form-grid form-grid--sidebar">
+          <label class="field">
+            <span>Model</span>
+            <select [(ngModel)]="selectedModel" (ngModelChange)="syncPreview()">
+              <option *ngFor="let model of models" [value]="model">{{ model }}</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Reference name</span>
+            <input type="text" [(ngModel)]="chunkLabel" (ngModelChange)="syncPreview()" />
+          </label>
+
+          <label class="field">
+            <span>Chunk strategy</span>
+            <select [(ngModel)]="chunkStrategy" (ngModelChange)="syncPreview()">
+              <option *ngFor="let strategy of chunkStrategies" [value]="strategy">{{ strategy }}</option>
+            </select>
+          </label>
+
+          <label class="field field--toggle">
+            <input type="checkbox" [(ngModel)]="normalized" (ngModelChange)="syncPreview()" />
+            <span>Normalize vector output</span>
+          </label>
+        </div>
+
+        <div class="panel-actions">
+          <button type="button" class="primary-button" (click)="generateEmbedding()">
+            Generate preview
+          </button>
+        </div>
+      </section>
+
+      <section class="panel-card panel-card--sidebar">
+        <div class="section-heading">
+          <div>
+            <h3>Stage readiness</h3>
+            <p>What is ready today versus what is still blocked on the backend.</p>
+          </div>
+        </div>
+
+        <div class="readiness-list">
+          <article class="readiness-item">
+            <span class="summary-label">Request contract</span>
+            <p>Known for both single-string and array input on the same endpoint.</p>
+          </article>
+          <article class="readiness-item">
+            <span class="summary-label">Current blocker</span>
+            <p>The stage embedding model file is not present yet, so real requests still fail server-side.</p>
+          </article>
+          <article class="readiness-item">
+            <span class="summary-label">UI goal</span>
+            <p>Keep the request flow understandable now, then swap the preview over to the real endpoint later.</p>
+          </article>
+        </div>
+      </section>
+    </aside>
   </div>
 </section>

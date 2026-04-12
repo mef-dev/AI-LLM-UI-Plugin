@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import {
   JsonRecord,
@@ -9,12 +10,13 @@ import {
   LlmRegistryLocator,
   LlmStatus,
   LlmUpdateRequest,
+  LlmValidationResponse,
 } from '../../models/llm-registry.models';
 import {
   LlmRegistryFormValue,
   LlmRegistryUploadValue,
 } from '../../models/llm-registry-form.models';
-import { LlmFakeApiService } from '../../services/llm-fake-api.service';
+import { LlmApiService } from '../../services/llm-api.service';
 
 @Component({
   selector: 'app-llm-registry-workspace',
@@ -41,16 +43,27 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   loading = false;
   errorMessage = '';
   saveMessage = '';
+  saveMessageVisible = false;
   uploadMessage = '';
   selectedUploadFile: File | null = null;
+  private saveMessageHideTimeoutId: ReturnType<typeof window.setTimeout> | null = null;
+  private saveMessageClearTimeoutId: ReturnType<typeof window.setTimeout> | null = null;
 
   form: LlmRegistryFormValue = this.createEmptyForm();
   uploadForm: LlmRegistryUploadValue = this.createEmptyUploadForm();
 
-  constructor(private readonly llmApi: LlmFakeApiService) {}
+  constructor(
+    private readonly llmApi: LlmApiService,
+    @Inject(DOCUMENT) private readonly document: Document,
+  ) {}
 
   ngOnInit(): void {
     this.loadModels();
+  }
+
+  ngOnDestroy(): void {
+    this.clearSaveMessage();
+    this.updateBackgroundScrollLock(false);
   }
 
   loadModels(): void {
@@ -73,8 +86,10 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
             ? models.some((item) => item.model_id === this.selectedModel?.model_id)
             : false;
 
-          const nextId = selectedStillExists ? this.selectedModel?.model_id : models[0].model_id;
-          this.selectModel(nextId!);
+          const nextModel = selectedStillExists
+            ? models.find((item) => item.model_id === this.selectedModel?.model_id) ?? models[0]
+            : models[0];
+          this.selectModel(nextModel);
         },
         error: (error: Error) => {
           this.errorMessage = error.message;
@@ -82,15 +97,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       });
   }
 
-  selectModel(id: string): void {
-    this.llmApi.getModelById(id).subscribe({
-      next: (model) => {
-        this.selectedModel = model;
-      },
-      error: (error: Error) => {
-        this.errorMessage = error.message;
-      },
-    });
+  selectModel(model: LlmRegistryLocator): void {
+    this.selectedModel = model;
   }
 
   resetFilters(): void {
@@ -100,16 +108,18 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   }
 
   startCreate(): void {
+    this.errorMessage = '';
     this.editingModelId = null;
-    this.saveMessage = '';
+    this.clearSaveMessage();
     this.form = this.createEmptyForm();
-    this.uploadVisible = false;
-    this.formVisible = true;
+    this.setUploadVisible(false);
+    this.setFormVisible(true);
   }
 
   startEdit(model: LlmRegistryLocator): void {
+    this.errorMessage = '';
     this.editingModelId = model.model_id;
-    this.saveMessage = '';
+    this.clearSaveMessage();
     this.form = {
       model_name: model.model_name,
       display_name: model.display_name ?? '',
@@ -124,8 +134,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       capabilitiesJson: this.stringifyJson(model.capabilities),
       configJson: this.stringifyJson(model.config),
     };
-    this.uploadVisible = false;
-    this.formVisible = true;
+    this.setUploadVisible(false);
+    this.setFormVisible(true);
   }
 
   resetEditor(): void {
@@ -138,6 +148,7 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   }
 
   startUpload(model: LlmRegistryLocator): void {
+    this.errorMessage = '';
     this.uploadModelTarget = model;
     this.uploadMessage = '';
     this.selectedUploadFile = null;
@@ -145,12 +156,13 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       device: model.device ?? '',
       version: model.version ?? '',
     };
-    this.formVisible = false;
-    this.uploadVisible = true;
+    this.setFormVisible(false);
+    this.setUploadVisible(true);
   }
 
   closeEditor(): void {
-    this.formVisible = false;
+    this.errorMessage = '';
+    this.setFormVisible(false);
   }
 
   setUploadFile(file: File | null): void {
@@ -170,7 +182,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   }
 
   closeUpload(): void {
-    this.uploadVisible = false;
+    this.errorMessage = '';
+    this.setUploadVisible(false);
   }
 
   submitUpload(): void {
@@ -187,34 +200,20 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       return;
     }
 
-    this.llmApi
-      .uploadModel(
-        this.uploadModelTarget.model_id,
-        this.selectedUploadFile.name,
-        this.normalizeEnum(this.uploadForm.device),
-        this.normalizeText(this.uploadForm.version)
-      )
-      .subscribe({
-        next: (uploaded) => {
-          this.selectedModel = uploaded;
-          this.uploadModelTarget = uploaded;
-          this.uploadMessage = `${uploaded.display_name || uploaded.model_name} received mocked archive ${this.selectedUploadFile?.name}.`;
-          this.startEdit(uploaded);
-          this.formVisible = false;
-          this.uploadVisible = false;
-          this.loadModels();
-        },
-        error: (error: Error) => {
-          this.errorMessage = error.message;
-        },
-      });
+    this.errorMessage =
+      'Upload endpoint integration is not wired yet. LLM list/create/update/delete/validate are now connected to the real API.';
   }
 
   validateSelected(model: LlmRegistryLocator): void {
     this.llmApi.validateModel(model.model_id).subscribe({
-      next: (validated) => {
-        this.selectedModel = validated;
-        this.saveMessage = `${validated.display_name || validated.model_name} was validated by the fake service.`;
+      next: (validated: LlmValidationResponse) => {
+        this.selectedModel = {
+          ...model,
+          status: validated.status as LlmStatus,
+        };
+        this.setSaveMessage(
+          `${model.display_name || model.model_name} validation returned ${validated.status}.`
+        );
         this.loadModels();
       },
       error: (error: Error) => {
@@ -224,18 +223,33 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   }
 
   deleteSelected(model: LlmRegistryLocator): void {
-    const confirmed = confirm(`Delete mocked model ${model.display_name || model.model_name}?`);
+    const confirmed = confirm(`Delete model ${model.display_name || model.model_name}?`);
     if (!confirmed) {
       return;
     }
 
+    this.errorMessage = '';
+
     this.llmApi.deleteModel(model.model_id).subscribe({
       next: () => {
-        this.saveMessage = `${model.display_name || model.model_name} was removed from the fake registry.`;
+        const deletedModelId = model.model_id;
+
+        this.setSaveMessage(`${model.display_name || model.model_name} was removed from the registry.`);
         this.selectedModel = null;
-        if (this.editingModelId === model.model_id) {
-          this.startCreate();
+
+        if (this.editingModelId === deletedModelId) {
+          this.setFormVisible(false);
+          this.editingModelId = null;
+          this.form = this.createEmptyForm();
         }
+
+        if (this.uploadModelTarget?.model_id === deletedModelId) {
+          this.setUploadVisible(false);
+          this.uploadModelTarget = null;
+          this.selectedUploadFile = null;
+          this.uploadForm = this.createEmptyUploadForm();
+        }
+
         this.loadModels();
       },
       error: (error: Error) => {
@@ -246,10 +260,20 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
 
   submitForm(): void {
     this.errorMessage = '';
-    this.saveMessage = '';
+    this.clearSaveMessage();
 
     if (!this.form.model_name.trim()) {
       this.errorMessage = 'Model name is required.';
+      return;
+    }
+
+    if (!this.form.device) {
+      this.errorMessage = 'Device is required.';
+      return;
+    }
+
+    if (!this.form.url.trim()) {
+      this.errorMessage = 'URL is required.';
       return;
     }
 
@@ -275,9 +299,9 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
     if (!this.editingModelId) {
       this.llmApi.createModel(basePayload).subscribe({
         next: (created) => {
-          this.saveMessage = `${created.display_name || created.model_name} was created in the fake registry.`;
+          this.setSaveMessage(`${created.display_name || created.model_name} was created in the registry.`);
           this.selectedModel = created;
-          this.formVisible = false;
+          this.setFormVisible(false);
           this.editingModelId = created.model_id;
           this.loadModels();
         },
@@ -295,9 +319,9 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
 
     this.llmApi.updateModel(this.editingModelId, updatePayload).subscribe({
       next: (updated) => {
-        this.saveMessage = `${updated.display_name || updated.model_name} was updated in the fake registry.`;
+        this.setSaveMessage(`${updated.display_name || updated.model_name} was updated in the registry.`);
         this.selectedModel = updated;
-        this.formVisible = false;
+        this.setFormVisible(false);
         this.editingModelId = updated.model_id;
         this.loadModels();
       },
@@ -347,6 +371,52 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
     return value || undefined;
   }
 
+  private setSaveMessage(message: string): void {
+    this.clearSaveMessage();
+    this.saveMessage = message;
+    this.saveMessageVisible = true;
+    this.saveMessageHideTimeoutId = window.setTimeout(() => {
+      this.saveMessageVisible = false;
+      this.saveMessageHideTimeoutId = null;
+      this.saveMessageClearTimeoutId = window.setTimeout(() => {
+        this.saveMessage = '';
+        this.saveMessageClearTimeoutId = null;
+      }, 260);
+    }, 3600);
+  }
+
+  private clearSaveMessage(): void {
+    if (this.saveMessageHideTimeoutId !== null) {
+      window.clearTimeout(this.saveMessageHideTimeoutId);
+      this.saveMessageHideTimeoutId = null;
+    }
+
+    if (this.saveMessageClearTimeoutId !== null) {
+      window.clearTimeout(this.saveMessageClearTimeoutId);
+      this.saveMessageClearTimeoutId = null;
+    }
+
+    this.saveMessageVisible = false;
+    this.saveMessage = '';
+  }
+
+  private setFormVisible(visible: boolean): void {
+    this.formVisible = visible;
+    this.updateBackgroundScrollLock(this.formVisible || this.uploadVisible);
+  }
+
+  private setUploadVisible(visible: boolean): void {
+    this.uploadVisible = visible;
+    this.updateBackgroundScrollLock(this.formVisible || this.uploadVisible);
+  }
+
+  private updateBackgroundScrollLock(locked: boolean): void {
+    const method = locked ? 'add' : 'remove';
+
+    this.document.body?.classList[method]('modal-scroll-locked');
+    this.document.documentElement?.classList[method]('modal-scroll-locked');
+  }
+
   private createEmptyForm(): LlmRegistryFormValue {
     return {
       model_name: '',
@@ -358,7 +428,7 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       api_key: '',
       version: '',
       status: 'DRAFT' as LlmStatus,
-      headersJson: '{\n  "Authorization": "Bearer demo-token"\n}',
+      headersJson: '{}',
       capabilitiesJson: '{\n  "chat": true,\n  "embeddings": false\n}',
       configJson: '{\n  "max_context": 4096\n}',
     };

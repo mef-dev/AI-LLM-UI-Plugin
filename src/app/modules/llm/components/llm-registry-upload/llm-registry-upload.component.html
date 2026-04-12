@@ -1,7 +1,7 @@
 <section class="upload-card" *ngIf="model as current">
   <div class="section-heading">
     <div>
-      <h3>Upload mocked model archive</h3>
+      <h3>Upload model archive</h3>
       <span>{{ current.display_name || current.model_name }}</span>
     </div>
     <button type="button" class="icon-button" (click)="close.emit()" aria-label="Close upload">
@@ -10,8 +10,8 @@
   </div>
 
   <p class="upload-note">
-    This simulates `POST /llm/{{ '{' }}id{{ '}' }}/upload`. It does not send a real file, but it
-    updates the mocked model as if an archive upload happened.
+    `POST /llm/{{ '{' }}id{{ '}' }}/upload` is still pending backend integration in
+    the UI. The registry CRUD flow is already connected to the real API.
   </p>
 
   <div class="upload-grid">
@@ -40,7 +40,7 @@
       Clear upload
     </button>
     <button type="button" class="primary-button" (click)="submitUpload.emit()" [disabled]="!fileName">
-      Upload mocked ZIP
+      Upload ZIP
     </button>
   </div>
 </section>

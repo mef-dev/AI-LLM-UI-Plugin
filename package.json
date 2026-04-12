@@ -7,7 +7,7 @@
     "generate-version-file": "npx generate-version-file",
     "publish": "npx mef-dev-publish",
     "build:plugin": "npm run generate-version-file && ng build --configuration production --output-hashing none --single-bundle",
-    "publish-kuber": "npm run publish apiUrl=https://api.mef.dev"
+    "publish-kuber": "npm run publish apiUrl=https://stage-api.mef.dev"
   },
   "private": true,
   "dependencies": {

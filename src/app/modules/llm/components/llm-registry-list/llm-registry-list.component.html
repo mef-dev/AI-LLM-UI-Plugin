@@ -4,7 +4,7 @@
     <span>{{ models.length }} item(s)</span>
   </div>
 
-  <p *ngIf="loading" class="state-message">Loading fake registry data...</p>
+  <p *ngIf="loading" class="state-message">Loading registry data...</p>
   <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
 
   <div *ngIf="!loading && !errorMessage && models.length" class="list-table">
@@ -13,7 +13,7 @@
       type="button"
       class="model-row"
       [class.model-row--active]="selectedModelId === model.model_id"
-      (click)="selectModel(model.model_id)"
+      (click)="selectModel(model)"
     >
       <div class="model-row__main">
         <strong>{{ model.display_name || model.model_name }}</strong>
@@ -32,6 +32,6 @@
 
   <div *ngIf="!loading && !errorMessage && !models.length" class="empty-state">
     <h3>No models found</h3>
-    <p>Change filters or register a new mocked LLM entry.</p>
+    <p>Change filters or register a new LLM entry.</p>
   </div>
 </section>

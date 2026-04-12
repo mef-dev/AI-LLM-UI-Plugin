@@ -57,3 +57,8 @@ export interface LlmListFilters {
   status?: LlmStatus | '';
   modelName?: string;
 }
+
+export interface LlmValidationResponse {
+  ok: boolean;
+  status: LlmStatus | string;
+}

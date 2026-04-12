@@ -9,6 +9,12 @@ body {
   background: #f2f5f9;
 }
 
+html.modal-scroll-locked,
+body.modal-scroll-locked {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 * {
   box-sizing: border-box;
 }

@@ -1,29 +1,39 @@
 <section class="editor-card">
   <div class="section-heading">
-    <div>
-      <h3>{{ editingModelId ? 'Edit mocked LLM' : 'Create mocked LLM' }}</h3>
-      <span>{{ editingModelId ? 'PUT /llm/{id}' : 'POST /llm' }}</span>
+    <div class="section-heading__content">
+      <div class="section-heading__title-row">
+        <h3>{{ editingModelId ? 'Edit LLM' : 'Create LLM' }}</h3>
+        <span class="request-chip">{{ editingModelId ? 'PUT /llm/{id}' : 'POST /llm' }}</span>
+      </div>
+      <p class="editor-note">
+        Create a model entry for the LLM registry. Required fields are marked with
+        <strong>*</strong>.
+      </p>
     </div>
     <button type="button" class="icon-button" (click)="close.emit()" aria-label="Close editor">
       Close
     </button>
   </div>
 
-  <p class="editor-note">
-    This form writes only to the fake service. The fields match the API
-    documentation so the same UI can later talk to the real backend.
-  </p>
-
+  <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
   <p *ngIf="saveMessage" class="state-message state-message--success">{{ saveMessage }}</p>
 
   <div class="form-grid">
     <label class="field">
-      <span>Model name</span>
+      <span class="field-label">
+        Model name
+        <strong class="required-mark" aria-hidden="true">*</strong>
+      </span>
       <input
         type="text"
         [(ngModel)]="form.model_name"
         placeholder="meta-llama/Llama-3.1-8B-Instruct"
+        [class.field-control--invalid]="shouldShowFieldHint('model_name')"
+        (blur)="markFieldTouched('model_name')"
       />
+      <small class="field-hint" *ngIf="shouldShowFieldHint('model_name')">
+        Required. Use the exact backend model identifier.
+      </small>
     </label>
 
     <label class="field">
@@ -32,11 +42,21 @@
     </label>
 
     <label class="field">
-      <span>Device</span>
-      <select [(ngModel)]="form.device">
-        <option value="">Not set</option>
+      <span class="field-label">
+        Device
+        <strong class="required-mark" aria-hidden="true">*</strong>
+      </span>
+      <select
+        [(ngModel)]="form.device"
+        [class.field-control--invalid]="shouldShowFieldHint('device')"
+        (blur)="markFieldTouched('device')"
+      >
+        <option value="">Choose device</option>
         <option *ngFor="let device of devices" [value]="device">{{ device }}</option>
       </select>
+      <small class="field-hint" *ngIf="shouldShowFieldHint('device')">
+        Required. Needed for backend runtime and storage operations.
+      </small>
     </label>
 
     <label class="field">
@@ -54,10 +74,24 @@
     </label>
 
     <label class="field">
-      <span>URL</span>
-      <input type="text" [(ngModel)]="form.url" placeholder="https://endpoint.example/llm" />
+      <span class="field-label">
+        URL
+        <strong class="required-mark" aria-hidden="true">*</strong>
+      </span>
+      <input
+        type="text"
+        [(ngModel)]="form.url"
+        placeholder="http://localhost:8080"
+        [class.field-control--invalid]="shouldShowFieldHint('url')"
+        (blur)="markFieldTouched('url')"
+      />
+      <small class="field-hint" *ngIf="shouldShowFieldHint('url')">
+        Required. Enter the model endpoint or service URL.
+      </small>
     </label>
+  </div>
 
+  <div class="form-grid form-grid--secondary">
     <label class="field field--checkbox">
       <input type="checkbox" [(ngModel)]="form.is_required" />
       <span>Required model</span>
@@ -71,29 +105,61 @@
     </label>
   </div>
 
-  <div class="json-grid">
-    <label class="field">
-      <span>Headers JSON</span>
-      <textarea [(ngModel)]="form.headersJson"></textarea>
-    </label>
-
-    <label class="field">
-      <span>Capabilities JSON</span>
-      <textarea [(ngModel)]="form.capabilitiesJson"></textarea>
-    </label>
-
-    <label class="field">
-      <span>Config JSON</span>
-      <textarea [(ngModel)]="form.configJson"></textarea>
-    </label>
-  </div>
-
-  <div class="editor-actions">
-    <button type="button" class="ghost-button" (click)="reset.emit()">
-      Clear form
+  <section class="advanced-section" [class.advanced-section--open]="advancedExpanded">
+    <button
+      type="button"
+      class="advanced-toggle"
+      (click)="toggleAdvanced()"
+      [attr.aria-expanded]="advancedExpanded"
+    >
+      <span class="advanced-toggle__label">Advanced settings</span>
+      <span class="advanced-toggle__description">
+        Headers, capabilities, and config JSON
+      </span>
+      <span class="advanced-toggle__state">{{ advancedExpanded ? 'Hide' : 'Show' }}</span>
     </button>
-    <button type="button" class="primary-button" (click)="submitForm.emit()">
-      {{ editingModelId ? 'Save changes' : 'Create model' }}
-    </button>
+
+    <div *ngIf="advancedExpanded" class="json-grid">
+      <label class="field">
+        <span>Headers JSON</span>
+        <textarea [(ngModel)]="form.headersJson" placeholder="{}"></textarea>
+      </label>
+
+      <label class="field">
+        <span>Capabilities JSON</span>
+        <textarea [(ngModel)]="form.capabilitiesJson"></textarea>
+      </label>
+
+      <label class="field">
+        <span>Config JSON</span>
+        <textarea [(ngModel)]="form.configJson"></textarea>
+      </label>
+    </div>
+  </section>
+
+  <div class="editor-footer">
+    <div class="editor-footer__meta">
+      <p *ngIf="isSubmitDisabled" class="editor-actions__hint">
+        Fill in {{ missingFieldsSummary }} to enable
+        {{ editingModelId ? 'Save changes' : 'Create model' }}.
+      </p>
+      <button type="button" class="reset-button" (click)="handleReset()">
+        Reset fields
+      </button>
+    </div>
+
+    <div class="editor-footer__actions">
+      <span class="primary-button-wrapper" [attr.title]="submitDisabledReason || null">
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="isSubmitDisabled"
+        [attr.aria-disabled]="isSubmitDisabled"
+        (click)="handleSubmit()"
+      >
+        {{ editingModelId ? 'Save changes' : 'Create model' }}
+      </button>
+      </span>
+    </div>
   </div>
 </section>
