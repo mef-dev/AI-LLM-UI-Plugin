@@ -61,26 +61,32 @@
         [class.message-card--assistant]="message.role === 'assistant'"
       >
         <div class="message-card__header">
-          <div class="message-card__meta">
-            <span
-              class="role-chip"
-              [class.role-chip--system]="message.role === 'system'"
-              [class.role-chip--user]="message.role === 'user'"
-              [class.role-chip--assistant]="message.role === 'assistant'"
-            >
-              {{ message.role }}
-            </span>
-            <span class="message-card__index">Message {{ i + 1 }}</span>
-          </div>
+          <h5 class="message-card__title">
+            {{
+              message.role === 'assistant'
+                ? 'Assistant reply'
+                : message.role === 'system'
+                  ? 'System message'
+                  : 'Prompt'
+            }}
+          </h5>
         </div>
 
         <label class="field field--content">
-          <span class="field-label">Content</span>
-          <textarea class="message-textarea" [(ngModel)]="message.content"></textarea>
+          <span class="field-label">{{ message.role === 'user' ? 'Message' : 'Content' }}</span>
+          <textarea
+            class="message-textarea"
+            [(ngModel)]="message.content"
+            [readonly]="message.role === 'assistant'"
+          ></textarea>
         </label>
 
         <div class="message-card__footer">
-          <label class="field field--compact">
+          <span class="message-card__note" *ngIf="message.role === 'assistant'">
+            Assistant replies are added from the live response.
+          </span>
+
+          <label class="field field--compact" *ngIf="message.role !== 'assistant'">
             <span class="field-label">Role</span>
             <select [(ngModel)]="message.role">
               <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
@@ -105,7 +111,7 @@
       Each preview appends the assistant reply to the thread so you can keep iterating.
     </p>
     <button type="button" class="primary-button" (click)="send.emit()" [disabled]="loading">
-      {{ loading ? 'Generating preview...' : 'Run preview' }}
+      {{ loading ? 'Sending...' : 'Send message' }}
     </button>
   </div>
 </section>

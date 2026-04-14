@@ -2,12 +2,12 @@
   <div class="section-heading">
     <div>
       <h3>Assistant preview</h3>
-      <p>Inspect the latest reply shape while live stage completions are still blocked.</p>
+      <p>Inspect the latest real stage reply, usage details, and raw request/response diagnostics.</p>
     </div>
     <span *ngIf="response" class="response-badge">{{ response.object }}</span>
   </div>
 
-  <p *ngIf="loading" class="state-message">Generating preview reply...</p>
+  <p *ngIf="loading" class="state-message">Generating assistant reply...</p>
   <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
 
   <div *ngIf="response as result; else emptyState" class="response-content">
@@ -40,31 +40,18 @@
       </div>
     </div>
 
-    <details class="diagnostics-panel">
-      <summary>Diagnostics</summary>
-
-      <div class="diagnostics-panel__content">
-        <div class="assistant-block">
-          <div class="block-heading">
-            <span class="meta-label">Raw response preview</span>
-            <button type="button" class="copy-button" (click)="copyJson(result, 'response')">
-              {{ copiedTarget === 'response' ? 'Copied' : 'Copy JSON' }}
-            </button>
-          </div>
-          <pre class="json-preview" [innerHTML]="formatJsonHtml(result)"></pre>
-        </div>
-
-        <div class="assistant-block">
-          <div class="block-heading">
-            <span class="meta-label">Request preview</span>
-            <button type="button" class="copy-button" (click)="copyJson(request, 'request')">
-              {{ copiedTarget === 'request' ? 'Copied' : 'Copy JSON' }}
-            </button>
-          </div>
-          <pre class="json-preview" [innerHTML]="formatJsonHtml(request)"></pre>
-        </div>
+    <div class="diagnostics-note">
+      <span class="meta-label">Diagnostics</span>
+      <p>Use the browser Network tab to inspect raw request and response payloads during stage testing.</p>
+      <div class="diagnostics-note__actions">
+        <button type="button" class="copy-button" (click)="copyJson(result, 'response')">
+          {{ copiedTarget === 'response' ? 'Copied response JSON' : 'Copy response JSON' }}
+        </button>
+        <button type="button" class="copy-button" (click)="copyJson(request, 'request')">
+          {{ copiedTarget === 'request' ? 'Copied request JSON' : 'Copy request JSON' }}
+        </button>
       </div>
-    </details>
+    </div>
   </div>
 
   <ng-template #emptyState>

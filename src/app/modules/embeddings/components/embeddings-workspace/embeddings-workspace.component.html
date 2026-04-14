@@ -4,10 +4,10 @@
       <p class="embeddings-hero__eyebrow">Embeddings workspace</p>
       <div class="embeddings-hero__title-row">
         <h2>Text indexing preview</h2>
-        <span class="status-chip status-chip--pending">Backend model pending</span>
+        <span class="status-chip status-chip--success">Live stage endpoint</span>
       </div>
       <p class="embeddings-hero__subtitle">
-        Prepare source text for search and retrieval, then preview how the request would be shaped once stage embeddings are available.
+        Generate real embeddings on stage with <strong>BAAI/bge-m3</strong> and inspect the returned vector shape before wiring the wider RAG flow.
       </p>
     </div>
   </header>
@@ -55,10 +55,10 @@
 
         <div class="chunk-preview">
           <div class="section-heading section-heading--inline">
-            <div>
-              <h3>Chunk preview</h3>
-              <p>Quick view of how the current text would be split before embedding.</p>
-            </div>
+          <div>
+            <h3>Chunk preview</h3>
+            <p>Quick view of how the current text will be split by the selected chunk length.</p>
+          </div>
           </div>
 
           <div class="summary-grid">
@@ -99,14 +99,16 @@
       <section class="panel-card">
         <div class="section-heading">
           <div>
-            <h3>Embedding preview</h3>
+            <h3>Embedding response</h3>
             <p>Result summary first, with raw payload details tucked away below.</p>
           </div>
         </div>
 
+        <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
+        <p *ngIf="loading" class="state-message">Generating embeddings...</p>
         <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
 
-        <div class="summary-grid summary-grid--preview">
+        <div class="summary-grid summary-grid--preview" *ngIf="response; else emptyResponseState">
           <article class="summary-item">
             <span class="summary-label">Model</span>
             <strong>{{ preview.model }}</strong>
@@ -116,35 +118,47 @@
             <strong>{{ preview.dimensions }}</strong>
           </article>
           <article class="summary-item">
-            <span class="summary-label">Strategy</span>
-            <strong>{{ preview.chunkStrategy }}</strong>
+            <span class="summary-label">Returned vectors</span>
+            <strong>{{ response.data.length || 0 }}</strong>
           </article>
           <article class="summary-item">
-            <span class="summary-label">Normalized</span>
-            <strong>{{ preview.normalized ? 'Yes' : 'No' }}</strong>
+            <span class="summary-label">Input mode</span>
+            <strong>{{ preview.inputMode === 'single' ? 'Single text' : 'Batch input' }}</strong>
           </article>
         </div>
 
-        <div class="vector-sample">
+        <div class="vector-sample" *ngIf="response">
           <div class="vector-sample__heading">
             <span class="summary-label">Sample values</span>
-            <p>Small preview of the mocked vector output.</p>
+            <p>Small preview of the first returned embedding vector.</p>
           </div>
           <div class="vector-strip">
             <span *ngFor="let value of sampleVector">{{ value }}</span>
           </div>
         </div>
 
-        <details class="diagnostics-panel">
+        <details class="diagnostics-panel" *ngIf="response">
           <summary>Diagnostics</summary>
 
           <div class="diagnostics-panel__content">
             <div class="code-block">
-              <span class="summary-label">Preview payload</span>
-              <pre class="code-panel">{{ previewJson }}</pre>
+              <span class="summary-label">Request payload</span>
+              <pre class="code-panel">{{ requestJson }}</pre>
+            </div>
+
+            <div class="code-block">
+              <span class="summary-label">Raw response</span>
+              <pre class="code-panel">{{ responseJson }}</pre>
             </div>
           </div>
         </details>
+
+        <ng-template #emptyResponseState>
+          <div class="empty-state">
+            <h4>No embedding response yet</h4>
+            <p>Run the request once to inspect dimensions, returned vectors, and the raw stage response.</p>
+          </div>
+        </ng-template>
       </section>
     </div>
 
@@ -166,26 +180,14 @@
           </label>
 
           <label class="field">
-            <span>Reference name</span>
-            <input type="text" [(ngModel)]="chunkLabel" (ngModelChange)="syncPreview()" />
-          </label>
-
-          <label class="field">
-            <span>Chunk strategy</span>
-            <select [(ngModel)]="chunkStrategy" (ngModelChange)="syncPreview()">
-              <option *ngFor="let strategy of chunkStrategies" [value]="strategy">{{ strategy }}</option>
-            </select>
-          </label>
-
-          <label class="field field--toggle">
-            <input type="checkbox" [(ngModel)]="normalized" (ngModelChange)="syncPreview()" />
-            <span>Normalize vector output</span>
+            <span>Chunk length</span>
+            <input type="number" [(ngModel)]="chunkLength" (ngModelChange)="syncPreview()" />
           </label>
         </div>
 
         <div class="panel-actions">
-          <button type="button" class="primary-button" (click)="generateEmbedding()">
-            Generate preview
+          <button type="button" class="primary-button" (click)="generateEmbedding()" [disabled]="loading">
+            {{ loading ? 'Generating...' : 'Generate embeddings' }}
           </button>
         </div>
       </section>
@@ -194,22 +196,22 @@
         <div class="section-heading">
           <div>
             <h3>Stage readiness</h3>
-            <p>What is ready today versus what is still blocked on the backend.</p>
+            <p>What is ready now versus what should still wait for the next phase.</p>
           </div>
         </div>
 
         <div class="readiness-list">
           <article class="readiness-item">
-            <span class="summary-label">Request contract</span>
-            <p>Known for both single-string and array input on the same endpoint.</p>
+            <span class="summary-label">Ready now</span>
+            <p>Real embeddings generation for single text and batch input on the same endpoint.</p>
           </article>
           <article class="readiness-item">
-            <span class="summary-label">Current blocker</span>
-            <p>The stage embedding model file is not present yet, so real requests still fail server-side.</p>
+            <span class="summary-label">Current model</span>
+            <p>Use <strong>BAAI/bge-m3</strong> for stage testing, as confirmed by Vlad's Postman example.</p>
           </article>
           <article class="readiness-item">
-            <span class="summary-label">UI goal</span>
-            <p>Keep the request flow understandable now, then swap the preview over to the real endpoint later.</p>
+            <span class="summary-label">Next phase</span>
+            <p>Connect this page into documents and retrieval workflows once the wider RAG flow is in place.</p>
           </article>
         </div>
       </section>

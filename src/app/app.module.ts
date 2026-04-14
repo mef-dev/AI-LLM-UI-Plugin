@@ -28,6 +28,7 @@ import { ChatRequestSettingsComponent } from './modules/chat/components/chat-req
 import { ChatResponsePreviewComponent } from './modules/chat/components/chat-response-preview/chat-response-preview.component';
 import { ChatPageComponent } from './modules/chat/pages/chat-page/chat-page.component';
 import { DocumentPageComponent } from './modules/document/pages/document-page/document-page.component';
+import { DocumentWorkspaceComponent } from './modules/document/components/document-workspace/document-workspace.component';
 import { EmbeddingsWorkspaceComponent } from './modules/embeddings/components/embeddings-workspace/embeddings-workspace.component';
 import { EmbeddingsPageComponent } from './modules/embeddings/pages/embeddings-page/embeddings-page.component';
 import { LlmRegistryFiltersComponent } from './modules/llm/components/llm-registry-filters/llm-registry-filters.component';
@@ -56,6 +57,7 @@ import { ModulePageComponent } from './shared/components/module-page/module-page
     ChatResponsePreviewComponent,
     LlmDbPageComponent,
     DocumentPageComponent,
+    DocumentWorkspaceComponent,
     EmbeddingsWorkspaceComponent,
     EmbeddingsPageComponent,
     LlmRegistryDetailsComponent,

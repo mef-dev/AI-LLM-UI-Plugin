@@ -1,15 +1,13 @@
 import { Component } from '@angular/core';
+import { EmbeddingsApiService } from '../../services/embeddings-api.service';
+import { EmbeddingsRequest, EmbeddingsResponse } from '../../models/embeddings.models';
 
 type EmbeddingInputMode = 'single' | 'batch';
-type ChunkStrategy = 'sentence_window' | 'paragraph' | 'document';
 
 interface EmbeddingPreview {
   model: string;
   dimensions: number;
-  chunkStrategy: ChunkStrategy;
-  vector: number[];
   textLength: number;
-  normalized: boolean;
   inputMode: EmbeddingInputMode;
   itemCount: number;
   chunkCount: number;
@@ -23,19 +21,9 @@ interface EmbeddingPreview {
   styleUrls: ['./embeddings-workspace.component.scss']
 })
 export class EmbeddingsWorkspaceComponent {
-  readonly models = [
-    'text-embedding-3-large',
-    'text-embedding-3-small',
-    'natec/internal-embedding-v1',
-  ];
+  readonly models = ['BAAI/bge-m3'];
 
   readonly inputModes: EmbeddingInputMode[] = ['single', 'batch'];
-  readonly chunkStrategies: ChunkStrategy[] = ['sentence_window', 'paragraph', 'document'];
-  readonly modelDimensions: Record<string, number> = {
-    'text-embedding-3-large': 3072,
-    'text-embedding-3-small': 1536,
-    'natec/internal-embedding-v1': 1024,
-  };
 
   inputMode: EmbeddingInputMode = 'single';
   sourceText =
@@ -45,13 +33,16 @@ export class EmbeddingsWorkspaceComponent {
     'Support asked for the latest escalation procedure for billing mismatches.',
     'Operations wants a searchable summary of pricing-rule incidents from the last quarter.',
   ].join('\n');
-  chunkLabel = 'billing-release-notes';
-  chunkStrategy: ChunkStrategy = 'sentence_window';
-  selectedModel = this.models[0];
-  normalized = true;
+  selectedModel = 'BAAI/bge-m3';
+  chunkLength = 512;
+  response: EmbeddingsResponse | null = null;
+  loading = false;
+  errorMessage = '';
   successMessage = '';
 
   preview = this.generatePreview();
+
+  constructor(private readonly embeddingsApi: EmbeddingsApiService) {}
 
   setInputMode(mode: EmbeddingInputMode): void {
     this.inputMode = mode;
@@ -59,12 +50,44 @@ export class EmbeddingsWorkspaceComponent {
   }
 
   generateEmbedding(): void {
-    this.preview = this.generatePreview();
-    this.successMessage = 'Preview regenerated from the current embeddings setup.';
+    const inputs = this.parsedInputs;
+
+    if (!inputs.length) {
+      this.errorMessage = 'Add source text before generating embeddings.';
+      this.successMessage = '';
+      this.response = null;
+      return;
+    }
+
+    const request: EmbeddingsRequest = {
+      model: this.selectedModel,
+      input: this.inputMode === 'single' ? inputs[0] : inputs,
+      chunk_length: this.chunkLength,
+    };
+
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.embeddingsApi.generateEmbeddings(request).subscribe({
+      next: (response) => {
+        this.response = response;
+        this.preview = this.generatePreview(response);
+        this.loading = false;
+        this.successMessage = 'Embeddings generated successfully from the stage API.';
+      },
+      error: (error: Error) => {
+        this.loading = false;
+        this.errorMessage = error.message;
+        this.response = null;
+      },
+    });
   }
 
   syncPreview(): void {
     this.preview = this.generatePreview();
+    this.response = null;
+    this.errorMessage = '';
     this.successMessage = '';
   }
 
@@ -78,45 +101,35 @@ export class EmbeddingsWorkspaceComponent {
   }
 
   get sampleVector(): number[] {
-    return this.preview.vector.slice(0, 8);
+    return this.response?.data[0]?.embedding.slice(0, 8) ?? [];
   }
 
-  get previewJson(): string {
+  get requestJson(): string {
     return JSON.stringify(
       {
         input: this.inputMode === 'single' ? this.parsedInputs[0] || '' : this.parsedInputs,
         model: this.preview.model,
-        chunk_label: this.chunkLabel,
-        chunk_strategy: this.preview.chunkStrategy,
-        normalized: this.preview.normalized,
-        dimensions: this.preview.dimensions,
-        item_count: this.preview.itemCount,
-        chunk_count: this.preview.chunkCount,
-        text_length: this.preview.textLength,
-        embedding_preview: this.preview.vector,
+        chunk_length: this.chunkLength,
       },
       null,
       2
     );
   }
 
-  private generatePreview(): EmbeddingPreview {
+  get responseJson(): string {
+    return JSON.stringify(this.response, null, 2);
+  }
+
+  private generatePreview(response?: EmbeddingsResponse | null): EmbeddingPreview {
     const inputs = this.parsedInputs;
     const combinedText = inputs.join(' ');
-    const chunkPreviews = this.buildChunks(inputs);
-    const base = Array.from({ length: 12 }, (_, index) => {
-      const seed = combinedText.charCodeAt(index % Math.max(combinedText.length, 1)) || 65;
-      const value = (((seed * (index + 7)) % 97) / 97) * 2 - 1;
-      return Number(value.toFixed(4));
-    });
+    const chunkPreviews = this.buildChunks(inputs, this.chunkLength);
+    const firstEmbedding = response?.data[0]?.embedding;
 
     return {
       model: this.selectedModel,
-      dimensions: this.modelDimensions[this.selectedModel] ?? 1536,
-      chunkStrategy: this.chunkStrategy,
-      vector: base,
+      dimensions: firstEmbedding?.length ?? 0,
       textLength: combinedText.trim().length,
-      normalized: this.normalized,
       inputMode: this.inputMode,
       itemCount: inputs.length,
       chunkCount: chunkPreviews.length,
@@ -124,41 +137,28 @@ export class EmbeddingsWorkspaceComponent {
     };
   }
 
-  private buildChunks(inputs: string[]): string[] {
+  private buildChunks(inputs: string[], chunkLength: number): string[] {
     if (!inputs.length) {
       return [];
     }
 
-    switch (this.chunkStrategy) {
-      case 'document':
-        return inputs.map((input) => this.truncateChunk(input));
-      case 'paragraph':
-        return inputs.flatMap((input) =>
-          input
-            .split(/\n{2,}/)
-            .map((chunk) => chunk.trim())
-            .filter(Boolean)
-            .map((chunk) => this.truncateChunk(chunk))
-        );
-      case 'sentence_window':
-      default:
-        return inputs.flatMap((input) => {
-          const sentences = input
-            .split(/(?<=[.!?])\s+/)
-            .map((chunk) => chunk.trim())
-            .filter(Boolean);
+    return inputs.flatMap((input) => {
+      const compact = input.replace(/\s+/g, ' ').trim();
 
-          if (sentences.length <= 1) {
-            return [this.truncateChunk(input)];
-          }
+      if (!compact) {
+        return [];
+      }
 
-          return sentences.map((sentence, index) =>
-            this.truncateChunk(
-              index === 0 ? sentence : `${sentences[index - 1]} ${sentence}`
-            )
-          );
-        });
-    }
+      if (compact.length <= chunkLength) {
+        return [this.truncateChunk(compact)];
+      }
+
+      const chunks: string[] = [];
+      for (let start = 0; start < compact.length; start += chunkLength) {
+        chunks.push(this.truncateChunk(compact.slice(start, start + chunkLength)));
+      }
+      return chunks;
+    });
   }
 
   private truncateChunk(value: string): string {

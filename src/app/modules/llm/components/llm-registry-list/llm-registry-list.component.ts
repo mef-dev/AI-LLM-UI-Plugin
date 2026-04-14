@@ -14,8 +14,13 @@ export class LlmRegistryListComponent {
   @Input() selectedModelId: string | null = null;
 
   @Output() selected = new EventEmitter<LlmRegistryLocator>();
+  @Output() create = new EventEmitter<void>();
 
   selectModel(model: LlmRegistryLocator): void {
     this.selected.emit(model);
+  }
+
+  startCreate(): void {
+    this.create.emit();
   }
 }

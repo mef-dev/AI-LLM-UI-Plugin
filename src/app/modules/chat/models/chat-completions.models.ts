@@ -9,6 +9,7 @@ export interface ChatCompletionsRequest {
   model?: string;
   messages: ChatCompletionsRequestMessage[];
   stream?: boolean;
+  max_completion_tokens?: number;
   tag?: string | null;
   stream_interval?: number;
   diversity_penalty?: number;

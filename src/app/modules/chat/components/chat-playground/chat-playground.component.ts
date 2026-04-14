@@ -4,7 +4,7 @@ import {
   ChatCompletionsRequest,
   ChatMessageRole,
 } from '../../models/chat-completions.models';
-import { ChatFakeApiService } from '../../services/chat-fake-api.service';
+import { ChatApiService } from '../../services/chat-api.service';
 import { LlmRegistryLocator } from '../../../llm/models/llm-registry.models';
 import { LlmApiService } from '../../../llm/services/llm-api.service';
 
@@ -25,7 +25,7 @@ export class ChatPlaygroundComponent implements OnInit {
   successMessage = '';
 
   constructor(
-    private readonly chatApi: ChatFakeApiService,
+    private readonly chatApi: ChatApiService,
     private readonly llmApi: LlmApiService
   ) {}
 
@@ -35,8 +35,12 @@ export class ChatPlaygroundComponent implements OnInit {
         this.availableModels = models;
 
         const currentModelExists = models.some((model) => model.model_name === this.request.model);
-        if (!currentModelExists && models.length) {
-          this.request.model = models[0].model_name;
+        if (!currentModelExists) {
+          const preferredModel =
+            models.find((model) => model.model_name === 'azure/gpt-5-mini')?.model_name ??
+            models[0]?.model_name ??
+            'azure/gpt-5-mini';
+          this.request.model = preferredModel;
         }
       },
       error: (error: Error) => {
@@ -74,7 +78,7 @@ export class ChatPlaygroundComponent implements OnInit {
       next: (response) => {
         this.response = response;
         this.loading = false;
-        this.successMessage = 'Preview reply generated successfully.';
+        this.successMessage = 'Assistant reply generated successfully.';
         const assistantMessage = response.choices[0]?.message;
         if (assistantMessage) {
           this.request.messages = [...this.request.messages, assistantMessage];
@@ -91,36 +95,23 @@ export class ChatPlaygroundComponent implements OnInit {
     return JSON.stringify(value, null, 2);
   }
 
-  private createInitialRequest(model = 'meta-llama/Llama-3.1-8B-Instruct'): ChatCompletionsRequest {
+  private createInitialRequest(model = 'azure/gpt-5-mini'): ChatCompletionsRequest {
     return {
       model,
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful assistant for internal MEF.DEV users.',
+          content: 'Be brief and helpful.',
         },
         {
           role: 'user',
-          content: 'Explain what this AI LLM UI plugin should help platform users do.',
+          content: 'Say hello in one sentence.',
         },
       ],
-      stream: true,
-      tag: 'demo-chat-run',
-      stream_interval: 0.1,
-      diversity_penalty: 0,
-      do_sample: true,
-      early_stopping: false,
-      length_penalty: 1,
-      max_tokens: 512,
-      min_length: 0,
-      no_repeat_ngram_size: 0,
-      num_beams: 1,
-      num_return_sequences: 1,
-      past_present_share_buffer: false,
-      repetition_penalty: 1,
-      temperature: 0.7,
-      top_k: 50,
-      top_p: 0.9,
+      stream: false,
+      max_tokens: 120,
+      temperature: 1,
+      top_p: 1,
     };
   }
 }

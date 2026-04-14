@@ -40,6 +40,7 @@
       [errorMessage]="errorMessage"
       [selectedModelId]="selectedModel?.model_id || null"
       (selected)="selectModel($event)"
+      (create)="startCreate()"
     ></app-llm-registry-list>
 
     <app-llm-registry-details

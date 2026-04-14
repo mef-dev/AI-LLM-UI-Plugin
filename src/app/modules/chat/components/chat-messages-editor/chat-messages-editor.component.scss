@@ -130,6 +130,19 @@
   gap: 10px;
 }
 
+.message-card__title {
+  margin: 0;
+  color: #1b1f3b;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.message-card__note {
+  color: #6b7390;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .field {
   display: grid;
   gap: 8px;
@@ -149,39 +162,6 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-}
-
-.message-card__index {
-  color: #6b7390;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.role-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.role-chip--system {
-  background: rgba(155, 61, 36, 0.12);
-  color: #9b3d24;
-}
-
-.role-chip--user {
-  background: rgba(47, 84, 235, 0.12);
-  color: #3157bf;
-}
-
-.role-chip--assistant {
-  background: rgba(23, 102, 58, 0.12);
-  color: #17663a;
 }
 
 .field select,
@@ -211,6 +191,11 @@
   min-height: 124px;
   resize: vertical;
   line-height: 1.65;
+}
+
+.message-textarea[readonly] {
+  background: rgba(248, 250, 253, 0.92);
+  color: #4f5875;
 }
 
 .message-textarea--system {

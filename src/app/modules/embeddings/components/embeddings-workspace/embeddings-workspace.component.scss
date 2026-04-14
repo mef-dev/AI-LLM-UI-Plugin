@@ -79,6 +79,11 @@
   color: #9b3d24;
 }
 
+.status-chip--success {
+  background: rgba(226, 249, 236, 0.95);
+  color: #20724f;
+}
+
 .workspace-grid {
   display: grid;
   align-items: start;
@@ -382,9 +387,22 @@
   box-shadow: 0 14px 28px rgba(27, 31, 59, 0.18);
 }
 
-.state-message--success {
+.state-message {
   margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(27, 31, 59, 0.08);
+  background: rgba(247, 249, 253, 0.68);
+}
+
+.state-message--success {
   color: #17663a;
+  background: rgba(229, 248, 237, 0.92);
+}
+
+.state-message--error {
+  color: #b2482d;
+  background: rgba(255, 239, 237, 0.95);
 }
 
 @media (max-width: 1100px) {
