@@ -2,26 +2,35 @@
   <div class="section-heading">
     <div>
       <h3>Assistant preview</h3>
-      <p>Inspect the latest real stage reply, usage details, and raw request/response diagnostics.</p>
+      <p>Inspect the latest real stage reply, token usage, and lightweight diagnostics.</p>
     </div>
     <span *ngIf="response" class="response-badge">{{ response.object }}</span>
+    <span *ngIf="streamingEnabled && !response" class="response-badge response-badge--streaming">Streaming</span>
   </div>
 
-  <p *ngIf="loading" class="state-message">Generating assistant reply...</p>
+  <p *ngIf="loading && !streamingEnabled" class="state-message">Generating assistant reply...</p>
+  <p *ngIf="loading && streamingEnabled" class="state-message">Streaming assistant reply from the stage endpoint...</p>
+  <p *ngIf="statusMessage" class="state-message">{{ statusMessage }}</p>
   <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
 
-  <div *ngIf="response as result; else emptyState" class="response-content">
+  <div *ngIf="response || streamingContent; else emptyState" class="response-content">
     <div class="assistant-block assistant-block--primary">
       <div class="block-heading block-heading--stacked">
         <div>
           <span class="meta-label">Assistant message</span>
-          <p class="assistant-caption">Latest preview generated from the current thread.</p>
+          <p class="assistant-caption">
+            {{
+              streamingEnabled
+                ? 'Partial text appears here as the streamed response arrives.'
+                : 'Latest preview generated from the current thread.'
+            }}
+          </p>
         </div>
       </div>
-      <pre class="message-panel">{{ result.choices[0].message.content }}</pre>
+      <pre class="message-panel" [class.message-panel--streaming]="streamingEnabled">{{ previewMessage }}</pre>
     </div>
 
-    <div class="meta-grid">
+    <div class="meta-grid" *ngIf="response as result">
       <div class="meta-item">
         <span class="meta-label">Model</span>
         <p>{{ result.model }}</p>
@@ -42,9 +51,16 @@
 
     <div class="diagnostics-note">
       <span class="meta-label">Diagnostics</span>
-      <p>Use the browser Network tab to inspect raw request and response payloads during stage testing.</p>
+      <p>
+        Use the browser Network tab to inspect raw payloads while testing live completions or SSE output on stage.
+      </p>
       <div class="diagnostics-note__actions">
-        <button type="button" class="copy-button" (click)="copyJson(result, 'response')">
+        <button
+          type="button"
+          class="copy-button"
+          [disabled]="!response"
+          (click)="copyJson(response, 'response')"
+        >
           {{ copiedTarget === 'response' ? 'Copied response JSON' : 'Copy response JSON' }}
         </button>
         <button type="button" class="copy-button" (click)="copyJson(request, 'request')">

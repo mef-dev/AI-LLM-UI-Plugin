@@ -17,6 +17,50 @@ export class LlmRegistryDetailsComponent {
   @Output() delete = new EventEmitter<LlmRegistryLocator>();
 
   formatJson(value: unknown): string {
-    return JSON.stringify(value ?? {}, null, 2);
+    return JSON.stringify(this.redactSensitiveJson(value ?? {}), null, 2);
+  }
+
+  formatUrl(url?: string): string {
+    if (!url) {
+      return 'n/a';
+    }
+
+    try {
+      const parsed = new URL(url);
+      const hostParts = parsed.hostname.split('.');
+
+      if (hostParts.length > 2) {
+        hostParts[0] = 'redacted-resource';
+      }
+
+      parsed.hostname = hostParts.join('.');
+      return parsed.toString();
+    } catch {
+      return url.replace(/https:\/\/[^./\s]+(\.[^\s]+)/, 'https://redacted-resource$1');
+    }
+  }
+
+  private redactSensitiveJson(value: unknown): unknown {
+    if (Array.isArray(value)) {
+      return value.map((item) => this.redactSensitiveJson(item));
+    }
+
+    if (!value || typeof value !== 'object') {
+      return value;
+    }
+
+    return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>((safe, [key, item]) => {
+      const normalizedKey = key.toLowerCase();
+      const shouldRedact =
+        normalizedKey.includes('authorization') ||
+        normalizedKey.includes('api_key') ||
+        normalizedKey.includes('apikey') ||
+        normalizedKey.includes('token') ||
+        normalizedKey.includes('secret') ||
+        normalizedKey.includes('password');
+
+      safe[key] = shouldRedact ? '[redacted]' : this.redactSensitiveJson(item);
+      return safe;
+    }, {});
   }
 }

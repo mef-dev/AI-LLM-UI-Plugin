@@ -47,19 +47,59 @@
 }
 
 .icon-button {
-  padding: 11px 16px;
-  border-radius: 999px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 14px;
   border: 1px solid rgba(27, 31, 59, 0.1);
   background: rgba(244, 246, 252, 0.9);
-  color: #1b1f3b;
-  font: inherit;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
   cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.icon-button::before,
+.icon-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 4px;
+  border-radius: 999px;
+  background: #2f3758;
+  transform-origin: center;
+}
+
+.icon-button::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.icon-button::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .editor-note {
   margin: 0;
   color: #54607d;
   line-height: 1.6;
+}
+
+.sensitive-toggle {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #9b3d24;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .state-message {
@@ -132,6 +172,29 @@
   color: #8f4516;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.sensitive-notice {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-height: 156px;
+  padding: 18px 20px;
+  border: 1px dashed rgba(155, 61, 36, 0.26);
+  border-radius: 18px;
+  background: rgba(255, 248, 242, 0.82);
+}
+
+.sensitive-notice span {
+  color: #30385a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sensitive-notice p {
+  margin: 0;
+  color: #6b7390;
+  line-height: 1.6;
 }
 
 .field-control--invalid {

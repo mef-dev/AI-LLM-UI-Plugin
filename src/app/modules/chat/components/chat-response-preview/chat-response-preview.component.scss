@@ -39,6 +39,11 @@
   font-weight: 700;
 }
 
+.response-badge--streaming {
+  background: rgba(226, 243, 235, 0.9);
+  color: #17663a;
+}
+
 .block-heading {
   display: flex;
   align-items: center;
@@ -170,6 +175,22 @@ pre {
     0 12px 24px rgba(27, 31, 59, 0.05);
 }
 
+.message-panel--streaming {
+  position: relative;
+}
+
+.message-panel--streaming::after {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 1.2em;
+  margin-left: 6px;
+  vertical-align: bottom;
+  border-radius: 999px;
+  background: rgba(23, 102, 58, 0.7);
+  animation: stream-caret 1s ease-in-out infinite;
+}
+
 .json-preview {
   display: block;
   margin: 0;
@@ -200,6 +221,22 @@ pre {
   font: inherit;
   font-size: 13px;
   cursor: pointer;
+}
+
+.copy-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes stream-caret {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
 }
 
 @media (max-width: 800px) {

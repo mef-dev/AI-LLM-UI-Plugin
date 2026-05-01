@@ -83,7 +83,7 @@
 
         <div class="message-card__footer">
           <span class="message-card__note" *ngIf="message.role === 'assistant'">
-            Assistant replies are added from the live response.
+            Assistant replies are added from the model response.
           </span>
 
           <label class="field field--compact" *ngIf="message.role !== 'assistant'">
@@ -94,6 +94,7 @@
           </label>
 
           <button
+            *ngIf="message.role !== 'assistant'"
             type="button"
             class="ghost-button"
             (click)="removeMessage.emit(i)"
@@ -104,14 +105,45 @@
         </div>
       </article>
     </ng-container>
+
+    <article class="message-card message-card--assistant message-card--live" *ngIf="streamingEnabled || streamingContent">
+      <div class="message-card__header">
+        <h5 class="message-card__title">Assistant reply</h5>
+        <span class="live-badge">{{ loading ? 'Streaming' : 'Completed' }}</span>
+      </div>
+
+      <label class="field field--content">
+        <span class="field-label">Content</span>
+        <div class="live-stream-panel" [class.live-stream-panel--active]="loading || !!streamingContent">
+          {{ streamingContent || 'Waiting for streamed assistant text…' }}
+        </div>
+      </label>
+
+      <div class="message-card__footer">
+        <span class="message-card__note">
+          Watch this panel to confirm whether streamed text arrives before the request finishes.
+        </span>
+      </div>
+    </article>
   </div>
 
   <div class="conversation-actions">
     <p class="conversation-actions__hint">
-      Each preview appends the assistant reply to the thread so you can keep iterating.
+      Stage chat currently uses the streaming path by default, so keep prompts practical and short while testing.
     </p>
-    <button type="button" class="primary-button" (click)="send.emit()" [disabled]="loading">
-      {{ loading ? 'Sending...' : 'Send message' }}
-    </button>
+    <div class="conversation-actions__buttons">
+      <button
+        type="button"
+        class="send-button"
+        (click)="loading ? cancel.emit() : send.emit()"
+        [attr.aria-label]="loading ? 'Stop generating' : 'Send message'"
+        [title]="loading ? 'Stop' : 'Send'"
+      >
+        <span *ngIf="!loading; else stopIcon" class="send-button__label">Send</span>
+        <ng-template #stopIcon>
+          <span class="send-button__stop" aria-hidden="true"></span>
+        </ng-template>
+      </button>
+    </div>
   </div>
 </section>

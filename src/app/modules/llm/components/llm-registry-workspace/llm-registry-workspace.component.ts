@@ -201,7 +201,7 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
     }
 
     this.errorMessage =
-      'Upload endpoint integration is not wired yet. LLM list/create/update/delete/validate are now connected to the real API.';
+      'Archive upload is disabled for this demo. LLM list/create/update/delete/validate are connected to the real API.';
   }
 
   validateSelected(model: LlmRegistryLocator): void {

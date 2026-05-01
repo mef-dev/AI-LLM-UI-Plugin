@@ -49,3 +49,9 @@ export interface ChatCompletionResponse {
   choices: ChatCompletionChoice[];
   usage: ChatCompletionUsage;
 }
+
+export interface ChatCompletionStreamEvent {
+  type: 'delta' | 'response';
+  delta?: string;
+  response?: Partial<ChatCompletionResponse> & Record<string, unknown>;
+}

@@ -4,12 +4,7 @@ import { LlmRegistryLocator } from '../../../llm/models/llm-registry.models';
 
 type ParameterHintKey =
   | 'model'
-  | 'temperature'
-  | 'topP'
-  | 'maxTokens'
-  | 'stream'
   | 'tag'
-  | 'topK'
   | 'streamInterval';
 
 @Component({
@@ -26,13 +21,8 @@ export class ChatRequestSettingsComponent {
 
   readonly parameterHints: Record<ParameterHintKey, string> = {
     model: 'Choose which registered model this chat preview should target.',
-    temperature: 'Higher values make replies more varied. Lower values make them more stable and predictable.',
-    topP: 'Limits token selection to the most likely probability mass. Lower values make output more focused.',
-    maxTokens: 'Caps how long the assistant reply is allowed to be.',
-    stream: 'Keeps the preview closer to streamed responses expected from the real endpoint.',
     tag: 'Optional identifier for tracing a single run in logs or future history.',
-    topK: 'Restricts the next-token choice to the top K candidates before sampling.',
-    streamInterval: 'Preview delay between streamed chunks while streaming is enabled.',
+    streamInterval: 'Controls how frequently the stage endpoint emits streamed chunks.',
   };
 
   activeHintKey: ParameterHintKey | null = null;

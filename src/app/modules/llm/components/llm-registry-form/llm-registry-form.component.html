@@ -9,6 +9,14 @@
         Create a model entry for the LLM registry. Required fields are marked with
         <strong>*</strong>.
       </p>
+      <button
+        *ngIf="editingModelId"
+        type="button"
+        class="sensitive-toggle"
+        (click)="toggleSensitiveValues()"
+      >
+        {{ sensitiveValuesVisible ? 'Hide sensitive values' : 'Show sensitive values' }}
+      </button>
     </div>
     <button type="button" class="icon-button" (click)="close.emit()" aria-label="Close editor">
       Close
@@ -79,12 +87,15 @@
         <strong class="required-mark" aria-hidden="true">*</strong>
       </span>
       <input
-        type="text"
+        [type]="isSensitiveValueHidden ? 'password' : 'text'"
         [(ngModel)]="form.url"
         placeholder="http://localhost:8080"
         [class.field-control--invalid]="shouldShowFieldHint('url')"
         (blur)="markFieldTouched('url')"
       />
+      <small class="field-hint" *ngIf="isSensitiveValueHidden">
+        Hidden in edit mode so provider resource names do not appear during a demo.
+      </small>
       <small class="field-hint" *ngIf="shouldShowFieldHint('url')">
         Required. Enter the model endpoint or service URL.
       </small>
@@ -120,10 +131,19 @@
     </button>
 
     <div *ngIf="advancedExpanded" class="json-grid">
-      <label class="field">
+      <label class="field" *ngIf="!isSensitiveValueHidden; else hiddenHeaders">
         <span>Headers JSON</span>
         <textarea [(ngModel)]="form.headersJson" placeholder="{}"></textarea>
       </label>
+
+      <ng-template #hiddenHeaders>
+        <div class="sensitive-notice">
+          <span>Headers JSON</span>
+          <p>
+            Headers are hidden to avoid exposing auth tokens on screen. Show sensitive values if you need to edit them.
+          </p>
+        </div>
+      </ng-template>
 
       <label class="field">
         <span>Capabilities JSON</span>

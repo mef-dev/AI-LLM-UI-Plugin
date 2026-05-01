@@ -11,8 +11,19 @@ export class ChatResponsePreviewComponent {
   @Input() response: ChatCompletionResponse | null = null;
   @Input() request: ChatCompletionsRequest | null = null;
   @Input() loading = false;
+  @Input() statusMessage = '';
   @Input() successMessage = '';
+  @Input() streamingContent = '';
+  @Input() streamingEnabled = false;
   copiedTarget: 'request' | 'response' | null = null;
+
+  get previewMessage(): string {
+    if (this.streamingEnabled && this.streamingContent) {
+      return this.streamingContent;
+    }
+
+    return this.response?.choices[0]?.message.content || '';
+  }
 
   formatJson(value: unknown): string {
     return JSON.stringify(value, null, 2);

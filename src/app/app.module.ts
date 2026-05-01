@@ -39,6 +39,8 @@ import { LlmRegistryUploadComponent } from './modules/llm/components/llm-registr
 import { LlmRegistryWorkspaceComponent } from './modules/llm/components/llm-registry-workspace/llm-registry-workspace.component';
 import { LlmDbPageComponent } from './modules/llm-db/pages/llm-db-page/llm-db-page.component';
 import { LlmPageComponent } from './modules/llm/pages/llm-page/llm-page.component';
+import { ResponsesWorkspaceComponent } from './modules/responses/components/responses-workspace/responses-workspace.component';
+import { ResponsesPageComponent } from './modules/responses/pages/responses-page/responses-page.component';
 import { VectorPageComponent } from './modules/vector/pages/vector-page/vector-page.component';
 import { VectorWorkspaceComponent } from './modules/vector/components/vector-workspace/vector-workspace.component';
 import { ModulePageComponent } from './shared/components/module-page/module-page.component';
@@ -53,6 +55,8 @@ import { ModulePageComponent } from './shared/components/module-page/module-page
     ChatPlaygroundHeroComponent,
     ChatPlaygroundComponent,
     ChatPageComponent,
+    ResponsesWorkspaceComponent,
+    ResponsesPageComponent,
     ChatRequestSettingsComponent,
     ChatResponsePreviewComponent,
     LlmDbPageComponent,

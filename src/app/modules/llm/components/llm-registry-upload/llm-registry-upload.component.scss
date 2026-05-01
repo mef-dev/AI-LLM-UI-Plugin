@@ -28,13 +28,41 @@
 }
 
 .icon-button {
-  padding: 11px 16px;
-  border-radius: 999px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 14px;
   border: 1px solid rgba(27, 31, 59, 0.1);
   background: rgba(244, 246, 252, 0.9);
-  color: #1b1f3b;
-  font: inherit;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
   cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.icon-button::before,
+.icon-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 4px;
+  border-radius: 999px;
+  background: #2f3758;
+  transform-origin: center;
+}
+
+.icon-button::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.icon-button::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .upload-note {

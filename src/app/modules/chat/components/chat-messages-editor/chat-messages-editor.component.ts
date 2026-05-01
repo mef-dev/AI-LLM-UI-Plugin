@@ -12,8 +12,11 @@ export class ChatMessagesEditorComponent {
   @Input({ required: true }) roles: ChatMessageRole[] = [];
   @Input() errorMessage = '';
   @Input() loading = false;
+  @Input() streamingEnabled = false;
+  @Input() streamingContent = '';
 
   @Output() addUserMessage = new EventEmitter<void>();
   @Output() removeMessage = new EventEmitter<number>();
   @Output() send = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
 }

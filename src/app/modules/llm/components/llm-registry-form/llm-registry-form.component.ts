@@ -24,6 +24,7 @@ export class LlmRegistryFormComponent {
   @Output() submitForm = new EventEmitter<void>();
 
   advancedExpanded = false;
+  sensitiveValuesVisible = false;
 
   private touchedFields: Record<RequiredFieldKey, boolean> = {
     model_name: false,
@@ -75,6 +76,10 @@ export class LlmRegistryFormComponent {
     return this.missingRequiredFields.join(', ');
   }
 
+  get isSensitiveValueHidden(): boolean {
+    return !!this.editingModelId && !this.sensitiveValuesVisible;
+  }
+
   markFieldTouched(field: RequiredFieldKey): void {
     this.touchedFields[field] = true;
   }
@@ -98,6 +103,10 @@ export class LlmRegistryFormComponent {
     this.advancedExpanded = !this.advancedExpanded;
   }
 
+  toggleSensitiveValues(): void {
+    this.sensitiveValuesVisible = !this.sensitiveValuesVisible;
+  }
+
   handleReset(): void {
     this.resetViewState();
     this.reset.emit();
@@ -109,6 +118,7 @@ export class LlmRegistryFormComponent {
 
   private resetViewState(): void {
     this.advancedExpanded = false;
+    this.sensitiveValuesVisible = false;
     this.touchedFields = {
       model_name: false,
       device: false,

@@ -21,7 +21,11 @@
       <strong>{{ activeCollectionName }}</strong>
       <p>Documents and searches below will use this collection.</p>
     </div>
-    <button type="button" class="ghost-button" (click)="clearSearchResults()">Clear results</button>
+    <div class="collection-banner__actions">
+      <button type="button" class="ghost-button" (click)="openCollectionsModal()">Manage collections</button>
+      <button type="button" class="ghost-button" (click)="openDocumentBrowser()">Edit collection</button>
+      <button type="button" class="ghost-button" (click)="clearSearchResults()">Clear results</button>
+    </div>
   </section>
 
   <div class="workspace-grid">
@@ -67,6 +71,9 @@
         </div>
 
         <div class="panel-actions">
+          <button type="button" class="ghost-button" (click)="openCollectionsModal()">
+            Manage collections
+          </button>
           <button type="button" class="ghost-button" (click)="useCurrentCollectionName()">
             Use current name
           </button>
@@ -80,7 +87,7 @@
         <div class="section-heading">
           <div>
             <h3>2. Add document content</h3>
-            <p>First-stage support uses the JSON content endpoint. File upload can follow as the next step.</p>
+            <p>Use the JSON content endpoint when you want to paste text directly into the collection.</p>
           </div>
           <span class="step-status" [class.step-status--ready]="hasActiveCollection">
             {{ hasActiveCollection ? 'Collection ready' : 'Collection required' }}
@@ -122,6 +129,58 @@
             [disabled]="isCreatingDocument || !hasActiveCollection"
           >
             {{ isCreatingDocument ? 'Adding document...' : 'Add document to collection' }}
+          </button>
+        </div>
+      </section>
+
+      <section class="panel-card">
+        <div class="section-heading">
+          <div>
+            <h3>2b. Upload document file</h3>
+            <p>Upload a real file into the active collection using the multipart document endpoint.</p>
+          </div>
+          <span class="step-status" [class.step-status--ready]="hasActiveCollection">
+            {{ hasActiveCollection ? 'Collection ready' : 'Collection required' }}
+          </span>
+        </div>
+
+        <div class="upload-panel">
+          <label class="upload-dropzone">
+            <input type="file" (change)="onUploadFileSelected($event)" />
+            <span class="upload-dropzone__title">
+              {{ selectedUploadFileName || 'Choose a file to upload' }}
+            </span>
+            <span class="upload-dropzone__hint">
+              Upload support depends on which file formats the backend currently parses successfully.
+            </span>
+          </label>
+
+          <div class="form-grid">
+            <label class="field">
+              <span>Upload title</span>
+              <input type="text" [(ngModel)]="uploadTitle" />
+            </label>
+
+            <label class="field">
+              <span>Tags</span>
+              <input type="text" [(ngModel)]="uploadTags" placeholder="uploaded, pdf" />
+            </label>
+
+            <label class="field field--wide">
+              <span>Upload metadata JSON</span>
+              <textarea class="json-textarea" [(ngModel)]="uploadMetadata"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="panel-actions">
+          <button
+            type="button"
+            class="primary-button"
+            (click)="uploadDocument()"
+            [disabled]="isUploadingDocument || !hasActiveCollection || !selectedUploadFile"
+          >
+            {{ isUploadingDocument ? 'Uploading file...' : 'Upload file to collection' }}
           </button>
         </div>
       </section>
@@ -207,7 +266,7 @@
           </article>
           <article class="readiness-item">
             <span class="summary-label">Next stage</span>
-            <p>Upload real files into a collection once the file-upload flow is added to this page.</p>
+            <p>Next after this first upload pass: collection browsing, document details, and richer RAG retrieval flows.</p>
           </article>
           <article class="readiness-item" *ngIf="createdDocumentSummary">
             <span class="summary-label">Latest document action</span>
@@ -256,4 +315,297 @@
       </article>
     </div>
   </section>
+
+  <div class="modal-layer" *ngIf="collectionsModalVisible" (click)="closeCollectionsModal()">
+    <div class="modal-panel modal-panel--collections" (click)="$event.stopPropagation()">
+      <section class="collections-modal">
+        <header class="collections-modal__header">
+          <div>
+            <p class="summary-label">Collections manager</p>
+            <h3>Manage existing collections</h3>
+            <p>Browse existing collections, switch the active one, or update and delete them without leaving this page.</p>
+          </div>
+          <button type="button" class="icon-button" (click)="closeCollectionsModal()" aria-label="Close collections manager">
+            ×
+          </button>
+        </header>
+
+        <p *ngIf="collectionsErrorMessage" class="state-message state-message--error">{{ collectionsErrorMessage }}</p>
+        <p *ngIf="collectionModalMessage" class="state-message state-message--success">{{ collectionModalMessage }}</p>
+
+        <div class="collections-modal__body">
+          <aside class="collections-browser">
+            <div class="collections-browser__header">
+              <h4>Existing collections</h4>
+              <button type="button" class="ghost-button ghost-button--compact" (click)="loadCollections()" [disabled]="collectionsLoading">
+                {{ collectionsLoading ? 'Refreshing...' : 'Refresh' }}
+              </button>
+            </div>
+
+            <div class="collections-browser__body">
+              <p *ngIf="collectionsLoading" class="empty-note">Loading collections...</p>
+              <p *ngIf="!collectionsLoading && !existingCollections.length" class="empty-note">
+                No collections were returned yet.
+              </p>
+
+              <div class="collections-list" *ngIf="existingCollections.length">
+                <button
+                  type="button"
+                  class="collection-list-item"
+                  *ngFor="let collection of existingCollections"
+                  [class.collection-list-item--active]="collection.name === selectedManagedCollection?.name"
+                  (click)="selectManagedCollection(collection.name)"
+                >
+                  <span class="collection-list-item__name">{{ collection.name }}</span>
+                  <span class="collection-list-item__meta">
+                    {{ getManagedCollectionDocumentsCount(collection) }} docs · {{ getManagedCollectionChunksCount(collection) }} chunks
+                  </span>
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          <section class="collections-editor">
+            <div class="collections-editor__header">
+              <div>
+                <h4>{{ selectedManagedCollection?.name || 'Select a collection' }}</h4>
+                <p *ngIf="selectedManagedCollection">
+                  {{ selectedManagedCollection.model || 'Unknown model' }} · {{ selectedManagedCollection.provider || 'Unknown provider' }}
+                </p>
+              </div>
+              <button
+                *ngIf="selectedManagedCollection"
+                type="button"
+                class="ghost-button ghost-button--compact"
+                (click)="useManagedCollection(selectedManagedCollection.name)"
+              >
+                Use this collection
+              </button>
+            </div>
+
+            <div class="collections-editor__body">
+              <p *ngIf="collectionDetailsLoading" class="empty-note">Loading collection details...</p>
+
+              <div class="collections-editor__content" *ngIf="selectedManagedCollection && !collectionDetailsLoading">
+                <div class="collections-stats">
+                  <article class="collection-stat">
+                    <span class="summary-label">Documents</span>
+                    <strong>{{ selectedManagedCollection.documents_count ?? 0 }}</strong>
+                  </article>
+                  <article class="collection-stat">
+                    <span class="summary-label">Chunks</span>
+                    <strong>{{ selectedManagedCollection.chunks_count ?? 0 }}</strong>
+                  </article>
+                </div>
+
+                <div class="form-grid">
+                  <label class="field field--wide">
+                    <span>Description</span>
+                    <textarea [(ngModel)]="managedCollectionDescription"></textarea>
+                  </label>
+
+                  <label class="field">
+                    <span>Chunk length</span>
+                    <input type="number" [(ngModel)]="managedCollectionChunkLength" />
+                  </label>
+
+                  <label class="field">
+                    <span>Chunk overlap</span>
+                    <input type="number" [(ngModel)]="managedCollectionChunkOverlap" />
+                  </label>
+                </div>
+              </div>
+
+              <p *ngIf="!selectedManagedCollection && !collectionDetailsLoading" class="empty-note">
+                Pick a collection on the left to inspect or edit it.
+              </p>
+            </div>
+
+            <div class="collections-editor__footer" *ngIf="selectedManagedCollection && !collectionDetailsLoading">
+              <div class="collections-editor__actions">
+                <button
+                  type="button"
+                  class="ghost-button"
+                  (click)="openDocumentBrowser(selectedManagedCollection.name)"
+                >
+                  Edit collection
+                </button>
+                <button
+                  type="button"
+                  class="ghost-button ghost-button--danger"
+                  (click)="deleteManagedCollection()"
+                  [disabled]="collectionDeleteLoading"
+                >
+                  {{ collectionDeleteLoading ? 'Deleting...' : 'Delete collection' }}
+                </button>
+                <button
+                  type="button"
+                  class="primary-button"
+                  (click)="saveManagedCollection()"
+                  [disabled]="collectionSaveLoading"
+                >
+                  {{ collectionSaveLoading ? 'Saving...' : 'Save changes' }}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="modal-layer" *ngIf="documentBrowserVisible" (click)="closeDocumentBrowser()">
+    <div class="modal-panel modal-panel--document-browser" (click)="$event.stopPropagation()">
+      <section class="collections-modal collections-modal--browser">
+        <header class="collections-modal__header">
+          <div>
+            <p class="summary-label">Collection editor</p>
+            <h3>{{ documentBrowserTitle }}</h3>
+            <p>Browse, preview, open, and delete documents in this collection.</p>
+          </div>
+          <button type="button" class="icon-button" (click)="closeDocumentBrowser()" aria-label="Close collection editor">
+            ×
+          </button>
+        </header>
+
+        <p *ngIf="collectionDocumentsErrorMessage" class="state-message state-message--error">
+          {{ collectionDocumentsErrorMessage }}
+        </p>
+
+        <div class="documents-browser-shell">
+          <div class="documents-browser-workspace">
+            <section class="documents-library documents-library--list">
+              <div class="documents-library__header">
+                <div class="documents-list-header">
+                  <button
+                    type="button"
+                    class="sort-header-button"
+                    [class.sort-header-button--active]="isDocumentSortActiveByTitle"
+                    (click)="setDocumentSort('title')"
+                  >
+                    <span>Name</span>
+                    <span class="sort-indicator">{{ getDocumentSortIndicator('title') }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-header-button"
+                    [class.sort-header-button--active]="isDocumentSortActiveByCreated"
+                    (click)="setDocumentSort('created_at')"
+                  >
+                    <span>Date Modified</span>
+                    <span class="sort-indicator">{{ getDocumentSortIndicator('created_at') }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-header-button"
+                    [class.sort-header-button--active]="isDocumentSortActiveByChunks"
+                    (click)="setDocumentSort('chunks_count')"
+                  >
+                    <span>Chunks</span>
+                    <span class="sort-indicator">{{ getDocumentSortIndicator('chunks_count') }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="documents-library__body">
+                <p *ngIf="collectionDocumentsLoading" class="empty-note">Loading documents...</p>
+                <p *ngIf="!collectionDocumentsLoading && !collectionDocuments.length" class="empty-note">
+                  No documents were returned for this collection yet.
+                </p>
+
+                <button
+                  type="button"
+                  class="document-row"
+                  *ngFor="let document of collectionDocuments"
+                  [class.document-row--active]="isDocumentSelected(document)"
+                  (click)="selectDocument(document.document_id)"
+                >
+                  <span class="document-row__name">
+                    <span class="document-row__icon">≣</span>
+                    <span>{{ document.title }}</span>
+                  </span>
+                  <span class="document-row__date">{{ document.created_at ? (document.created_at | date:'mediumDate') : '—' }}</span>
+                  <span class="document-row__kind">{{ document.chunks_count ?? 0 }} chunks</span>
+                </button>
+              </div>
+            </section>
+
+            <aside class="document-inspector">
+              <div class="document-inspector__header">
+                <div>
+                  <h4>{{ selectedDocument?.title || 'Select a document' }}</h4>
+                  <p *ngIf="selectedDocument">{{ selectedDocument.source || 'No source provided' }}</p>
+                </div>
+                <div class="document-inspector__actions" *ngIf="selectedDocument">
+                  <button type="button" class="ghost-button ghost-button--compact" (click)="openDocumentViewer()">
+                    Open
+                  </button>
+                  <button
+                    type="button"
+                    class="ghost-button ghost-button--compact ghost-button--danger"
+                    (click)="deleteSelectedDocument()"
+                    [disabled]="documentDeleteLoading"
+                  >
+                    {{ documentDeleteLoading ? 'Deleting...' : 'Delete' }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="document-inspector__body">
+                <p *ngIf="documentPreviewLoading" class="empty-note">Loading document preview...</p>
+                <p *ngIf="!selectedDocument && !documentPreviewLoading" class="empty-note">
+                  Select a document to inspect it here.
+                </p>
+
+                <div *ngIf="selectedDocument && !documentPreviewLoading" class="document-inspector__content">
+                  <p class="document-inspector__note">
+                    Review the selected document here before opening or deleting it.
+                  </p>
+
+                  <div class="result-meta-row" *ngIf="selectedDocument.tags?.length">
+                    <span class="result-chip" *ngFor="let tag of selectedDocument.tags">{{ tag }}</span>
+                  </div>
+
+                  <div class="document-preview-card">
+                    <span class="summary-label">Preview</span>
+                    <pre>{{ getSelectedDocumentPreview() }}</pre>
+                  </div>
+
+                  <details class="metadata-panel" *ngIf="selectedDocument.metadata">
+                    <summary>View metadata JSON</summary>
+                    <pre class="metadata-block">{{ selectedDocument.metadata | json }}</pre>
+                  </details>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="modal-layer" *ngIf="documentViewerVisible" (click)="closeDocumentViewer()">
+    <div class="modal-panel modal-panel--document-viewer" (click)="$event.stopPropagation()">
+      <section class="collections-modal">
+        <header class="collections-modal__header">
+          <div>
+            <p class="summary-label">Document viewer</p>
+            <h3>{{ selectedDocument?.title || 'Document' }}</h3>
+            <p>{{ selectedDocument?.source || 'Opened from the selected collection document preview.' }}</p>
+          </div>
+          <button type="button" class="icon-button" (click)="closeDocumentViewer()" aria-label="Close document viewer">
+            ×
+          </button>
+        </header>
+
+        <div class="document-viewer-content" *ngIf="selectedDocument">
+          <div class="result-meta-row" *ngIf="selectedDocument.tags?.length">
+            <span class="result-chip" *ngFor="let tag of selectedDocument.tags">{{ tag }}</span>
+          </div>
+
+          <pre class="document-viewer-text">{{ selectedDocument.content }}</pre>
+        </div>
+      </section>
+    </div>
+  </div>
 </section>

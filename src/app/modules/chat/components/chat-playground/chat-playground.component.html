@@ -7,9 +7,12 @@
       [roles]="roles"
       [errorMessage]="errorMessage"
       [loading]="loading"
+      [streamingEnabled]="streamingEnabled"
+      [streamingContent]="streamingContent"
       (addUserMessage)="addUserMessage()"
       (removeMessage)="removeMessage($event)"
-      (send)="sendCompletion()"
+      (send)="sendStreamCompletion()"
+      (cancel)="cancelActiveRequest()"
     ></app-chat-messages-editor>
 
     <div class="workspace-sidebar">
@@ -22,7 +25,10 @@
         [request]="request"
         [response]="response"
         [loading]="loading"
+        [statusMessage]="statusMessage"
         [successMessage]="successMessage"
+        [streamingContent]="streamingContent"
+        [streamingEnabled]="streamingEnabled"
       ></app-chat-response-preview>
     </div>
   </div>

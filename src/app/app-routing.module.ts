@@ -7,6 +7,7 @@ import { DocumentPageComponent } from './modules/document/pages/document-page/do
 import { EmbeddingsPageComponent } from './modules/embeddings/pages/embeddings-page/embeddings-page.component';
 import { LlmDbPageComponent } from './modules/llm-db/pages/llm-db-page/llm-db-page.component';
 import { LlmPageComponent } from './modules/llm/pages/llm-page/llm-page.component';
+import { ResponsesPageComponent } from './modules/responses/pages/responses-page/responses-page.component';
 import { VectorPageComponent } from './modules/vector/pages/vector-page/vector-page.component';
 
 const routes: Routes = PlatformHelper.updatePluginsRoutes([
@@ -22,6 +23,10 @@ const routes: Routes = PlatformHelper.updatePluginsRoutes([
       {
         path: 'chat',
         component: ChatPageComponent
+      },
+      {
+        path: 'responses',
+        component: ResponsesPageComponent
       },
       {
         path: 'llm-db',
