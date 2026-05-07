@@ -2,15 +2,16 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../../environments/environment';
 
-import { EndpointService } from 'src/app/core/services/endpoint.service';
+import { EndpointService } from '../../../core/services/endpoint.service';
 import {
   LlmCreateRequest,
   LlmListFilters,
   LlmRegistryLocator,
   LlmUpdateRequest,
   LlmValidationResponse,
+  normalizeLlmAccessMode,
 } from '../models/llm-registry.models';
 
 @Injectable({ providedIn: 'root' })
@@ -24,6 +25,7 @@ export class LlmApiService {
     return this.http
       .get<LlmRegistryLocator[]>(this.registryUrl, { headers: this.requestHeaders })
       .pipe(
+        map((items) => items.map((item) => this.normalizeRegistryItem(item))),
         map((items) => this.applyFilters(items, filters)),
         catchError((error) => this.handleError(error))
       );
@@ -32,19 +34,28 @@ export class LlmApiService {
   getModelById(id: string): Observable<LlmRegistryLocator> {
     return this.http
       .get<LlmRegistryLocator>(`${this.registryUrl}/${id}`, { headers: this.requestHeaders })
-      .pipe(catchError((error) => this.handleError(error)));
+      .pipe(
+        map((item) => this.normalizeRegistryItem(item)),
+        catchError((error) => this.handleError(error))
+      );
   }
 
   createModel(request: LlmCreateRequest): Observable<LlmRegistryLocator> {
     return this.http
       .post<LlmRegistryLocator>(this.registryUrl, request, { headers: this.requestHeaders })
-      .pipe(catchError((error) => this.handleError(error)));
+      .pipe(
+        map((item) => this.normalizeRegistryItem(item)),
+        catchError((error) => this.handleError(error))
+      );
   }
 
   updateModel(id: string, request: LlmUpdateRequest): Observable<LlmRegistryLocator> {
     return this.http
       .put<LlmRegistryLocator>(`${this.registryUrl}/${id}`, request, { headers: this.requestHeaders })
-      .pipe(catchError((error) => this.handleError(error)));
+      .pipe(
+        map((item) => this.normalizeRegistryItem(item)),
+        catchError((error) => this.handleError(error))
+      );
   }
 
   deleteModel(id: string): Observable<void> {
@@ -75,6 +86,14 @@ export class LlmApiService {
     }
 
     return headers;
+  }
+
+
+  private normalizeRegistryItem(item: LlmRegistryLocator): LlmRegistryLocator {
+    return {
+      ...item,
+      access_mode: normalizeLlmAccessMode(item.access_mode),
+    };
   }
 
   private applyFilters(items: LlmRegistryLocator[], filters: LlmListFilters): LlmRegistryLocator[] {

@@ -1,8 +1,8 @@
-<section class="response-card">
+<section id="chat-run-diagnostics" class="response-card">
   <div class="section-heading">
     <div>
-      <h3>Assistant preview</h3>
-      <p>Inspect the latest real stage reply, token usage, and lightweight diagnostics.</p>
+      <h3>Run diagnostics</h3>
+      <p>Confirm which model ran, inspect token usage, and copy the exact request or response payload when debugging.</p>
     </div>
     <span *ngIf="response" class="response-badge">{{ response.object }}</span>
     <span *ngIf="streamingEnabled && !response" class="response-badge response-badge--streaming">Streaming</span>
@@ -14,22 +14,6 @@
   <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
 
   <div *ngIf="response || streamingContent; else emptyState" class="response-content">
-    <div class="assistant-block assistant-block--primary">
-      <div class="block-heading block-heading--stacked">
-        <div>
-          <span class="meta-label">Assistant message</span>
-          <p class="assistant-caption">
-            {{
-              streamingEnabled
-                ? 'Partial text appears here as the streamed response arrives.'
-                : 'Latest preview generated from the current thread.'
-            }}
-          </p>
-        </div>
-      </div>
-      <pre class="message-panel" [class.message-panel--streaming]="streamingEnabled">{{ previewMessage }}</pre>
-    </div>
-
     <div class="meta-grid" *ngIf="response as result">
       <div class="meta-item">
         <span class="meta-label">Model</span>
@@ -47,12 +31,20 @@
         <span class="meta-label">Completion ID</span>
         <p>{{ result.id }}</p>
       </div>
+      <div class="meta-item">
+        <span class="meta-label">Request mode</span>
+        <p>{{ request?.stream ? 'Streaming' : 'Single response' }}</p>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Message shape</span>
+        <p>Two-message payload: system, then user.</p>
+      </div>
     </div>
 
     <div class="diagnostics-note">
       <span class="meta-label">Diagnostics</span>
       <p>
-        Use the browser Network tab to inspect raw payloads while testing live completions or SSE output on stage.
+        Use the browser Network tab to inspect raw payloads or SSE output while the assistant result on the left stays focused on the readable answer.
       </p>
       <div class="diagnostics-note__actions">
         <button
@@ -72,8 +64,8 @@
 
   <ng-template #emptyState>
     <div class="empty-state">
-      <h4>No preview yet</h4>
-      <p>Run the conversation once to inspect the assistant answer, token usage, and request diagnostics.</p>
+      <h4>No diagnostics yet</h4>
+      <p>Run the request once to populate model metadata, token usage, and copyable JSON payloads.</p>
     </div>
   </ng-template>
 </section>

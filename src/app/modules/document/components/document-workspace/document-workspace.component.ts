@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, Inject, OnDestroy, Renderer2 } from '@angular/core';
+import { Component, ElementRef, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import {
   DocumentCollectionCreateRequest,
   DocumentCollectionDetail,
@@ -20,27 +20,51 @@ import { DocumentApiService } from '../../services/document-api.service';
   templateUrl: './document-workspace.component.html',
   styleUrls: ['./document-workspace.component.scss']
 })
-export class DocumentWorkspaceComponent {
-  collectionName = 'my-collection';
-  collectionDescription = 'Knowledge base with multilingual BGE-M3 embeddings';
-  model = 'BAAI/bge-m3';
-  chunkLength = 256;
-  chunkOverlap = 50;
-  provider = 'Pgvector';
+export class DocumentWorkspaceComponent implements OnInit, OnDestroy {
+  private static readonly defaultCollectionName = 'my-collection';
+  private static readonly defaultCollectionDescription = 'Knowledge base with multilingual BGE-M3 embeddings';
+  private static readonly defaultModel = 'BAAI/bge-m3';
+  private static readonly defaultChunkLength = 256;
+  private static readonly defaultChunkOverlap = 50;
+  private static readonly defaultProvider = 'Pgvector';
+  private static readonly uploadMessageDismissMs = 15000;
 
-  documentTitle = 'Getting Started Guide';
-  documentContent =
-    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry standard dummy text ever since the 1500s. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.';
-  documentSource = 'https://docs.example.com/getting-started';
-  documentTags = 'guide, onboarding';
-  documentMetadata = '{\n  "author": "John Doe",\n  "category": "documentation"\n}';
-  uploadTitle = 'Uploaded guide';
-  uploadTags = 'uploaded, pdf';
-  uploadMetadata = '{\n  "source_type": "file_upload"\n}';
+  @ViewChild('statusViewport') private statusViewport?: ElementRef<HTMLElement>;
+
+  readonly createNewCollectionOption = '__create_new_collection__';
+  readonly collectionModelChoices = ['BAAI/bge-m3', 'gte-base'];
+  readonly providerChoices = ['Pgvector', 'pgvector'];
+  readonly metricChoices = ['cosine', 'euclidean', 'dotProduct'];
+  readonly scoreModeChoices = ['similarity', 'distance'];
+  readonly fieldHelp = {
+    topK: 'Maximum number of matching results to return from the retrieval request.',
+    minScore: 'Minimum score threshold required before a result is shown.',
+    metric: 'Distance or similarity metric used when comparing vectors during retrieval.',
+    scoreMode: 'Controls whether the backend returns similarity-style scores or distance-style scores.',
+    includeContent: 'Include the matched chunk text in the search results payload.',
+    includeMetadata: 'Include saved metadata in the search results payload.'
+  } as const;
+
+  collectionName = '';
+  collectionDescription = '';
+  model = DocumentWorkspaceComponent.defaultModel;
+  chunkLength = DocumentWorkspaceComponent.defaultChunkLength;
+  chunkOverlap = DocumentWorkspaceComponent.defaultChunkOverlap;
+  provider = DocumentWorkspaceComponent.defaultProvider;
+
+  documentTitle = '';
+  documentContent = '';
+  documentSource = '';
+  documentTags = '';
+  documentMetadata = '';
+  uploadTitle = '';
+  uploadTags = '';
+  uploadMetadata = '';
   selectedUploadFile: File | null = null;
   selectedUploadFileName = '';
 
-  searchQuery = 'there are many variations of passages of Lorem Ipsum available';
+  readonly searchQueryPlaceholder = 'there are many variations of passages of Lorem Ipsum available';
+  searchQuery = '';
   topK = 5;
   minScore = 0.7;
   includeContent = true;
@@ -55,7 +79,11 @@ export class DocumentWorkspaceComponent {
   createdCollection = false;
   createdDocumentSummary: string | null = null;
   activeCollectionName = '';
+  selectedCollectionOption = this.createNewCollectionOption;
+  collectionSelectorLoading = false;
+  collectionPresetLoading = false;
   collectionsModalVisible = false;
+  collectionsModalClosing = false;
   collectionsLoading = false;
   collectionDetailsLoading = false;
   collectionSaveLoading = false;
@@ -74,10 +102,14 @@ export class DocumentWorkspaceComponent {
   documentPreviewLoading = false;
   documentDeleteLoading = false;
   documentViewerVisible = false;
+  documentViewerClosing = false;
   documentBrowserVisible = false;
+  documentBrowserClosing = false;
   documentBrowserCollection: DocumentCollectionDetail | null = null;
   documentSortBy: 'title' | 'created_at' | 'chunks_count' = 'created_at';
   documentSortOrder: 'asc' | 'desc' = 'desc';
+  private modalCloseTimerId: number | null = null;
+  private messageTimerId: number | null = null;
 
   constructor(
     private readonly documentApi: DocumentApiService,
@@ -85,7 +117,21 @@ export class DocumentWorkspaceComponent {
     @Inject(DOCUMENT) private readonly document: Document
   ) {}
 
+  ngOnInit(): void {
+    this.refreshCollectionOptions();
+  }
+
   ngOnDestroy(): void {
+    if (this.modalCloseTimerId !== null) {
+      window.clearTimeout(this.modalCloseTimerId);
+      this.modalCloseTimerId = null;
+    }
+
+    if (this.messageTimerId !== null) {
+      window.clearTimeout(this.messageTimerId);
+      this.messageTimerId = null;
+    }
+
     this.unlockBackgroundScroll();
   }
 
@@ -102,18 +148,18 @@ export class DocumentWorkspaceComponent {
       name: collectionName,
       description: this.collectionDescription.trim(),
       model: this.model,
-      chunk_length: this.chunkLength,
-      chunk_overlap: this.chunkOverlap,
+      chunkLength: this.chunkLength,
+      chunkOverlap: this.chunkOverlap,
       provider: this.provider,
-      vector_search: {
+      vectorSearch: {
         algorithms: [
           {
             name: `${sanitizedName}_hnsw`,
             kind: 'hnsw',
-            hnsw_parameters: {
+            hnswParameters: {
               m: 16,
-              ef_construction: 200,
-              ef_search: 100,
+              efConstruction: 200,
+              efSearch: 100,
               metric: this.metric,
             },
           },
@@ -135,11 +181,13 @@ export class DocumentWorkspaceComponent {
         this.loadingAction = null;
         this.createdCollection = true;
         this.activeCollectionName = collectionName;
+        this.syncCollectionSelector(collectionName);
+        this.refreshCollectionOptions(collectionName);
         this.successMessage = `Collection "${collectionName}" created successfully.`;
       },
       error: (error: Error) => {
         this.loadingAction = null;
-        this.errorMessage = error.message;
+        this.showUploadMessage('error', error.message);
       },
     });
   }
@@ -171,8 +219,8 @@ export class DocumentWorkspaceComponent {
         .map((tag) => tag.trim())
         .filter(Boolean),
       metadata,
-      chunk_length: this.chunkLength,
-      chunk_overlap: this.chunkOverlap,
+      chunkLength: this.chunkLength,
+      chunkOverlap: this.chunkOverlap,
     };
 
     this.loadingAction = 'document';
@@ -216,8 +264,8 @@ export class DocumentWorkspaceComponent {
         .map((tag) => tag.trim())
         .filter(Boolean),
       metadata,
-      chunk_length: this.chunkLength,
-      chunk_overlap: this.chunkOverlap,
+      chunkLength: this.chunkLength,
+      chunkOverlap: this.chunkOverlap,
     };
 
     this.loadingAction = 'upload';
@@ -227,11 +275,11 @@ export class DocumentWorkspaceComponent {
       next: () => {
         this.loadingAction = null;
         this.createdDocumentSummary = `File "${this.selectedUploadFile?.name}" was uploaded to ${collectionName}.`;
-        this.successMessage = this.createdDocumentSummary;
+        this.showUploadMessage('success', this.createdDocumentSummary);
       },
       error: (error: Error) => {
         this.loadingAction = null;
-        this.errorMessage = error.message;
+        this.showUploadMessage('error', error.message);
       },
     });
   }
@@ -251,12 +299,16 @@ export class DocumentWorkspaceComponent {
 
     const request: DocumentSearchRequest = {
       query: this.searchQuery.trim(),
-      top_k: this.topK,
+      topK: this.topK,
       metric: this.metric,
-      score_mode: this.scoreMode,
-      min_score: this.minScore,
-      include_content: this.includeContent,
-      include_metadata: this.includeMetadata,
+      scoreMode: this.scoreMode,
+      tags: [],
+      minScore: this.minScore,
+      includeContent: this.includeContent,
+      includeMetadata: this.includeMetadata,
+      select: null,
+      searchFields: null,
+      decorators: {},
     };
 
     this.loadingAction = 'search';
@@ -296,6 +348,22 @@ export class DocumentWorkspaceComponent {
     return !!this.activeCollectionName;
   }
 
+  get collectionModelOptions(): string[] {
+    return this.withCurrentOption(this.collectionModelChoices, this.model);
+  }
+
+  get providerOptions(): string[] {
+    return this.withCurrentOption(this.providerChoices, this.provider);
+  }
+
+  get metricOptions(): string[] {
+    return this.withCurrentOption(this.metricChoices, this.metric);
+  }
+
+  get scoreModeOptions(): string[] {
+    return this.withCurrentOption(this.scoreModeChoices, this.scoreMode);
+  }
+
   useCurrentCollectionName(): void {
     const collectionName = this.collectionName.trim();
 
@@ -305,9 +373,47 @@ export class DocumentWorkspaceComponent {
     }
 
     this.activeCollectionName = collectionName;
+    this.syncCollectionSelector(collectionName);
     this.createdCollection = false;
     this.successMessage = `Working with collection "${collectionName}".`;
     this.errorMessage = '';
+  }
+
+  refreshCollectionOptions(preferredCollectionName = this.selectedCollectionOption): void {
+    this.collectionSelectorLoading = true;
+
+    this.documentApi.listCollections().subscribe({
+      next: (response) => {
+        this.collectionSelectorLoading = false;
+        this.existingCollections = response.items ?? [];
+        this.syncCollectionSelector(preferredCollectionName);
+      },
+      error: (error: Error) => {
+        this.collectionSelectorLoading = false;
+        this.errorMessage = error.message;
+      },
+    });
+  }
+
+  onCollectionPresetChange(name: string): void {
+    if (name === this.createNewCollectionOption) {
+      this.startNewCollectionDraft();
+      return;
+    }
+
+    this.collectionPresetLoading = true;
+    this.clearMessages();
+
+    this.documentApi.getCollection(name).subscribe({
+      next: (collection) => {
+        this.collectionPresetLoading = false;
+        this.applyCollectionPreset(collection);
+      },
+      error: (error: Error) => {
+        this.collectionPresetLoading = false;
+        this.errorMessage = error.message;
+      },
+    });
   }
 
   clearSearchResults(): void {
@@ -325,14 +431,22 @@ export class DocumentWorkspaceComponent {
   }
 
   closeCollectionsModal(): void {
-    this.collectionsModalVisible = false;
-    this.collectionsLoading = false;
-    this.collectionDetailsLoading = false;
-    this.collectionSaveLoading = false;
-    this.collectionDeleteLoading = false;
-    this.collectionsErrorMessage = '';
-    this.collectionModalMessage = '';
-    this.updateBackgroundScrollLock();
+    if (!this.collectionsModalVisible) {
+      return;
+    }
+
+    this.collectionsModalClosing = true;
+    this.scheduleModalClose(() => {
+      this.collectionsModalVisible = false;
+      this.collectionsModalClosing = false;
+      this.collectionsLoading = false;
+      this.collectionDetailsLoading = false;
+      this.collectionSaveLoading = false;
+      this.collectionDeleteLoading = false;
+      this.collectionsErrorMessage = '';
+      this.collectionModalMessage = '';
+      this.updateBackgroundScrollLock();
+    });
   }
 
   loadCollections(): void {
@@ -343,6 +457,7 @@ export class DocumentWorkspaceComponent {
       next: (response) => {
         this.collectionsLoading = false;
         this.existingCollections = response.items ?? [];
+        this.syncCollectionSelector();
 
         if (!this.existingCollections.length) {
           this.selectedManagedCollection = null;
@@ -384,8 +499,14 @@ export class DocumentWorkspaceComponent {
   }
 
   useManagedCollection(name: string): void {
-    this.activeCollectionName = name;
-    this.collectionName = name;
+    if (this.selectedManagedCollection?.name === name) {
+      this.applyCollectionPreset(this.selectedManagedCollection);
+    } else {
+      this.activeCollectionName = name;
+      this.collectionName = name;
+      this.syncCollectionSelector(name);
+    }
+
     this.collectionsModalVisible = false;
     this.successMessage = `Working with collection "${name}".`;
     this.errorMessage = '';
@@ -415,8 +536,8 @@ export class DocumentWorkspaceComponent {
 
     const request: DocumentCollectionUpdateRequest = {
       description: this.managedCollectionDescription.trim(),
-      chunk_length: this.managedCollectionChunkLength,
-      chunk_overlap: this.managedCollectionChunkOverlap,
+      chunkLength: this.managedCollectionChunkLength,
+      chunkOverlap: this.managedCollectionChunkOverlap,
     };
 
     this.collectionSaveLoading = true;
@@ -473,6 +594,8 @@ export class DocumentWorkspaceComponent {
         if (this.existingCollections[0]?.name) {
           this.selectManagedCollection(this.existingCollections[0].name);
         }
+
+        this.syncCollectionSelector();
       },
       error: (error: Error) => {
         this.collectionDeleteLoading = false;
@@ -552,8 +675,16 @@ export class DocumentWorkspaceComponent {
   }
 
   closeDocumentViewer(): void {
-    this.documentViewerVisible = false;
-    this.updateBackgroundScrollLock();
+    if (!this.documentViewerVisible) {
+      return;
+    }
+
+    this.documentViewerClosing = true;
+    this.scheduleModalClose(() => {
+      this.documentViewerVisible = false;
+      this.documentViewerClosing = false;
+      this.updateBackgroundScrollLock();
+    });
   }
 
   openDocumentBrowser(collectionName = this.activeCollectionName || this.selectedManagedCollection?.name || ''): void {
@@ -578,15 +709,23 @@ export class DocumentWorkspaceComponent {
   }
 
   closeDocumentBrowser(): void {
-    this.documentBrowserVisible = false;
-    this.collectionDocumentsLoading = false;
-    this.documentPreviewLoading = false;
-    this.documentDeleteLoading = false;
-    this.collectionDocumentsErrorMessage = '';
-    this.collectionDocuments = [];
-    this.selectedDocument = null;
-    this.documentBrowserCollection = null;
-    this.updateBackgroundScrollLock();
+    if (!this.documentBrowserVisible) {
+      return;
+    }
+
+    this.documentBrowserClosing = true;
+    this.scheduleModalClose(() => {
+      this.documentBrowserVisible = false;
+      this.documentBrowserClosing = false;
+      this.collectionDocumentsLoading = false;
+      this.documentPreviewLoading = false;
+      this.documentDeleteLoading = false;
+      this.collectionDocumentsErrorMessage = '';
+      this.collectionDocuments = [];
+      this.selectedDocument = null;
+      this.documentBrowserCollection = null;
+      this.updateBackgroundScrollLock();
+    });
   }
 
   deleteSelectedDocument(): void {
@@ -760,9 +899,90 @@ export class DocumentWorkspaceComponent {
     return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'default';
   }
 
+  private startNewCollectionDraft(): void {
+    this.selectedCollectionOption = this.createNewCollectionOption;
+    this.activeCollectionName = '';
+    this.createdCollection = false;
+    this.collectionName = '';
+    this.collectionDescription = '';
+    this.model = DocumentWorkspaceComponent.defaultModel;
+    this.chunkLength = DocumentWorkspaceComponent.defaultChunkLength;
+    this.chunkOverlap = DocumentWorkspaceComponent.defaultChunkOverlap;
+    this.provider = DocumentWorkspaceComponent.defaultProvider;
+    this.clearMessages();
+  }
+
+  private applyCollectionPreset(collection: DocumentCollectionListItem | DocumentCollectionDetail): void {
+    this.collectionName = collection.name;
+    this.collectionDescription = collection.description ?? '';
+    this.model = collection.model?.trim() || DocumentWorkspaceComponent.defaultModel;
+    this.chunkLength = collection.chunk_length ?? DocumentWorkspaceComponent.defaultChunkLength;
+    this.chunkOverlap = collection.chunk_overlap ?? DocumentWorkspaceComponent.defaultChunkOverlap;
+    this.provider = collection.provider?.trim() || DocumentWorkspaceComponent.defaultProvider;
+    this.activeCollectionName = collection.name;
+    this.createdCollection = false;
+    this.syncCollectionSelector(collection.name);
+  }
+
+  private syncCollectionSelector(preferredCollectionName = this.selectedCollectionOption): void {
+    const candidateNames = [
+      preferredCollectionName,
+      this.activeCollectionName,
+      this.collectionName.trim(),
+      this.selectedCollectionOption,
+    ]
+      .map((name) => (name === this.createNewCollectionOption ? '' : name.trim()))
+      .filter(Boolean);
+
+    const selectedName = candidateNames.find((name) =>
+      this.existingCollections.some((collection) => collection.name === name)
+    );
+
+    this.selectedCollectionOption = selectedName || this.createNewCollectionOption;
+  }
+
+  private withCurrentOption(options: string[], currentValue: string): string[] {
+    const trimmedValue = currentValue.trim();
+
+    if (!trimmedValue || options.includes(trimmedValue)) {
+      return options;
+    }
+
+    return [trimmedValue, ...options];
+  }
+
   private clearMessages(): void {
+    this.clearMessageTimer();
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  private showUploadMessage(type: 'success' | 'error', message: string): void {
+    this.clearMessageTimer();
+    this.errorMessage = type === 'error' ? message : '';
+    this.successMessage = type === 'success' ? message : '';
+
+    window.setTimeout(() => {
+      this.statusViewport?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+
+    this.messageTimerId = window.setTimeout(() => {
+      this.errorMessage = '';
+      this.successMessage = '';
+      this.messageTimerId = null;
+    }, DocumentWorkspaceComponent.uploadMessageDismissMs);
+  }
+
+  private clearMessageTimer(): void {
+    if (this.messageTimerId === null) {
+      return;
+    }
+
+    window.clearTimeout(this.messageTimerId);
+    this.messageTimerId = null;
   }
 
   private updateBackgroundScrollLock(): void {
@@ -780,5 +1000,16 @@ export class DocumentWorkspaceComponent {
   private unlockBackgroundScroll(): void {
     this.renderer.removeStyle(this.document.body, 'overflow');
     this.renderer.removeStyle(this.document.documentElement, 'overflow');
+  }
+
+  private scheduleModalClose(callback: () => void): void {
+    if (this.modalCloseTimerId !== null) {
+      window.clearTimeout(this.modalCloseTimerId);
+    }
+
+    this.modalCloseTimerId = window.setTimeout(() => {
+      callback();
+      this.modalCloseTimerId = null;
+    }, 220);
   }
 }

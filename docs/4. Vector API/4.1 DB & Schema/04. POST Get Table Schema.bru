@@ -1,0 +1,32 @@
+meta {
+  name: 04. POST Get Table Schema
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/vector/{{vector_table_name}}/table
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "pgvector"
+  }
+}
+
+tests {
+  test("Status 200", function() { expect(res.status).to.equal(200); });
+  test("name matches", function() { expect(res.body.name).to.be.a("string").and.not.empty; });
+  test("has fields array", function() { expect(res.body.fields).to.be.an("array").with.lengthOf.at.least(1); });
+  test("has vector field", function() {
+    const vec = (res.body.fields || []).find(f => f.type === "Vector");
+    expect(vec, "no vector field").to.exist;
+    expect(vec.dimensions).to.be.a("number");
+  });
+  test("has vectorSearch config", function() {
+    expect(res.body.vectorSearch).to.be.an("object");
+    expect(res.body.vectorSearch.profiles).to.be.an("array");
+  });
+}

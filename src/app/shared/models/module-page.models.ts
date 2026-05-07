@@ -10,8 +10,13 @@ export type ModuleAction = {
 
 export type ModulePageConfig = {
   name: string;
+  eyebrow?: string;
+  badgeLabel?: string;
+  badgeTone?: 'neutral' | 'success' | 'warning';
   subtitle: string;
-  purpose: string;
+  purpose?: string;
+  overviewTitle?: string;
+  actionsTitle?: string;
   sections: ModuleSection[];
   actions: ModuleAction[];
 };

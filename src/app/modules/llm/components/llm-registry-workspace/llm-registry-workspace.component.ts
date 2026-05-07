@@ -4,7 +4,9 @@ import { finalize } from 'rxjs/operators';
 import {
   JsonRecord,
   LlmAccessMode,
+  LLM_ACCESS_MODE_OPTIONS,
   LlmCreateRequest,
+  normalizeLlmAccessMode,
   LlmDevice,
   LlmListFilters,
   LlmRegistryLocator,
@@ -27,7 +29,7 @@ import { LlmApiService } from '../../services/llm-api.service';
 export class LlmRegistryWorkspaceComponent implements OnInit {
   readonly statuses: LlmStatus[] = ['DRAFT', 'VALIDATED', 'DISABLED'];
   readonly devices: LlmDevice[] = ['cpu', 'cuda'];
-  readonly accessModes: LlmAccessMode[] = ['direct', 'internal_service', 'external_service'];
+  readonly accessModes = LLM_ACCESS_MODE_OPTIONS;
 
   readonly filters: LlmListFilters = {
     status: '',
@@ -40,6 +42,8 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   editingModelId: string | null = null;
   formVisible = false;
   uploadVisible = false;
+  formClosing = false;
+  uploadClosing = false;
   loading = false;
   errorMessage = '';
   saveMessage = '';
@@ -48,6 +52,7 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   selectedUploadFile: File | null = null;
   private saveMessageHideTimeoutId: number | null = null;
   private saveMessageClearTimeoutId: number | null = null;
+  private closeTimerId: number | null = null;
 
   form: LlmRegistryFormValue = this.createEmptyForm();
   uploadForm: LlmRegistryUploadValue = this.createEmptyUploadForm();
@@ -64,6 +69,10 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
   ngOnDestroy(): void {
     this.clearSaveMessage();
     this.updateBackgroundScrollLock(false);
+    if (this.closeTimerId !== null) {
+      window.clearTimeout(this.closeTimerId);
+      this.closeTimerId = null;
+    }
   }
 
   loadModels(): void {
@@ -112,7 +121,7 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
     this.editingModelId = null;
     this.clearSaveMessage();
     this.form = this.createEmptyForm();
-    this.setUploadVisible(false);
+    this.instantHideUpload();
     this.setFormVisible(true);
   }
 
@@ -124,7 +133,7 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       model_name: model.model_name,
       display_name: model.display_name ?? '',
       device: model.device ?? '',
-      access_mode: model.access_mode,
+      access_mode: normalizeLlmAccessMode(model.access_mode),
       is_required: model.is_required,
       url: model.url ?? '',
       api_key: model.api_key ?? '',
@@ -134,7 +143,7 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       capabilitiesJson: this.stringifyJson(model.capabilities),
       configJson: this.stringifyJson(model.config),
     };
-    this.setUploadVisible(false);
+    this.instantHideUpload();
     this.setFormVisible(true);
   }
 
@@ -156,13 +165,18 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       device: model.device ?? '',
       version: model.version ?? '',
     };
-    this.setFormVisible(false);
+    this.instantHideForm();
     this.setUploadVisible(true);
   }
 
-  closeEditor(): void {
+  requestCloseEditor(): void {
     this.errorMessage = '';
-    this.setFormVisible(false);
+    if (!this.formVisible) {
+      return;
+    }
+
+    this.formClosing = true;
+    this.scheduleClose(() => this.instantHideForm());
   }
 
   setUploadFile(file: File | null): void {
@@ -181,9 +195,14 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
     this.uploadForm = this.createEmptyUploadForm();
   }
 
-  closeUpload(): void {
+  requestCloseUpload(): void {
     this.errorMessage = '';
-    this.setUploadVisible(false);
+    if (!this.uploadVisible) {
+      return;
+    }
+
+    this.uploadClosing = true;
+    this.scheduleClose(() => this.instantHideUpload());
   }
 
   submitUpload(): void {
@@ -201,7 +220,7 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
     }
 
     this.errorMessage =
-      'Archive upload is disabled for this demo. LLM list/create/update/delete/validate are connected to the real API.';
+      'Archive upload is not available from this screen yet. Listing, creating, updating, deleting, and validating models are available.';
   }
 
   validateSelected(model: LlmRegistryLocator): void {
@@ -402,12 +421,33 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
 
   private setFormVisible(visible: boolean): void {
     this.formVisible = visible;
+    this.formClosing = false;
     this.updateBackgroundScrollLock(this.formVisible || this.uploadVisible);
   }
 
   private setUploadVisible(visible: boolean): void {
     this.uploadVisible = visible;
+    this.uploadClosing = false;
     this.updateBackgroundScrollLock(this.formVisible || this.uploadVisible);
+  }
+
+  private instantHideForm(): void {
+    this.setFormVisible(false);
+  }
+
+  private instantHideUpload(): void {
+    this.setUploadVisible(false);
+  }
+
+  private scheduleClose(callback: () => void): void {
+    if (this.closeTimerId !== null) {
+      window.clearTimeout(this.closeTimerId);
+    }
+
+    this.closeTimerId = window.setTimeout(() => {
+      callback();
+      this.closeTimerId = null;
+    }, 220);
   }
 
   private updateBackgroundScrollLock(locked: boolean): void {
@@ -422,7 +462,7 @@ export class LlmRegistryWorkspaceComponent implements OnInit {
       model_name: '',
       display_name: '',
       device: '' as LlmDevice | '',
-      access_mode: 'direct' as LlmAccessMode,
+      access_mode: 'LLM_ACCESS_MODE_DIRECT' as LlmAccessMode,
       is_required: false,
       url: '',
       api_key: '',

@@ -1,13 +1,13 @@
 <section class="responses-page">
   <header class="responses-hero">
     <div class="responses-hero__content">
-      <p class="responses-hero__eyebrow">Responses workspace</p>
+      <p class="responses-hero__eyebrow">Responses</p>
       <div class="responses-hero__title-row">
         <h2>Structured responses</h2>
-        <span class="status-chip status-chip--success">Live stage endpoint</span>
+        <span class="status-chip status-chip--success">Connected endpoint</span>
       </div>
       <p class="responses-hero__subtitle">
-        Use the alternative `/responses` API for structured input, reasoning settings, and future advanced response workflows.
+        Use the `/responses` API for structured input, reasoning settings, and longer-form response workflows.
       </p>
     </div>
   </header>
@@ -20,13 +20,13 @@
     <section class="panel-card">
       <div class="section-heading">
         <div>
-          <h3>Build request</h3>
-          <p>Keep this first pass practical: developer instruction, one user message, and a few core controls.</p>
+          <h3>Structured request</h3>
+          <p>Set the validated model first, then send one developer instruction and one user prompt through the stable `/responses` flow.</p>
         </div>
       </div>
 
       <div class="form-grid">
-        <label class="field">
+        <label class="field field--model">
           <span>Model</span>
           <select [(ngModel)]="request.model">
             <option *ngFor="let model of availableModels" [value]="model.model_name">
@@ -34,46 +34,63 @@
             </option>
           </select>
           <small class="field-hint">
-            `azure/gpt-5-mini` is valid for normal Responses calls when the registry marks it with `responses: true`. Use a `/responses` model when streaming needs a dedicated endpoint.
+            This page defaults to the validated non-streaming Responses model so you can verify the stable stage flow first.
           </small>
           <small class="field-hint" *ngIf="usingModelFallback">
-            Registry capability flags are missing, so this list is showing all registered models as a fallback.
+            No model is explicitly marked for Responses, so this page is showing all registered models.
           </small>
         </label>
 
-        <label class="field">
-          <span>Reasoning effort</span>
-          <select [(ngModel)]="request.reasoning.effort">
-            <option *ngFor="let effort of reasoningEfforts" [value]="effort">{{ effort }}</option>
-          </select>
-        </label>
+        <div class="settings-group">
+          <div class="settings-group__header">
+            <h4>Run settings</h4>
+            <p>Keep these practical so the returned output is easy to inspect.</p>
+          </div>
 
-        <label class="field">
-          <span>Max output tokens</span>
-          <input type="number" [(ngModel)]="request.max_output_tokens" />
-          <small class="field-hint">Keep this small for smoke tests so stage and Azure usage stay minimal.</small>
-        </label>
+          <label class="field field--narrow field--reasoning">
+            <span>Reasoning effort</span>
+            <select [(ngModel)]="request.reasoning.effort">
+              <option *ngFor="let effort of reasoningEfforts" [value]="effort">{{ effort | titlecase }}</option>
+            </select>
+          </label>
 
-        <label class="field field--toggle">
-          <input type="checkbox" [(ngModel)]="request.stream" (ngModelChange)="onStreamModeChanged()" />
-          <span>Stream response</span>
-        </label>
+          <label class="field field--tokens">
+            <span>Max output tokens</span>
+            <input type="number" [(ngModel)]="request.max_output_tokens" />
+            <small class="field-hint">Smaller output limits keep responses quicker and easier to review.</small>
+          </label>
+        </div>
 
         <label class="field field--wide">
           <span>Developer instruction</span>
-          <textarea [(ngModel)]="developerInstruction"></textarea>
+          <textarea
+            [(ngModel)]="developerInstruction"
+            placeholder="Describe how the model should behave, what tone to use, or what rules to follow"
+          ></textarea>
+          <small class="field-hint">Sets the model's behavior for this request.</small>
         </label>
 
         <label class="field field--wide">
           <span>User prompt</span>
-          <textarea [(ngModel)]="userPrompt"></textarea>
+          <textarea
+            [(ngModel)]="userPrompt"
+            placeholder="Write the request or task you want the model to answer"
+          ></textarea>
+          <small class="field-hint">The actual task sent after the developer instruction.</small>
         </label>
       </div>
 
+      <p class="field-hint field-hint--inline">Streaming is hidden here until the backend path is stable.</p>
+
       <div class="panel-actions">
         <button type="button" class="ghost-button" (click)="reset()">Reset</button>
-        <button type="button" class="primary-button" (click)="sendResponse()" [disabled]="loading || !request.model">
-          {{ loading ? (request.stream ? 'Streaming response...' : 'Sending request...') : 'Run responses request' }}
+        <button
+          type="button"
+          class="primary-button"
+          (click)="sendResponse()"
+          [disabled]="loading || !request.model || !canSendResponse"
+        >
+          {{ loading ? 'Sending request...' : 'Run /responses request' }}
         </button>
       </div>
     </section>
@@ -83,26 +100,45 @@
         <div class="section-heading">
           <div>
             <h3>Response preview</h3>
-            <p>Start with readable output first, then review the returned identifiers and token usage.</p>
+            <p>Read the returned text first, then confirm the status, model, and token usage below.</p>
           </div>
         </div>
 
         <div class="empty-state" *ngIf="!response && !streamingContent && !loading">
           <h4>No response yet</h4>
-          <p>Run the request once to verify the `/responses` endpoint from the real UI, or stream it live.</p>
+          <p>Run a structured request to inspect the returned output and metadata.</p>
         </div>
 
         <p *ngIf="loading" class="loading-message">
-          {{ request.stream ? 'Streaming response from the stage endpoint...' : 'Generating response...' }}
+          Generating response...
         </p>
 
-        <ng-container *ngIf="response || streamingContent || (loading && request.stream)">
+        <ng-container *ngIf="response || streamingContent || loading">
+          <div class="meta-grid meta-grid--summary">
+            <div class="meta-item">
+              <span class="summary-label">Selected model</span>
+              <p>{{ selectedModelLabel }}</p>
+            </div>
+            <div class="meta-item">
+              <span class="summary-label">Reasoning</span>
+              <p>{{ request.reasoning.effort }}</p>
+            </div>
+            <div class="meta-item">
+              <span class="summary-label">Output limit</span>
+              <p>{{ request.max_output_tokens }}</p>
+            </div>
+          </div>
+
           <div class="output-panel">
             <span class="summary-label">Output text</span>
             <pre>{{ previewOutputText || 'Waiting for streamed text…' }}</pre>
           </div>
 
           <div class="meta-grid">
+            <div class="meta-item">
+              <span class="summary-label">Request mode</span>
+              <p>{{ requestModeLabel }}</p>
+            </div>
             <div class="meta-item">
               <span class="summary-label">Model</span>
               <p>{{ response?.model || request.model }}</p>
@@ -123,45 +159,8 @@
               <span class="summary-label">Output tokens</span>
               <p>{{ response?.usage?.output_tokens ?? 0 }}</p>
             </div>
-            <div class="meta-item" *ngIf="request.stream">
-              <span class="summary-label">Stream events</span>
-              <p>{{ streamEventSummary }}</p>
-            </div>
-          </div>
-
-          <div class="output-panel" *ngIf="request.stream && (!streamingContent || response)">
-            <span class="summary-label">Stream debug</span>
-            <pre>{{ streamDebugJson }}</pre>
           </div>
         </ng-container>
-      </section>
-
-      <section class="panel-card panel-card--sidebar">
-        <div class="section-heading">
-          <div>
-            <h3>Why this page</h3>
-            <p>How this differs from standard chat completions.</p>
-          </div>
-        </div>
-
-        <div class="readiness-list">
-          <article class="readiness-item">
-            <span class="summary-label">Alternative API</span>
-            <p>The Responses API supports structured input blocks and explicit reasoning controls.</p>
-          </article>
-          <article class="readiness-item">
-            <span class="summary-label">Current pass</span>
-            <p>Basic text streaming is now supported here. Richer event inspection can come next if deeper debugging is needed.</p>
-          </article>
-          <article class="readiness-item">
-            <span class="summary-label">Use case</span>
-            <p>Keep chat for classic prompt testing and use Responses for more advanced structured workflows.</p>
-          </article>
-          <article class="readiness-item">
-            <span class="summary-label">Testing tip</span>
-            <p>For smoke tests, use short prompts, low reasoning, and a small token limit to avoid unnecessary provider usage.</p>
-          </article>
-        </div>
       </section>
     </aside>
   </div>

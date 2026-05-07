@@ -15,7 +15,7 @@ import {
   UiProfileViewModel,
 } from '@natec/mef-dev-platform-connector';
 import { catchError, map } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';

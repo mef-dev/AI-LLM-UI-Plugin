@@ -61,6 +61,11 @@
   line-height: 0;
   cursor: pointer;
   flex: 0 0 auto;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .icon-button::before,
@@ -84,22 +89,17 @@
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
+.icon-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(27, 31, 59, 0.18);
+  background: rgba(236, 240, 248, 0.98);
+  box-shadow: 0 12px 24px rgba(27, 31, 59, 0.1);
+}
+
 .editor-note {
   margin: 0;
   color: #54607d;
   line-height: 1.6;
-}
-
-.sensitive-toggle {
-  width: fit-content;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #9b3d24;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
 }
 
 .state-message {
@@ -174,6 +174,18 @@
   line-height: 1.5;
 }
 
+.sensitive-field {
+  transition: transform 180ms ease;
+}
+
+.sensitive-field--hidden {
+  cursor: pointer;
+}
+
+.sensitive-field--hidden input {
+  letter-spacing: 0.06em;
+}
+
 .sensitive-notice {
   display: grid;
   gap: 10px;
@@ -183,6 +195,11 @@
   border: 1px dashed rgba(155, 61, 36, 0.26);
   border-radius: 18px;
   background: rgba(255, 248, 242, 0.82);
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .sensitive-notice span {
@@ -195,6 +212,12 @@
   margin: 0;
   color: #6b7390;
   line-height: 1.6;
+}
+
+.sensitive-notice:hover {
+  transform: translateY(-1px);
+  border-color: rgba(155, 61, 36, 0.34);
+  box-shadow: 0 12px 24px rgba(155, 61, 36, 0.08);
 }
 
 .field-control--invalid {

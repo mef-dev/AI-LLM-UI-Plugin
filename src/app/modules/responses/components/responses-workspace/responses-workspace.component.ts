@@ -18,8 +18,8 @@ import { ResponsesApiService } from '../../services/responses-api.service';
 })
 export class ResponsesWorkspaceComponent implements OnInit, OnDestroy {
   private static readonly modelsCacheKey = 'responsesWorkspace.cachedModels';
-  readonly defaultDeveloperInstruction = 'You are an AI assistant that helps internal MEF.DEV users.';
-  readonly defaultUserPrompt = 'Explain in two short sentences what response streaming is and why it helps developers.';
+  readonly defaultDeveloperInstruction = 'Be brief and helpful.';
+  readonly defaultUserPrompt = '';
   private readonly emptyStreamMessage = 'The stream finished, but no text output was parsed.';
   allModels: LlmRegistryLocator[] = [];
   availableModels: LlmRegistryLocator[] = [];
@@ -83,10 +83,13 @@ export class ResponsesWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const modelCompatibilityWarning = this.getSelectedModelCompatibilityWarning();
-    if (modelCompatibilityWarning) {
-      this.warningMessage = modelCompatibilityWarning;
+    if (!this.canSendResponse) {
+      this.errorMessage = 'Add both a developer instruction and a user prompt before sending.';
+      return;
     }
+
+    const modelCompatibilityWarning = this.getSelectedModelCompatibilityWarning();
+    this.warningMessage = modelCompatibilityWarning ?? '';
 
     this.activeRequest?.unsubscribe();
     this.activeRequest = null;
@@ -160,8 +163,8 @@ export class ResponsesWorkspaceComponent implements OnInit, OnDestroy {
     this.activeRequest?.unsubscribe();
     this.activeRequest = null;
     const nextRequest = this.createInitialRequest();
-    nextRequest.stream = this.request.stream;
-    nextRequest.model = this.pickPreferredModel(nextRequest.stream);
+    nextRequest.stream = false;
+    nextRequest.model = this.pickPreferredModel(false);
     this.request = nextRequest;
     this.response = null;
     this.errorMessage = '';
@@ -213,6 +216,37 @@ export class ResponsesWorkspaceComponent implements OnInit, OnDestroy {
     return this.streamEventTypes.length ? this.streamEventTypes.join(', ') : 'No stream events captured.';
   }
 
+  get selectedModelLabel(): string {
+    return this.selectedModel?.display_name || this.request.model;
+  }
+
+  get requestModeLabel(): string {
+    return this.request.stream ? 'Streaming' : 'Single response';
+  }
+
+  get streamReadinessHint(): string {
+    return 'Responses is locked to single-response mode here because the current stage streaming path is not reliable yet.';
+  }
+
+  get selectedModelRegistryHint(): string {
+    const model = this.selectedModel;
+
+    if (!model) {
+      return 'Choose a registered model to verify how the stage `/responses` endpoint behaves.';
+    }
+
+    const compatibilityWarning = this.getSelectedModelCompatibilityWarning();
+    if (compatibilityWarning) {
+      return compatibilityWarning;
+    }
+
+    if (!this.hasExplicitResponsesModels) {
+      return 'This page is using the registry fallback list because no model is explicitly marked with Responses capability yet. The endpoint can still work, but a model registry update may be needed if the reply fails.';
+    }
+
+    return 'This model looks compatible with the Responses flow based on the current registry data.';
+  }
+
   get streamDebugJson(): string {
     if (!this.latestStreamResponse) {
       return 'No final response payload was captured from the stream.';
@@ -229,10 +263,14 @@ export class ResponsesWorkspaceComponent implements OnInit, OnDestroy {
     return this.response?.status || 'completed';
   }
 
-  private createInitialRequest(model = 'azure/gpt-5-mini'): ResponsesRequest {
+  get canSendResponse(): boolean {
+    return !!this.developerInstruction.trim() && !!this.userPrompt.trim();
+  }
+
+  private createInitialRequest(model = 'azure/gpt-5-mini/responses'): ResponsesRequest {
     return {
       model,
-      stream: true,
+      stream: false,
       max_output_tokens: 120,
       reasoning: {
         effort: 'low',
@@ -244,10 +282,6 @@ export class ResponsesWorkspaceComponent implements OnInit, OnDestroy {
         },
       },
     };
-  }
-
-  onStreamModeChanged(): void {
-    this.request.model = this.pickPreferredModel(this.request.stream);
   }
 
   get usingModelFallback(): boolean {
@@ -421,15 +455,13 @@ export class ResponsesWorkspaceComponent implements OnInit, OnDestroy {
   private pickPreferredModel(streamMode: boolean): string {
     const exactMatch = streamMode
       ? this.availableModels.find((model) => model.model_name === 'azure/gpt-5-mini/responses')
-      : this.availableModels.find((model) => model.model_name === 'azure/gpt-5-mini');
+      : this.availableModels.find((model) => model.model_name === 'azure/gpt-5-mini/responses');
 
     if (exactMatch) {
       return exactMatch.model_name;
     }
 
-    const fallback = streamMode
-      ? this.availableModels.find((model) => model.model_name.toLowerCase().includes('/responses'))
-      : this.availableModels.find((model) => !model.model_name.toLowerCase().includes('/responses'));
+    const fallback = this.availableModels.find((model) => model.model_name.toLowerCase().includes('/responses'));
 
     return fallback?.model_name ?? this.availableModels[0]?.model_name ?? '';
   }

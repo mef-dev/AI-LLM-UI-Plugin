@@ -4,16 +4,10 @@
       <p class="llm-hero__eyebrow">LLM registry</p>
       <h2>Model management</h2>
       <p class="llm-hero__subtitle">
-        This page is now connected to the real stage LLM registry API for list,
-        create, update, delete, and validate operations.
+        Manage model entries, validation status, and connection details from one registry view.
       </p>
     </div>
 
-    <div class="llm-hero__actions">
-      <button type="button" class="ghost-button" (click)="resetFilters()">
-        Reset filters
-      </button>
-    </div>
   </header>
 
   <div class="state-toast-layer" aria-live="polite">
@@ -28,6 +22,7 @@
   </div>
 
   <app-llm-registry-filters
+    *ngIf="models.length > 5 || filters.status || filters.modelName"
     [filters]="filters"
     [statuses]="statuses"
     (filtersChanged)="loadModels()"
@@ -45,7 +40,6 @@
 
     <app-llm-registry-details
       [model]="selectedModel"
-      (create)="startCreate()"
       (edit)="startEdit($event)"
       (upload)="startUpload($event)"
       (validate)="validateSelected($event)"
@@ -53,8 +47,8 @@
     ></app-llm-registry-details>
   </div>
 
-  <div class="modal-layer" *ngIf="formVisible" (click)="closeEditor()">
-    <div class="modal-panel" (click)="$event.stopPropagation()">
+  <div class="modal-layer" *ngIf="formVisible || formClosing" [class.modal-layer--closing]="formClosing" (click)="requestCloseEditor()">
+    <div class="modal-panel" [class.modal-panel--closing]="formClosing" (click)="$event.stopPropagation()">
       <app-llm-registry-form
         [form]="form"
         [editingModelId]="editingModelId"
@@ -63,21 +57,21 @@
         [accessModes]="accessModes"
         [errorMessage]="errorMessage"
         [saveMessage]="saveMessage"
-        (close)="closeEditor()"
+        (close)="requestCloseEditor()"
         (reset)="resetEditor()"
         (submitForm)="submitForm()"
       ></app-llm-registry-form>
     </div>
   </div>
 
-  <div class="modal-layer" *ngIf="uploadVisible" (click)="closeUpload()">
-    <div class="modal-panel modal-panel--narrow" (click)="$event.stopPropagation()">
+  <div class="modal-layer" *ngIf="uploadVisible || uploadClosing" [class.modal-layer--closing]="uploadClosing" (click)="requestCloseUpload()">
+    <div class="modal-panel modal-panel--narrow" [class.modal-panel--closing]="uploadClosing" (click)="$event.stopPropagation()">
       <app-llm-registry-upload
         [model]="uploadModelTarget"
         [form]="uploadForm"
         [devices]="devices"
         [fileName]="selectedUploadFile?.name || ''"
-        (close)="closeUpload()"
+        (close)="requestCloseUpload()"
         (fileSelected)="setUploadFile($event)"
         (reset)="resetUpload()"
         (submitUpload)="submitUpload()"

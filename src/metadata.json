@@ -1,0 +1,42 @@
+{
+  "name": "ai-llm-ui",
+  "serviceType": "UI",
+  "description": "AI LLM UI plugin for interacting with the ai backend module on MEF.DEV",
+  "dependencies": [],
+  "config": {
+    "routesUI": [
+      {
+        "lang": "en",
+        "routerLink": "chat",
+        "label": "Chat"
+      },
+      {
+        "lang": "en",
+        "routerLink": "llm-db",
+        "label": "LLM DB"
+      },
+      {
+        "lang": "en",
+        "routerLink": "document",
+        "label": "Document"
+      },
+      {
+        "lang": "en",
+        "routerLink": "embeddings",
+        "label": "Embeddings"
+      },
+      {
+        "lang": "en",
+        "routerLink": "llm",
+        "label": "LLM"
+      },
+      {
+        "lang": "en",
+        "routerLink": "vector",
+        "label": "Vector"
+      }
+    ]
+  },
+  "externalUrl": null,
+  "configuration": "{}"
+}

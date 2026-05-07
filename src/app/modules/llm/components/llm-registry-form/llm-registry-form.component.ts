@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { LlmAccessMode, LlmDevice, LlmStatus } from '../../models/llm-registry.models';
+import { LlmAccessMode, LlmAccessModeOption, LlmDevice, LlmStatus } from '../../models/llm-registry.models';
 import { LlmRegistryFormValue } from '../../models/llm-registry-form.models';
 
 type RequiredFieldKey = 'model_name' | 'device' | 'url';
@@ -15,7 +15,7 @@ export class LlmRegistryFormComponent {
   @Input({ required: true }) editingModelId: string | null = null;
   @Input({ required: true }) statuses: LlmStatus[] = [];
   @Input({ required: true }) devices: LlmDevice[] = [];
-  @Input({ required: true }) accessModes: LlmAccessMode[] = [];
+  @Input({ required: true }) accessModes: LlmAccessModeOption[] = [];
   @Input() errorMessage = '';
   @Input() saveMessage = '';
 
@@ -24,7 +24,7 @@ export class LlmRegistryFormComponent {
   @Output() submitForm = new EventEmitter<void>();
 
   advancedExpanded = false;
-  sensitiveValuesVisible = false;
+  revealedSensitiveField: 'url' | 'headers' | null = null;
 
   private touchedFields: Record<RequiredFieldKey, boolean> = {
     model_name: false,
@@ -76,8 +76,12 @@ export class LlmRegistryFormComponent {
     return this.missingRequiredFields.join(', ');
   }
 
-  get isSensitiveValueHidden(): boolean {
-    return !!this.editingModelId && !this.sensitiveValuesVisible;
+  get isUrlSensitiveHidden(): boolean {
+    return !!this.editingModelId && this.revealedSensitiveField !== 'url';
+  }
+
+  get areHeadersSensitiveHidden(): boolean {
+    return !!this.editingModelId && this.revealedSensitiveField !== 'headers';
   }
 
   markFieldTouched(field: RequiredFieldKey): void {
@@ -103,8 +107,20 @@ export class LlmRegistryFormComponent {
     this.advancedExpanded = !this.advancedExpanded;
   }
 
-  toggleSensitiveValues(): void {
-    this.sensitiveValuesVisible = !this.sensitiveValuesVisible;
+  revealSensitiveField(field: 'url' | 'headers'): void {
+    if (!this.editingModelId) {
+      return;
+    }
+
+    this.revealedSensitiveField = field;
+  }
+
+  concealSensitiveField(field: 'url' | 'headers'): void {
+    if (!this.editingModelId || this.revealedSensitiveField !== field) {
+      return;
+    }
+
+    this.revealedSensitiveField = null;
   }
 
   handleReset(): void {
@@ -118,7 +134,7 @@ export class LlmRegistryFormComponent {
 
   private resetViewState(): void {
     this.advancedExpanded = false;
-    this.sensitiveValuesVisible = false;
+    this.revealedSensitiveField = null;
     this.touchedFields = {
       model_name: false,
       device: false,

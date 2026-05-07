@@ -1,0 +1,25 @@
+meta {
+  name: 01. POST Search (like by field)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/vector/{{vector_table_name}}/search
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "pgvector",
+      "search": "Authentication",
+      "select": "*",
+      "searchFields": "title"
+  }
+}
+
+tests {
+  test("Status 200", function() { expect(res.status).to.equal(200); });
+  test("has value array", function() { expect(res.body.value).to.be.an("array"); });
+}

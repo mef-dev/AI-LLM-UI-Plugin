@@ -1,12 +1,13 @@
 <section
+  id="chat-request-settings"
   class="parameters-card"
   (mouseleave)="clearHoverHint()"
   (focusout)="clearHintOnCardExit($event)"
 >
   <div class="section-heading">
     <div>
-      <h3>Stage-safe request</h3>
-      <p>This panel only shows the fields the current stage chat endpoint is handling reliably.</p>
+      <h3>Request settings</h3>
+      <p>Choose the model and the small set of stage-safe controls developers are most likely to compare between runs.</p>
     </div>
   </div>
 
@@ -59,7 +60,7 @@
   <div class="supported-note">
     <p class="supported-note__title">Current stage behavior</p>
     <p class="supported-note__body">
-      Chat is using the streaming endpoint with a minimal payload for stability. Extra tuning fields are hidden here until the backend path is fixed.
+      Chat uses the streaming endpoint with a minimal two-message payload for stability. Extra tuning fields stay hidden here until the backend path is fully reliable.
     </p>
   </div>
 </section>

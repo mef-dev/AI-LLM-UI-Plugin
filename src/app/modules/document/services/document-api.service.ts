@@ -2,9 +2,9 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../../environments/environment';
 
-import { EndpointService } from 'src/app/core/services/endpoint.service';
+import { EndpointService } from '../../../core/services/endpoint.service';
 import {
   DocumentCollectionCreateRequest,
   DocumentCollectionDetail,
@@ -158,8 +158,8 @@ export class DocumentApiService {
       formData.append('metadata', JSON.stringify(request.metadata));
     }
 
-    formData.append('chunk_length', String(request.chunk_length));
-    formData.append('chunk_overlap', String(request.chunk_overlap));
+    formData.append('chunkLength', String(request.chunkLength));
+    formData.append('chunkOverlap', String(request.chunkOverlap));
 
     return this.http
       .post<unknown>(
@@ -252,7 +252,7 @@ export class DocumentApiService {
     response: DocumentSearchResult[] | DocumentSearchResponseEnvelope | null | undefined
   ): DocumentSearchResult[] {
     if (Array.isArray(response)) {
-      return response;
+      return response.map((item) => this.normalizeSearchResult(item));
     }
 
     if (!response || typeof response !== 'object') {
@@ -260,32 +260,53 @@ export class DocumentApiService {
     }
 
     if (Array.isArray(response.results)) {
-      return response.results;
+      return response.results.map((item) => this.normalizeSearchResult(item));
     }
 
     if (Array.isArray(response.items)) {
-      return response.items;
+      return response.items.map((item) => this.normalizeSearchResult(item));
     }
 
     if (Array.isArray(response.data)) {
-      return response.data;
+      return response.data.map((item) => this.normalizeSearchResult(item));
     }
 
     return [];
   }
 
+
+  private normalizeSearchResult(response: Partial<DocumentSearchResult> | null | undefined): DocumentSearchResult {
+    const item = (response ?? {}) as Record<string, unknown>;
+
+    return {
+      documentId:
+        this.readString(item['documentId']) || this.readString(item['document_id']) || this.readString(item['DocumentId']) || '',
+      title: this.readString(item['title']) || this.readString(item['Title']) || 'Untitled document',
+      chunkId: this.readNumber(item['chunkId']) ?? this.readNumber(item['chunk_id']) ?? this.readNumber(item['ChunkId']) ?? 0,
+      chunkIndex:
+        this.readNumber(item['chunkIndex']) ?? this.readNumber(item['chunk_index']) ?? this.readNumber(item['ChunkIndex']) ?? 0,
+      content: this.readString(item['content']) || this.readString(item['Content']) || undefined,
+      score: this.readNumber(item['score']) ?? this.readNumber(item['Score']) ?? 0,
+      metadata:
+        item['metadata'] && typeof item['metadata'] === 'object' && !Array.isArray(item['metadata'])
+          ? (item['metadata'] as Record<string, unknown>)
+          : undefined,
+    };
+  }
+
   private normalizeCollectionList(
     response: DocumentCollectionListResponse | null | undefined
   ): DocumentCollectionListResponse {
+    const payload = (response ?? {}) as Record<string, unknown>;
     const items = Array.isArray(response?.items)
       ? response?.items.map((item) => this.normalizeCollectionDetail(item))
       : [];
 
     return {
       items,
-      total_count: response?.total_count ?? items.length,
+      total_count: response?.total_count ?? this.readNumber(payload['totalCount']) ?? items.length,
       page: response?.page ?? 1,
-      page_size: response?.page_size ?? items.length,
+      page_size: response?.page_size ?? this.readNumber(payload['pageSize']) ?? items.length,
     };
   }
 
@@ -321,15 +342,16 @@ export class DocumentApiService {
   }
 
   private normalizeDocumentList(response: DocumentListResponse | null | undefined): DocumentListResponse {
+    const payload = (response ?? {}) as Record<string, unknown>;
     const items = Array.isArray(response?.items)
       ? response.items.map((item) => this.normalizeDocumentListItem(item))
       : [];
 
     return {
       items,
-      total_count: response?.total_count ?? items.length,
+      total_count: response?.total_count ?? this.readNumber(payload['totalCount']) ?? items.length,
       page: response?.page ?? 1,
-      page_size: response?.page_size ?? items.length,
+      page_size: response?.page_size ?? this.readNumber(payload['pageSize']) ?? items.length,
     };
   }
 

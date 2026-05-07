@@ -1,0 +1,46 @@
+meta {
+  name: 02. POST Upload (raw vectors)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/vector/{{vector_table_raw}}/upload
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "pgvector",
+      "value": [
+          {
+              "id": "1",
+              "chunk": "What are the rates only for calls?",
+              "embedding": [0.1, 0.2, 0.3]
+          },
+          {
+              "id": "2",
+              "chunk": "380 - the country code of Ukraine",
+              "embedding": [0.4, 0.5, 0.6]
+          },
+          {
+              "id": "3",
+              "chunk": "Roaming charges in different regions",
+              "embedding": [0.7, 0.8, 0.9]
+          }
+      ]
+  }
+}
+
+tests {
+  // [BUG] Npgsql cannot serialize JArray (raw vector array) — backend needs to
+  // convert the JSON array to float[] before passing to Npgsql parameter.
+  // Error: "Writing values of 'Newtonsoft.Json.Linq.JArray' is not supported..."
+  test("Status 2xx [BUG: JArray serialization to pgvector]", function() {
+    expect(res.status, (res.body && res.body.message) || "").to.be.oneOf([200, 201, 204]);
+  });
+  if (res.status >= 200 && res.status < 300) {
+    test("result == true", function() { expect(res.body.result).to.equal(true); });
+  }
+}

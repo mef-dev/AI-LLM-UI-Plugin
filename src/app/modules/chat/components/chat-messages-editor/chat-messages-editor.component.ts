@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ChatCompletionsRequestMessage, ChatMessageRole } from '../../models/chat-completions.models';
+import { ChatCompletionResponse, ChatCompletionsRequestMessage } from '../../models/chat-completions.models';
 
 @Component({
   selector: 'app-chat-messages-editor',
@@ -9,14 +9,22 @@ import { ChatCompletionsRequestMessage, ChatMessageRole } from '../../models/cha
 })
 export class ChatMessagesEditorComponent {
   @Input({ required: true }) messages: ChatCompletionsRequestMessage[] = [];
-  @Input({ required: true }) roles: ChatMessageRole[] = [];
+  @Input() response: ChatCompletionResponse | null = null;
   @Input() errorMessage = '';
   @Input() loading = false;
+  @Input() statusMessage = '';
+  @Input() successMessage = '';
   @Input() streamingEnabled = false;
   @Input() streamingContent = '';
 
-  @Output() addUserMessage = new EventEmitter<void>();
-  @Output() removeMessage = new EventEmitter<number>();
   @Output() send = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
+
+  get assistantMessage(): string {
+    if (this.streamingEnabled && this.streamingContent) {
+      return this.streamingContent;
+    }
+
+    return this.response?.choices[0]?.message.content || '';
+  }
 }

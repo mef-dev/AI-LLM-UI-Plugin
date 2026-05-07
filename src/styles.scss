@@ -36,6 +36,76 @@ button:active {
   transform: translateY(1px) scale(0.988);
 }
 
+.field-help {
+  position: relative;
+  display: inline-flex;
+  width: fit-content;
+  color: inherit;
+  border-bottom: 1px dashed rgba(155, 61, 36, 0.32);
+  cursor: help;
+}
+
+.field-help::before,
+.field-help::after {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.field-help::before {
+  content: '';
+  bottom: calc(100% + 4px);
+  left: 14px;
+  width: 10px;
+  height: 10px;
+  background: rgba(27, 31, 59, 0.96);
+  transform: translateY(6px) rotate(45deg);
+}
+
+.field-help::after {
+  content: attr(data-tooltip);
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 48px));
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(27, 31, 59, 0.96);
+  color: #fff8f2;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: normal;
+  box-shadow: 0 18px 36px rgba(27, 31, 59, 0.16);
+  transform: translateY(6px);
+  z-index: 30;
+}
+
+.field-help:hover::before,
+.field-help:hover::after,
+.field-help:focus-visible::before,
+.field-help:focus-visible::after {
+  opacity: 1;
+  transition-delay: 1.5s;
+}
+
+.field-help:hover::before,
+.field-help:focus-visible::before {
+  transform: translateY(0) rotate(45deg);
+}
+
+.field-help:hover::after,
+.field-help:focus-visible::after {
+  transform: translateY(0);
+}
+
+.field-help:focus-visible {
+  outline: none;
+}
+
 input:focus,
 select:focus,
 textarea:focus {
@@ -64,25 +134,41 @@ textarea:focus {
 
 .module-page > *,
 .chat-page > *,
-.llm-page > * {
+.llm-page > *,
+.responses-page > *,
+.documents-page > *,
+.embeddings-page > *,
+.vector-page > * {
   animation: surface-rise 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .module-page > *:nth-child(1),
 .chat-page > *:nth-child(1),
-.llm-page > *:nth-child(1) {
+.llm-page > *:nth-child(1),
+.responses-page > *:nth-child(1),
+.documents-page > *:nth-child(1),
+.embeddings-page > *:nth-child(1),
+.vector-page > *:nth-child(1) {
   animation-delay: 20ms;
 }
 
 .module-page > *:nth-child(2),
 .chat-page > *:nth-child(2),
-.llm-page > *:nth-child(2) {
+.llm-page > *:nth-child(2),
+.responses-page > *:nth-child(2),
+.documents-page > *:nth-child(2),
+.embeddings-page > *:nth-child(2),
+.vector-page > *:nth-child(2) {
   animation-delay: 90ms;
 }
 
 .module-page > *:nth-child(3),
 .chat-page > *:nth-child(3),
-.llm-page > *:nth-child(3) {
+.llm-page > *:nth-child(3),
+.responses-page > *:nth-child(3),
+.documents-page > *:nth-child(3),
+.embeddings-page > *:nth-child(3),
+.vector-page > *:nth-child(3) {
   animation-delay: 160ms;
 }
 

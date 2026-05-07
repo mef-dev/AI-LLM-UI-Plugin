@@ -17,7 +17,7 @@ import { LlmApiService } from '../../../llm/services/llm-api.service';
   styleUrls: ['./chat-playground.component.scss']
 })
 export class ChatPlaygroundComponent implements OnInit, OnDestroy {
-  readonly roles: ChatMessageRole[] = ['system', 'user', 'assistant'];
+  readonly roles: ChatMessageRole[] = ['system', 'user'];
 
   request: ChatCompletionsRequest = this.createInitialRequest();
   response: ChatCompletionResponse | null = null;
@@ -117,12 +117,17 @@ export class ChatPlaygroundComponent implements OnInit, OnDestroy {
     this.successMessage = '';
     this.response = null;
     this.streamingContent = '';
-    this.request.stream = stream;
+    const preparedRequest: ChatCompletionsRequest = {
+      ...this.request,
+      stream,
+      messages: this.buildNormalizedMessages(),
+    };
+    this.request = preparedRequest;
     this.streamingEnabled = stream;
     this.latestStreamPayload = null;
 
     if (stream) {
-      this.activeRequest = this.chatApi.createCompletionStream(this.request).subscribe({
+      this.activeRequest = this.chatApi.createCompletionStream(preparedRequest).subscribe({
         next: (event: ChatCompletionStreamEvent) => {
           if (event.type === 'delta') {
             this.streamingContent += event.delta || '';
@@ -150,7 +155,7 @@ export class ChatPlaygroundComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.activeRequest = this.chatApi.createCompletion(this.request).subscribe({
+    this.activeRequest = this.chatApi.createCompletion(preparedRequest).subscribe({
       next: (response: ChatCompletionResponse) => {
         this.finishResponse(response, 'Assistant reply generated successfully.');
       },
@@ -195,19 +200,23 @@ export class ChatPlaygroundComponent implements OnInit, OnDestroy {
     this.statusMessage = '';
     this.successMessage = successMessage;
     this.streamingEnabled = false;
-
-    const assistantMessage = response.choices[0]?.message;
-    if (assistantMessage) {
-      const alreadyAppended =
-        this.request.messages[this.request.messages.length - 1]?.role === 'assistant' &&
-        this.request.messages[this.request.messages.length - 1]?.content === assistantMessage.content;
-
-      if (!alreadyAppended) {
-        this.request.messages = [...this.request.messages, assistantMessage];
-      }
-    }
-
     this.streamingContent = '';
+  }
+
+  private buildNormalizedMessages(): ChatCompletionsRequest['messages'] {
+    const systemMessage = this.request.messages[0];
+    const userMessage = this.request.messages[1];
+
+    return [
+      {
+        role: 'system',
+        content: systemMessage?.content ?? '',
+      },
+      {
+        role: 'user',
+        content: userMessage?.content ?? '',
+      },
+    ];
   }
 
   private buildStreamResponse(): ChatCompletionResponse {

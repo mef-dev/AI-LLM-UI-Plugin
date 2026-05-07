@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PlatformHelper } from '@natec/mef-dev-platform-connector';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class EndpointService {

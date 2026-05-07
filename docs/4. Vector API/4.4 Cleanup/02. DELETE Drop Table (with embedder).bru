@@ -1,0 +1,21 @@
+meta {
+  name: 02. DELETE Drop Table (with embedder)
+  type: http
+  seq: 2
+}
+
+delete {
+  url: {{base_url}}/vector/{{vector_table_name}}/drop
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "Provider": "pgvector"
+  }
+}
+
+tests {
+  test("Status 2xx", function() { expect(res.status).to.be.oneOf([200, 204]); });
+}

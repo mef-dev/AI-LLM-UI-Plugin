@@ -1,45 +1,124 @@
 <section class="vector-page">
   <header class="vector-hero">
-    <div>
+    <div class="vector-hero__content">
       <p class="vector-hero__eyebrow">Vector search</p>
-      <h2>Mocked semantic retrieval</h2>
+      <div class="vector-hero__title-row">
+        <h2>Vector API search</h2>
+      </div>
       <p class="vector-hero__subtitle">
-        Search a mocked vector collection and preview the matches that would later feed RAG and
-        chat flows.
+        Run real <code>/vector/{{ '{' }}table{{ '}' }}/search</code> requests against the backend and inspect the exact payload that goes out. This page stays focused on the stable table-based flow; raw numeric vector upload/search remains hidden until the backend serialization issue is fixed.
       </p>
+      <div class="vector-hero__actions">
+        <button type="button" class="ghost-button" (click)="openLlmDbOverview()">
+          Open LLM DB overview
+        </button>
+      </div>
     </div>
   </header>
 
   <div class="workspace-grid">
     <section class="panel-card">
       <div class="section-heading">
-        <h3>Search request</h3>
-        <span>Mocked `/vector/search` input</span>
+        <div>
+          <h3>Search request</h3>
+          <p>Work with a real vector table here. This is table-based API search, not the document collection search from the Documents page.</p>
+        </div>
       </div>
 
       <div class="form-grid">
-        <label class="field field--wide">
-          <span>Query</span>
-          <textarea [(ngModel)]="query"></textarea>
+        <label class="field">
+          <span>Vector table</span>
+          <input [(ngModel)]="tableName" [placeholder]="tablePlaceholder" />
+          <small class="field-hint">Use the backend table name, for example `bruno-vector-test`.</small>
         </label>
 
         <label class="field">
-          <span>Collection</span>
-          <select [(ngModel)]="collection">
-            <option *ngFor="let item of collections" [value]="item">{{ item }}</option>
+          <span>Provider</span>
+          <select [(ngModel)]="provider">
+            <option *ngFor="let option of providerOptions" [value]="option">{{ option }}</option>
           </select>
         </label>
 
         <label class="field">
-          <span>Limit</span>
-          <input type="number" min="1" max="10" [(ngModel)]="limit" />
+          <span>Search mode</span>
+          <select [(ngModel)]="searchMode">
+            <option *ngFor="let option of searchModeOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Model</span>
+          <input [(ngModel)]="model" [placeholder]="modelPlaceholder" />
+          <small class="field-hint">Used for semantic vector search. You can leave the default BAAI model in place.</small>
+        </label>
+
+        <label class="field field--wide">
+          <span>Query</span>
+          <textarea [(ngModel)]="query" [placeholder]="queryPlaceholder"></textarea>
+        </label>
+
+        <label class="field">
+          <span>Select</span>
+          <input [(ngModel)]="select" placeholder="id, title, content, distance" />
+          <small class="field-hint">Comma-separated fields to bring back from the vector table.</small>
+        </label>
+
+        <label class="field">
+          <span>Result limit</span>
+          <input type="number" min="1" max="20" [(ngModel)]="limit" />
+          <small class="field-hint">Choose how many of the strongest matches to show in the results list.</small>
+        </label>
+
+        <label class="field" *ngIf="searchMode === 'semantic'">
+          <span>Vector field</span>
+          <input [(ngModel)]="vectorField" [placeholder]="detectedVectorField || 'embedding_text'" />
+          <small class="field-hint">The schema loader will detect this automatically when the table has a vector column.</small>
+        </label>
+
+        <label class="field" *ngIf="searchMode === 'semantic'">
+          <span>Metric</span>
+          <select [(ngModel)]="metric">
+            <option value="cosine">cosine</option>
+            <option value="euclidean">euclidean</option>
+            <option value="dotProduct">dotProduct</option>
+          </select>
+        </label>
+
+        <label class="field field--wide" *ngIf="searchMode === 'field'">
+          <span>Search fields</span>
+          <input [(ngModel)]="searchFields" [placeholder]="detectedSearchField || 'title'" />
+          <small class="field-hint">For text-mode search, this is the backend field expression, for example `title` or `embedding_text__source`.</small>
         </label>
       </div>
 
+      <div class="message-banner message-banner--error" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="message-banner message-banner--success" *ngIf="successMessage">{{ successMessage }}</div>
+
       <div class="panel-actions">
-        <button type="button" class="primary-button" (click)="runSearch()">
-          Run similarity search
+        <button type="button" class="ghost-button" (click)="refreshSchema()" [disabled]="schemaLoading">
+          {{ schemaLoading ? 'Loading schema…' : 'Load schema' }}
         </button>
+        <button type="button" class="primary-button" (click)="runSearch()" [disabled]="searchLoading">
+          {{ searchLoading ? 'Searching…' : 'Run vector search' }}
+        </button>
+      </div>
+
+      <div class="schema-panel" *ngIf="schema">
+        <div class="section-heading">
+          <div>
+            <h3>Detected schema</h3>
+            <p>{{ schema.name }}</p>
+          </div>
+          <span>{{ schema.fields.length }} field(s)</span>
+        </div>
+
+        <div class="schema-fields">
+          <article class="schema-field" *ngFor="let field of schema.fields">
+            <strong>{{ field.name }}</strong>
+            <span>{{ field.type }}</span>
+            <small *ngIf="field.dimensions">dims {{ field.dimensions }}</small>
+          </article>
+        </div>
       </div>
 
       <pre class="code-panel">{{ requestJson }}</pre>
@@ -47,22 +126,45 @@
 
     <section class="panel-card">
       <div class="section-heading">
-        <h3>Retrieved matches</h3>
+        <div>
+          <h3>Returned rows</h3>
+          <p>Inspect the backend rows exactly as the Vector API returns them.</p>
+        </div>
         <span>{{ results.length }} result(s)</span>
       </div>
 
-      <div class="results-list">
-        <article class="result-card" *ngFor="let result of results">
+      <div class="results-list" *ngIf="results.length; else emptyResultsState">
+        <article class="result-card" *ngFor="let result of results; let index = index">
           <div class="result-card__header">
             <div>
-              <h4>{{ result.title }}</h4>
-              <span>{{ result.source }}</span>
+              <h4>{{ getResultTitle(result, index) }}</h4>
+              <span>{{ getResultMeta(result) }}</span>
             </div>
-            <strong>{{ result.score | number: '1.2-2' }}</strong>
           </div>
-          <p>{{ result.snippet }}</p>
+          <p>{{ getFieldPreview(result) }}</p>
+          <pre class="result-json">{{ result | json }}</pre>
         </article>
       </div>
+
+      <ng-template #emptyResultsState>
+        <div class="empty-state">
+          <h4>No rows yet</h4>
+          <p>Load a table schema and run a vector search to review the backend response here.</p>
+        </div>
+      </ng-template>
     </section>
+  </div>
+
+  <div class="modal-layer" *ngIf="llmDbVisible" (click)="closeLlmDbOverview()">
+    <div class="modal-panel modal-panel--llm-db" (click)="$event.stopPropagation()">
+      <div class="modal-panel__header">
+        <p class="modal-panel__eyebrow">Advanced extension</p>
+        <button type="button" class="icon-button" (click)="closeLlmDbOverview()" aria-label="Close LLM DB overview">
+          ×
+        </button>
+      </div>
+
+      <app-module-page [config]="llmDbConfig"></app-module-page>
+    </div>
   </div>
 </section>

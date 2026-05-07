@@ -26,13 +26,17 @@ export class EmbeddingsWorkspaceComponent {
   readonly inputModes: EmbeddingInputMode[] = ['single', 'batch'];
 
   inputMode: EmbeddingInputMode = 'single';
-  sourceText =
+  readonly sourceTextPlaceholder =
     'Customers reported unstable invoice totals after a tariff update. We need to search related release notes and support knowledge before escalation.';
-  batchSourceText = [
+  readonly batchSourceTextPlaceholder = [
     'Invoice totals changed after the tariff update and finance needs related release notes.',
     'Support asked for the latest escalation procedure for billing mismatches.',
     'Operations wants a searchable summary of pricing-rule incidents from the last quarter.',
   ].join('\n');
+
+  sourceText =
+    'Customers reported unstable invoice totals after a tariff update. We need to search related release notes and support knowledge before escalation.';
+  batchSourceText = '';
   selectedModel = 'BAAI/bge-m3';
   chunkLength = 512;
   response: EmbeddingsResponse | null = null;
@@ -74,7 +78,7 @@ export class EmbeddingsWorkspaceComponent {
         this.response = response;
         this.preview = this.generatePreview(response);
         this.loading = false;
-        this.successMessage = 'Embeddings generated successfully from the stage API.';
+        this.successMessage = 'Embeddings generated successfully.';
       },
       error: (error: Error) => {
         this.loading = false;
@@ -117,7 +121,59 @@ export class EmbeddingsWorkspaceComponent {
   }
 
   get responseJson(): string {
-    return JSON.stringify(this.response, null, 2);
+    if (!this.response) {
+      return '';
+    }
+
+    const summarizedData = this.response.data.map((item, index) => ({
+      index: item.index ?? index,
+      dimensions: item.embedding?.length ?? 0,
+      firstValues: item.embedding?.slice(0, 12) ?? [],
+    }));
+
+    return JSON.stringify(
+      {
+        ...this.response,
+        data: summarizedData,
+      },
+      null,
+      2
+    );
+  }
+
+  get requestItemSummary(): string {
+    return this.inputMode === 'single' ? '1 text item' : `${this.parsedInputs.length} text items`;
+  }
+
+  get inputLengthSummary(): string {
+    return `${this.preview.textLength} characters`;
+  }
+
+  get responseStatusLabel(): string {
+    if (this.loading) {
+      return 'generating';
+    }
+
+    return this.response ? 'ready' : 'idle';
+  }
+
+  get firstVectorPreview(): string {
+    if (!this.response?.data[0]?.embedding?.length) {
+      return 'No vector returned yet.';
+    }
+
+    return JSON.stringify(this.response.data[0].embedding.slice(0, 12));
+  }
+
+  get diagnosticsVectorPreview(): string {
+    if (!this.response?.data[0]?.embedding?.length) {
+      return 'No embedding returned yet.';
+    }
+
+    const values = this.response.data[0].embedding;
+    const preview = values.slice(0, 24);
+
+    return `${JSON.stringify(preview, null, 2)}\n\n... ${Math.max(values.length - preview.length, 0)} more values omitted`;
   }
 
   private generatePreview(response?: EmbeddingsResponse | null): EmbeddingPreview {

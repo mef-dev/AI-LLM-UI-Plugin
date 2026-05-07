@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { LlmRegistryLocator } from '../../models/llm-registry.models';
+import { formatLlmAccessMode, LlmRegistryLocator } from '../../models/llm-registry.models';
 
 @Component({
   selector: 'app-llm-registry-details',
@@ -10,11 +10,14 @@ import { LlmRegistryLocator } from '../../models/llm-registry.models';
 export class LlmRegistryDetailsComponent {
   @Input() model: LlmRegistryLocator | null = null;
 
-  @Output() create = new EventEmitter<void>();
   @Output() edit = new EventEmitter<LlmRegistryLocator>();
   @Output() upload = new EventEmitter<LlmRegistryLocator>();
   @Output() validate = new EventEmitter<LlmRegistryLocator>();
   @Output() delete = new EventEmitter<LlmRegistryLocator>();
+
+  formatAccessMode(value?: string | null): string {
+    return formatLlmAccessMode(value);
+  }
 
   formatJson(value: unknown): string {
     return JSON.stringify(this.redactSensitiveJson(value ?? {}), null, 2);

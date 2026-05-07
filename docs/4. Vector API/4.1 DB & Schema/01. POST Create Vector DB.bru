@@ -1,0 +1,29 @@
+meta {
+  name: 01. POST Create Vector DB
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/vector/db
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "pgvector",
+      "databaseName": "{{vector_db_name}}",
+      "description": "Bruno test vector database"
+  }
+}
+
+tests {
+  // DB persists across runs and there is no DROP DATABASE endpoint, so on
+  // re-runs we get 500 with "database already exists" — accept that as success.
+  test("Status 2xx or 'already exists'", function() {
+    if (res.status >= 200 && res.status < 300) return;
+    const msg = (res.body && res.body.message) || "";
+    expect(msg, "unexpected error: " + msg).to.match(/already exists/i);
+  });
+}

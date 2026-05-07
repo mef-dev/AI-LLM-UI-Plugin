@@ -9,4 +9,15 @@ import { ModulePageConfig } from '../../models/module-page.models';
 })
 export class ModulePageComponent {
   @Input({ required: true }) config!: ModulePageConfig;
+
+  get badgeToneClass(): string {
+    switch (this.config.badgeTone) {
+      case 'warning':
+        return 'status-chip--warning';
+      case 'success':
+        return 'status-chip--success';
+      default:
+        return 'status-chip--neutral';
+    }
+  }
 }

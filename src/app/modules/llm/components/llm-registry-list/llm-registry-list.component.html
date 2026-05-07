@@ -25,7 +25,7 @@
           {{ model.status }}
         </span>
         <span class="meta-chip">{{ model.device || 'n/a' }}</span>
-        <span class="meta-chip">{{ model.access_mode }}</span>
+        <span class="meta-chip">{{ formatAccessMode(model.access_mode) }}</span>
       </div>
     </button>
 
@@ -35,8 +35,8 @@
       (click)="startCreate()"
     >
       <div class="model-row__main">
-        <strong>Add new model</strong>
-        <span>Create another registry entry directly from the models list.</span>
+        <strong>Add model</strong>
+        <span>Create another registry entry directly from the list.</span>
       </div>
 
       <div class="model-row__create-mark" aria-hidden="true">+</div>
@@ -45,7 +45,7 @@
 
   <div *ngIf="!loading && !errorMessage && !models.length" class="empty-state">
     <h3>No models found</h3>
-    <p>Change filters or register a new LLM entry.</p>
-    <button type="button" class="empty-state__action" (click)="startCreate()">Register first model</button>
+    <p>Adjust the filters or create a new model entry.</p>
+    <button type="button" class="empty-state__action" (click)="startCreate()">Add first model</button>
   </div>
 </section>

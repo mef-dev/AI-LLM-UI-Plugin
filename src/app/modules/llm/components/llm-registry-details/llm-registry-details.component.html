@@ -29,9 +29,9 @@
           <span class="detail-label">Status</span>
           <p>{{ current.status }}</p>
         </div>
-        <div>
+        <div class="detail-item detail-item--wrap">
           <span class="detail-label">Access mode</span>
-          <p>{{ current.access_mode }}</p>
+          <p>{{ formatAccessMode(current.access_mode) }}</p>
         </div>
         <div>
           <span class="detail-label">Device</span>
@@ -55,26 +55,20 @@
         <span class="detail-label">URL</span>
         <p>{{ formatUrl(current.url) }}</p>
       </div>
-
-      <div class="summary-actions">
-        <button type="button" class="primary-button" (click)="create.emit()">
-          Register model
-        </button>
-      </div>
     </div>
 
     <div class="details-pane details-pane--technical">
-      <div class="detail-block">
+      <div class="detail-block detail-block--technical">
         <span class="detail-label">Headers</span>
         <pre>{{ formatJson(current.headers) }}</pre>
       </div>
 
-      <div class="detail-block">
+      <div class="detail-block detail-block--technical">
         <span class="detail-label">Capabilities</span>
         <pre>{{ formatJson(current.capabilities) }}</pre>
       </div>
 
-      <div class="detail-block">
+      <div class="detail-block detail-block--technical">
         <span class="detail-label">Config</span>
         <pre>{{ formatJson(current.config) }}</pre>
       </div>

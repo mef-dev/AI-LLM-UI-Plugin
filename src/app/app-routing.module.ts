@@ -30,7 +30,8 @@ const routes: Routes = PlatformHelper.updatePluginsRoutes([
       },
       {
         path: 'llm-db',
-        component: LlmDbPageComponent
+        redirectTo: 'vector',
+        pathMatch: 'full'
       },
       {
         path: 'document',

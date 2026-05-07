@@ -7,6 +7,7 @@ import {
   LlmListFilters,
   LlmRegistryLocator,
   LlmUpdateRequest,
+  normalizeLlmAccessMode,
 } from '../models/llm-registry.models';
 
 @Injectable({ providedIn: 'root' })
@@ -19,7 +20,7 @@ export class LlmFakeApiService {
       model_id: '0f6d9bb1-5b83-4f72-8f51-6a2fe10df001',
       model_name: 'meta-llama/Llama-3.1-8B-Instruct',
       display_name: 'Llama 3.1 8B Instruct',
-      access_mode: 'direct',
+      access_mode: 'LLM_ACCESS_MODE_DIRECT',
       is_required: true,
       url: 'http://ai-runtime.internal/llm/llama-3-1-8b',
       api_key: 'sk-demo-llama',
@@ -38,7 +39,7 @@ export class LlmFakeApiService {
       model_id: '0f6d9bb1-5b83-4f72-8f51-6a2fe10df002',
       model_name: 'openai/gpt-4.1-mini',
       display_name: 'GPT 4.1 Mini Gateway',
-      access_mode: 'external_service',
+      access_mode: 'LLM_ACCESS_MODE_EXTERNAL_SERVICE',
       is_required: false,
       url: 'https://gateway.internal.example/llm/openai',
       api_key: 'sk-demo-openai',
@@ -57,7 +58,7 @@ export class LlmFakeApiService {
       model_id: '0f6d9bb1-5b83-4f72-8f51-6a2fe10df003',
       model_name: 'natec/internal-support-agent',
       display_name: 'Internal Support Agent',
-      access_mode: 'internal_service',
+      access_mode: 'LLM_ACCESS_MODE_INTERNAL_SERVICE',
       is_required: false,
       url: 'http://support-ai.internal/service/chat',
       api_key: 'sk-demo-support',
@@ -104,7 +105,7 @@ export class LlmFakeApiService {
       model_id: this.generateId(),
       model_name: request.model_name,
       display_name: request.display_name,
-      access_mode: request.access_mode ?? 'direct',
+      access_mode: normalizeLlmAccessMode(request.access_mode),
       is_required: request.is_required ?? false,
       url: request.url,
       api_key: request.api_key,
@@ -133,6 +134,7 @@ export class LlmFakeApiService {
     const updated: LlmRegistryLocator = {
       ...current,
       ...request,
+      access_mode: normalizeLlmAccessMode(request.access_mode ?? current.access_mode),
       updatedAt: new Date().toISOString(),
     };
 

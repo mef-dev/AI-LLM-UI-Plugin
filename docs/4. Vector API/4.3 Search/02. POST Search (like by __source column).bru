@@ -1,0 +1,26 @@
+meta {
+  name: 02. POST Search (like by __source column)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/vector/{{vector_table_name}}/search
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "pgvector",
+      "model": "BAAI/bge-m3",
+      "search": "OAuth2",
+      "select": "id, title, content",
+      "searchFields": "embedding_text__source"
+  }
+}
+
+tests {
+  test("Status 200", function() { expect(res.status).to.equal(200); });
+  test("has value array", function() { expect(res.body.value).to.be.an("array"); });
+}

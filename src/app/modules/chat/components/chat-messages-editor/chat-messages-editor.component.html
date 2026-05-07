@@ -1,36 +1,33 @@
 <section class="conversation-card">
   <div class="section-heading">
     <div>
-      <h3>Conversation</h3>
-      <p>Shape the thread on the left, then use the control rail to tune the preview behavior.</p>
+      <h3>Request Builder</h3>
+      <p>Set the system instruction and user prompt, then run one clean stage request and inspect the result below.</p>
     </div>
   </div>
 
   <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
+  <p *ngIf="statusMessage" class="state-message">{{ statusMessage }}</p>
+  <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
 
-  <section class="system-panel" *ngIf="messages[0] && messages[0].role === 'system'">
+  <section
+    id="chat-system-guidance"
+    class="system-panel"
+    *ngIf="messages[0] && messages[0].role === 'system'"
+  >
     <div class="system-panel__header">
       <div>
         <p class="system-panel__eyebrow">System guidance</p>
-        <p class="system-panel__caption">Sets the assistant behavior for the rest of the thread.</p>
+        <p class="system-panel__caption">This becomes the first item in the outbound messages array.</p>
       </div>
-
       <div class="message-toolbar">
         <label class="field field--compact">
           <span class="field-label">Role</span>
           <select [(ngModel)]="messages[0].role">
-            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+            <option value="system">system</option>
+            <option value="user">user</option>
           </select>
         </label>
-
-        <button
-          type="button"
-          class="ghost-button"
-          (click)="removeMessage.emit(0)"
-          [disabled]="messages.length === 1"
-        >
-          Remove
-        </button>
       </div>
     </div>
 
@@ -40,96 +37,63 @@
     </label>
   </section>
 
-  <div class="thread-header">
+  <div class="thread-header thread-header--user" *ngIf="messages[1]">
     <div>
-      <h4>Prompt thread</h4>
-      <p>User inputs and preview replies appear here in order.</p>
+      <h4>User prompt</h4>
+      <p>This becomes the second message in the request payload.</p>
+    </div>
+    <div class="message-toolbar">
+      <label class="field field--compact">
+        <span class="field-label">Role</span>
+        <select [(ngModel)]="messages[1].role">
+          <option value="system">system</option>
+          <option value="user">user</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <article id="chat-user-prompt" class="message-card message-card--user" *ngIf="messages[1]">
+    <label class="field field--content">
+      <span class="field-label">Message</span>
+      <textarea class="message-textarea" [(ngModel)]="messages[1].content"></textarea>
+    </label>
+
+    <div class="message-card__footer">
+      <span class="message-card__note">
+        The request is still normalized to the backend's two-message format when sent.
+      </span>
+    </div>
+  </article>
+
+  <section id="chat-assistant-result" class="result-panel">
+    <div class="thread-header">
+      <div>
+        <h4>Assistant result</h4>
+        <p>The latest chat output appears here while the sidebar keeps model and payload diagnostics separate.</p>
+      </div>
+      <span class="live-badge" *ngIf="loading || assistantMessage">
+        {{ loading ? 'Streaming' : assistantMessage ? 'Completed' : 'Idle' }}
+      </span>
     </div>
 
-    <button type="button" class="ghost-button ghost-button--inline" (click)="addUserMessage.emit()">
-      Add user prompt
-    </button>
-  </div>
+    <div class="live-stream-panel result-panel__output" [class.live-stream-panel--active]="loading">
+      {{
+        assistantMessage
+          || (loading
+            ? 'Waiting for streamed assistant text…'
+            : 'Run the request once to inspect the assistant reply here.')
+      }}
+    </div>
 
-  <div class="message-list">
-    <ng-container *ngFor="let message of messages; let i = index">
-      <article
-        *ngIf="!(i === 0 && messages[0]?.role === 'system')"
-        class="message-card"
-        [class.message-card--system]="message.role === 'system'"
-        [class.message-card--user]="message.role === 'user'"
-        [class.message-card--assistant]="message.role === 'assistant'"
-      >
-        <div class="message-card__header">
-          <h5 class="message-card__title">
-            {{
-              message.role === 'assistant'
-                ? 'Assistant reply'
-                : message.role === 'system'
-                  ? 'System message'
-                  : 'Prompt'
-            }}
-          </h5>
-        </div>
-
-        <label class="field field--content">
-          <span class="field-label">{{ message.role === 'user' ? 'Message' : 'Content' }}</span>
-          <textarea
-            class="message-textarea"
-            [(ngModel)]="message.content"
-            [readonly]="message.role === 'assistant'"
-          ></textarea>
-        </label>
-
-        <div class="message-card__footer">
-          <span class="message-card__note" *ngIf="message.role === 'assistant'">
-            Assistant replies are added from the model response.
-          </span>
-
-          <label class="field field--compact" *ngIf="message.role !== 'assistant'">
-            <span class="field-label">Role</span>
-            <select [(ngModel)]="message.role">
-              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-            </select>
-          </label>
-
-          <button
-            *ngIf="message.role !== 'assistant'"
-            type="button"
-            class="ghost-button"
-            (click)="removeMessage.emit(i)"
-            [disabled]="messages.length === 1"
-          >
-            Remove
-          </button>
-        </div>
-      </article>
-    </ng-container>
-
-    <article class="message-card message-card--assistant message-card--live" *ngIf="streamingEnabled || streamingContent">
-      <div class="message-card__header">
-        <h5 class="message-card__title">Assistant reply</h5>
-        <span class="live-badge">{{ loading ? 'Streaming' : 'Completed' }}</span>
-      </div>
-
-      <label class="field field--content">
-        <span class="field-label">Content</span>
-        <div class="live-stream-panel" [class.live-stream-panel--active]="loading || !!streamingContent">
-          {{ streamingContent || 'Waiting for streamed assistant text…' }}
-        </div>
-      </label>
-
-      <div class="message-card__footer">
-        <span class="message-card__note">
-          Watch this panel to confirm whether streamed text arrives before the request finishes.
-        </span>
-      </div>
-    </article>
-  </div>
+    <p class="message-card__note result-panel__note">
+      Use this area as the main response view. Use the right sidebar to confirm model selection, token usage, and copy raw request or response JSON.
+    </p>
+  </section>
 
   <div class="conversation-actions">
     <p class="conversation-actions__hint">
-      Stage chat currently uses the streaming path by default, so keep prompts practical and short while testing.
+      Chat sends a minimal two-message payload to stage: first `system`, then `user`.
     </p>
     <div class="conversation-actions__buttons">
       <button

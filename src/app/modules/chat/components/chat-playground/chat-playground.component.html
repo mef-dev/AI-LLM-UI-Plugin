@@ -4,13 +4,13 @@
   <div class="workspace-grid">
     <app-chat-messages-editor
       [messages]="request.messages"
-      [roles]="roles"
+      [response]="response"
       [errorMessage]="errorMessage"
       [loading]="loading"
+      [statusMessage]="statusMessage"
+      [successMessage]="successMessage"
       [streamingEnabled]="streamingEnabled"
       [streamingContent]="streamingContent"
-      (addUserMessage)="addUserMessage()"
-      (removeMessage)="removeMessage($event)"
       (send)="sendStreamCompletion()"
       (cancel)="cancelActiveRequest()"
     ></app-chat-messages-editor>

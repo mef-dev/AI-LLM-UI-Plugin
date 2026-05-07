@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../../environments/environment';
 
-import { EndpointService } from 'src/app/core/services/endpoint.service';
+import { EndpointService } from '../../../core/services/endpoint.service';
 import {
   ChatCompletionResponse,
   ChatCompletionStreamEvent,
@@ -281,36 +281,25 @@ export class ChatApiService {
       }))
       .filter((message) => message.content.length > 0);
 
-    const systemInstructions = trimmedMessages
-      .filter((message) => message.role === 'system')
-      .map((message) => message.content);
-    const conversationMessages = trimmedMessages.filter((message) => message.role !== 'system');
-
-    if (!systemInstructions.length) {
-      return conversationMessages;
+    const userMessages = trimmedMessages.filter((message) => message.role === 'user');
+    if (!userMessages.length) {
+      return trimmedMessages;
     }
 
-    const instructionText = `System instruction:\n${systemInstructions.join('\n\n')}`;
-    const firstUserMessageIndex = conversationMessages.findIndex((message) => message.role === 'user');
+    const systemMessages = trimmedMessages.filter((message) => message.role === 'system');
+    const systemContent = systemMessages.map((message) => message.content).join('\n\n').trim() || 'You are a helpful AI assistant.';
+    const latestUserMessage = userMessages[userMessages.length - 1];
 
-    if (firstUserMessageIndex === -1) {
-      return [
-        {
-          role: 'user',
-          content: instructionText,
-        },
-        ...conversationMessages,
-      ];
-    }
-
-    return conversationMessages.map((message, index) =>
-      index === firstUserMessageIndex
-        ? {
-            ...message,
-            content: `${instructionText}\n\nUser message:\n${message.content}`,
-          }
-        : message
-    );
+    return [
+      {
+        role: 'system',
+        content: systemContent,
+      },
+      {
+        role: 'user',
+        content: latestUserMessage.content,
+      },
+    ];
   }
 
   private assignIfPresent<K extends keyof ChatCompletionsRequest>(

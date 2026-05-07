@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { LlmRegistryLocator } from '../../models/llm-registry.models';
+import { formatLlmAccessMode, LlmRegistryLocator } from '../../models/llm-registry.models';
 
 @Component({
   selector: 'app-llm-registry-list',
@@ -8,6 +8,10 @@ import { LlmRegistryLocator } from '../../models/llm-registry.models';
   styleUrls: ['./llm-registry-list.component.scss']
 })
 export class LlmRegistryListComponent {
+  formatAccessMode(value?: string | null): string {
+    return formatLlmAccessMode(value);
+  }
+
   @Input() models: LlmRegistryLocator[] = [];
   @Input() loading = false;
   @Input() errorMessage = '';

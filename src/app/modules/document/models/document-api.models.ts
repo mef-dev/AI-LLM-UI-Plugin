@@ -1,10 +1,10 @@
 export interface DocumentVectorSearchAlgorithm {
   name: string;
   kind: string;
-  hnsw_parameters?: {
+  hnswParameters?: {
     m: number;
-    ef_construction: number;
-    ef_search: number;
+    efConstruction: number;
+    efSearch: number;
     metric: string;
   };
 }
@@ -18,10 +18,10 @@ export interface DocumentCollectionCreateRequest {
   name: string;
   description: string;
   model: string;
-  chunk_length: number;
-  chunk_overlap: number;
+  chunkLength: number;
+  chunkOverlap: number;
   provider: string;
-  vector_search: {
+  vectorSearch: {
     algorithms: DocumentVectorSearchAlgorithm[];
     profiles: DocumentVectorSearchProfile[];
   };
@@ -29,8 +29,8 @@ export interface DocumentCollectionCreateRequest {
 
 export interface DocumentCollectionUpdateRequest {
   description?: string;
-  chunk_length?: number;
-  chunk_overlap?: number;
+  chunkLength?: number;
+  chunkOverlap?: number;
 }
 
 export interface DocumentCollectionListItem {
@@ -71,8 +71,8 @@ export interface DocumentCreateRequest {
   source?: string;
   tags?: string[];
   metadata?: Record<string, unknown>;
-  chunk_length: number;
-  chunk_overlap: number;
+  chunkLength: number;
+  chunkOverlap: number;
 }
 
 export interface DocumentListItem {
@@ -115,18 +115,22 @@ export interface DocumentUploadRequest {
   title?: string;
   tags?: string[];
   metadata?: Record<string, unknown>;
-  chunk_length: number;
-  chunk_overlap: number;
+  chunkLength: number;
+  chunkOverlap: number;
 }
 
 export interface DocumentSearchRequest {
   query: string;
-  top_k: number;
-  metric: string;
-  score_mode: string;
-  min_score: number;
-  include_content: boolean;
-  include_metadata: boolean;
+  topK: number;
+  metric?: string;
+  scoreMode?: string;
+  tags?: string[];
+  minScore?: number;
+  includeContent?: boolean;
+  includeMetadata?: boolean;
+  select?: string | null;
+  searchFields?: string | null;
+  decorators?: Record<string, unknown>;
 }
 
 export interface DocumentSearchResult {

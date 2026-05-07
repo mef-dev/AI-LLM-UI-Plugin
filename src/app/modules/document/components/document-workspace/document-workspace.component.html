@@ -1,25 +1,27 @@
 <section class="documents-page">
   <header class="documents-hero">
     <div class="documents-hero__content">
-      <p class="documents-hero__eyebrow">Documents workspace</p>
+      <p class="documents-hero__eyebrow">Documents</p>
       <div class="documents-hero__title-row">
-        <h2>Collections, documents, and search</h2>
-        <span class="status-chip status-chip--success">Live stage endpoint</span>
+        <h2>Knowledge ingestion and retrieval</h2>
+        <span class="status-chip status-chip--success">Connected endpoint</span>
       </div>
       <p class="documents-hero__subtitle">
-        Start the real RAG flow by creating a collection, adding text content, and searching that collection against the stage API.
+        Choose a collection, add knowledge by text or file, and verify that it can be found through search.
       </p>
     </div>
   </header>
 
-  <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
-  <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
+  <div #statusViewport class="status-viewport" *ngIf="errorMessage || successMessage">
+    <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
+    <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
+  </div>
 
   <section class="collection-banner" *ngIf="activeCollectionName">
     <div>
       <span class="summary-label">Active collection</span>
       <strong>{{ activeCollectionName }}</strong>
-      <p>Documents and searches below will use this collection.</p>
+      <p>All uploads and verification searches below will use this collection.</p>
     </div>
     <div class="collection-banner__actions">
       <button type="button" class="ghost-button" (click)="openCollectionsModal()">Manage collections</button>
@@ -33,25 +35,75 @@
       <section class="panel-card">
         <div class="section-heading">
           <div>
-            <h3>1. Create collection</h3>
-            <p>Collections act like folders or knowledge bases for the documents you want to search later.</p>
+            <h3>1. Choose or create collection</h3>
+            <p>Start by selecting the knowledge base this content should be stored in and searched from later.</p>
           </div>
         </div>
 
         <div class="form-grid">
+          <label class="field field--wide">
+            <span>Collection preset</span>
+            <div class="collection-preset-controls">
+              <select
+                [(ngModel)]="selectedCollectionOption"
+                (ngModelChange)="onCollectionPresetChange($event)"
+                [disabled]="collectionSelectorLoading || collectionPresetLoading"
+              >
+                <option [value]="createNewCollectionOption">Create new collection</option>
+                <option *ngFor="let collection of existingCollections" [value]="collection.name">
+                  {{ collection.name }}
+                  <ng-container *ngIf="collection.documents_count || collection.chunks_count">
+                    · {{ collection.documents_count ?? 0 }} docs · {{ collection.chunks_count ?? 0 }} chunks
+                  </ng-container>
+                </option>
+              </select>
+
+              <button
+                type="button"
+                class="ghost-button ghost-button--compact"
+                (click)="refreshCollectionOptions()"
+                [disabled]="collectionSelectorLoading || collectionPresetLoading"
+              >
+                {{ collectionSelectorLoading ? 'Refreshing...' : 'Refresh list' }}
+              </button>
+            </div>
+            <small class="field-hint">
+              Choose an existing collection to auto-fill the form, or keep this on create new to enter your own setup.
+            </small>
+            <small class="field-hint" *ngIf="!existingCollections.length && !collectionSelectorLoading">
+              No existing collections were found yet, so this form is ready for a brand-new knowledge base.
+            </small>
+            <small class="field-hint" *ngIf="selectedCollectionOption !== createNewCollectionOption">
+              The fields below stay editable. Keep this name to use the selected collection, or change it before creating a new one from this preset.
+            </small>
+            <small class="field-hint" *ngIf="collectionPresetLoading">
+              Loading the selected collection settings...
+            </small>
+          </label>
+
           <label class="field">
             <span>Collection name</span>
-            <input type="text" [(ngModel)]="collectionName" />
+            <input type="text" [(ngModel)]="collectionName" placeholder="Input collection name here" />
+            <small class="field-hint">
+              {{
+                selectedCollectionOption === createNewCollectionOption
+                  ? 'Use a fresh collection name here when you want to create a new knowledge base.'
+                  : 'Keep this name to continue with the selected collection, or change it to create a new one based on these settings.'
+              }}
+            </small>
           </label>
 
           <label class="field">
             <span>Model</span>
-            <input type="text" [(ngModel)]="model" />
+            <select [(ngModel)]="model">
+              <option *ngFor="let option of collectionModelOptions" [value]="option">{{ option }}</option>
+            </select>
+            <small class="field-hint">Embedding model used when the backend indexes document chunks for this collection.</small>
           </label>
 
           <label class="field field--wide">
             <span>Description</span>
-            <input type="text" [(ngModel)]="collectionDescription" />
+            <input type="text" [(ngModel)]="collectionDescription" placeholder="Input collection description here" />
           </label>
 
           <label class="field">
@@ -66,7 +118,9 @@
 
           <label class="field">
             <span>Provider</span>
-            <input type="text" [(ngModel)]="provider" />
+            <select [(ngModel)]="provider">
+              <option *ngFor="let option of providerOptions" [value]="option">{{ option }}</option>
+            </select>
           </label>
         </div>
 
@@ -74,10 +128,12 @@
           <button type="button" class="ghost-button" (click)="openCollectionsModal()">
             Manage collections
           </button>
-          <button type="button" class="ghost-button" (click)="useCurrentCollectionName()">
-            Use current name
-          </button>
-          <button type="button" class="primary-button" (click)="createCollection()" [disabled]="isCreatingCollection">
+          <button
+            type="button"
+            class="primary-button"
+            (click)="createCollection()"
+            [disabled]="isCreatingCollection || collectionPresetLoading"
+          >
             {{ isCreatingCollection ? 'Creating collection...' : 'Create collection' }}
           </button>
         </div>
@@ -86,8 +142,8 @@
       <section class="panel-card">
         <div class="section-heading">
           <div>
-            <h3>2. Add document content</h3>
-            <p>Use the JSON content endpoint when you want to paste text directly into the collection.</p>
+            <h3>2. Add knowledge as text</h3>
+            <p>Paste content directly when you want the quickest ingestion path for testing and retrieval checks.</p>
           </div>
           <span class="step-status" [class.step-status--ready]="hasActiveCollection">
             {{ hasActiveCollection ? 'Collection ready' : 'Collection required' }}
@@ -96,18 +152,19 @@
 
         <div class="form-grid">
           <label class="field">
-            <span>Title</span>
-            <input type="text" [(ngModel)]="documentTitle" />
+              <span>Title</span>
+            <input type="text" [(ngModel)]="documentTitle" placeholder="Getting Started Guide" />
           </label>
 
           <label class="field">
             <span>Source URL</span>
-            <input type="text" [(ngModel)]="documentSource" />
+            <input type="text" [(ngModel)]="documentSource" placeholder="https://docs.example.com/getting-started" />
           </label>
 
           <label class="field field--wide">
             <span>Content</span>
-            <textarea [(ngModel)]="documentContent"></textarea>
+            <textarea [(ngModel)]="documentContent" placeholder="Paste the text you want to store in this collection"></textarea>
+            <small class="field-hint">This is the main text that will be chunked, embedded, and made searchable.</small>
           </label>
 
           <label class="field">
@@ -117,7 +174,11 @@
 
           <label class="field field--wide">
             <span>Metadata JSON</span>
-            <textarea class="json-textarea" [(ngModel)]="documentMetadata"></textarea>
+            <textarea
+              class="json-textarea"
+              [(ngModel)]="documentMetadata"
+              placeholder='{"author":"John Doe","category":"documentation"}'
+            ></textarea>
           </label>
         </div>
 
@@ -136,8 +197,8 @@
       <section class="panel-card">
         <div class="section-heading">
           <div>
-            <h3>2b. Upload document file</h3>
-            <p>Upload a real file into the active collection using the multipart document endpoint.</p>
+            <h3>2b. Upload file</h3>
+            <p>Use this path when you want to test how the backend ingests a real file into the active collection.</p>
           </div>
           <span class="step-status" [class.step-status--ready]="hasActiveCollection">
             {{ hasActiveCollection ? 'Collection ready' : 'Collection required' }}
@@ -158,7 +219,7 @@
           <div class="form-grid">
             <label class="field">
               <span>Upload title</span>
-              <input type="text" [(ngModel)]="uploadTitle" />
+              <input type="text" [(ngModel)]="uploadTitle" placeholder="Uploaded guide" />
             </label>
 
             <label class="field">
@@ -168,7 +229,11 @@
 
             <label class="field field--wide">
               <span>Upload metadata JSON</span>
-              <textarea class="json-textarea" [(ngModel)]="uploadMetadata"></textarea>
+              <textarea
+                class="json-textarea"
+                [(ngModel)]="uploadMetadata"
+                placeholder='{"source_type":"file_upload"}'
+              ></textarea>
             </label>
           </div>
         </div>
@@ -184,14 +249,26 @@
           </button>
         </div>
       </section>
+
+      <section class="panel-card panel-card--next-step" *ngIf="createdDocumentSummary && hasActiveCollection">
+        <div class="section-heading">
+          <div>
+            <h3>Next step: verify retrieval</h3>
+            <p>{{ createdDocumentSummary }}</p>
+          </div>
+        </div>
+        <p class="next-step-note">
+          Run a search against <strong>{{ activeCollectionName }}</strong> in the right sidebar to confirm the newly added knowledge can be retrieved.
+        </p>
+      </section>
     </div>
 
     <aside class="workspace-sidebar">
       <section class="panel-card panel-card--sidebar">
         <div class="section-heading">
           <div>
-            <h3>3. Search collection</h3>
-            <p>Use the collection you created above and test the search endpoint directly.</p>
+            <h3>3. Verify retrieval</h3>
+            <p>Search the active collection to confirm uploaded or pasted knowledge can actually be found.</p>
           </div>
           <span class="step-status" [class.step-status--ready]="hasActiveCollection">
             {{ hasActiveCollection ? 'Collection ready' : 'Collection required' }}
@@ -201,37 +278,42 @@
         <div class="form-grid form-grid--sidebar">
           <label class="field field--wide">
             <span>Query</span>
-            <textarea [(ngModel)]="searchQuery"></textarea>
+            <textarea [(ngModel)]="searchQuery" [placeholder]="searchQueryPlaceholder"></textarea>
+            <small class="field-hint">Use a phrase you expect to appear in or match the meaning of the content you just added.</small>
           </label>
 
           <label class="field">
-            <span>Top K</span>
+            <span class="field-help" tabindex="0" [attr.data-tooltip]="fieldHelp.topK">Top K</span>
             <input type="number" [(ngModel)]="topK" />
           </label>
 
           <label class="field">
-            <span>Min score</span>
+            <span class="field-help" tabindex="0" [attr.data-tooltip]="fieldHelp.minScore">Min score</span>
             <input type="number" step="0.1" [(ngModel)]="minScore" />
           </label>
 
           <label class="field">
-            <span>Metric</span>
-            <input type="text" [(ngModel)]="metric" />
+            <span class="field-help" tabindex="0" [attr.data-tooltip]="fieldHelp.metric">Metric</span>
+            <select [(ngModel)]="metric">
+              <option *ngFor="let option of metricOptions" [value]="option">{{ option }}</option>
+            </select>
           </label>
 
           <label class="field">
-            <span>Score mode</span>
-            <input type="text" [(ngModel)]="scoreMode" />
+            <span class="field-help" tabindex="0" [attr.data-tooltip]="fieldHelp.scoreMode">Score mode</span>
+            <select [(ngModel)]="scoreMode">
+              <option *ngFor="let option of scoreModeOptions" [value]="option">{{ option }}</option>
+            </select>
           </label>
 
           <label class="field field--toggle">
             <input type="checkbox" [(ngModel)]="includeContent" />
-            <span>Include content</span>
+            <span class="field-help" tabindex="0" [attr.data-tooltip]="fieldHelp.includeContent">Include content</span>
           </label>
 
           <label class="field field--toggle">
             <input type="checkbox" [(ngModel)]="includeMetadata" />
-            <span>Include metadata</span>
+            <span class="field-help" tabindex="0" [attr.data-tooltip]="fieldHelp.includeMetadata">Include metadata</span>
           </label>
         </div>
 
@@ -246,34 +328,6 @@
           </button>
         </div>
       </section>
-
-      <section class="panel-card panel-card--sidebar">
-        <div class="section-heading">
-          <div>
-            <h3>Current status</h3>
-            <p>What is ready in this first documents pass.</p>
-          </div>
-        </div>
-
-        <div class="readiness-list">
-          <article class="readiness-item">
-            <span class="summary-label">Ready now</span>
-            <p>Create collection, add text content, and search collection against the real stage API.</p>
-          </article>
-          <article class="readiness-item">
-            <span class="summary-label">Testing tip</span>
-            <p>Use one small collection, one short document, and one short search query for smoke testing.</p>
-          </article>
-          <article class="readiness-item">
-            <span class="summary-label">Next stage</span>
-            <p>Next after this first upload pass: collection browsing, document details, and richer RAG retrieval flows.</p>
-          </article>
-          <article class="readiness-item" *ngIf="createdDocumentSummary">
-            <span class="summary-label">Latest document action</span>
-            <p>{{ createdDocumentSummary }}</p>
-          </article>
-        </div>
-      </section>
     </aside>
   </div>
 
@@ -281,7 +335,7 @@
     <div class="section-heading">
       <div>
         <h3>Search results</h3>
-        <p>Returned chunks from the selected collection.</p>
+        <p>Returned chunks from the active collection, shown here so you can verify retrieval quality quickly.</p>
       </div>
     </div>
 
@@ -316,13 +370,13 @@
     </div>
   </section>
 
-  <div class="modal-layer" *ngIf="collectionsModalVisible" (click)="closeCollectionsModal()">
-    <div class="modal-panel modal-panel--collections" (click)="$event.stopPropagation()">
+  <div class="modal-layer" *ngIf="collectionsModalVisible || collectionsModalClosing" [class.modal-layer--closing]="collectionsModalClosing" (click)="closeCollectionsModal()">
+    <div class="modal-panel modal-panel--collections" [class.modal-panel--closing]="collectionsModalClosing" (click)="$event.stopPropagation()">
       <section class="collections-modal">
         <header class="collections-modal__header">
           <div>
-            <p class="summary-label">Collections manager</p>
-            <h3>Manage existing collections</h3>
+            <p class="summary-label">Existing collections</p>
+            <h3>Select from existing collections</h3>
             <p>Browse existing collections, switch the active one, or update and delete them without leaving this page.</p>
           </div>
           <button type="button" class="icon-button" (click)="closeCollectionsModal()" aria-label="Close collections manager">
@@ -454,8 +508,8 @@
     </div>
   </div>
 
-  <div class="modal-layer" *ngIf="documentBrowserVisible" (click)="closeDocumentBrowser()">
-    <div class="modal-panel modal-panel--document-browser" (click)="$event.stopPropagation()">
+  <div class="modal-layer" *ngIf="documentBrowserVisible || documentBrowserClosing" [class.modal-layer--closing]="documentBrowserClosing" (click)="closeDocumentBrowser()">
+    <div class="modal-panel modal-panel--document-browser" [class.modal-panel--closing]="documentBrowserClosing" (click)="$event.stopPropagation()">
       <section class="collections-modal collections-modal--browser">
         <header class="collections-modal__header">
           <div>
@@ -584,8 +638,8 @@
     </div>
   </div>
 
-  <div class="modal-layer" *ngIf="documentViewerVisible" (click)="closeDocumentViewer()">
-    <div class="modal-panel modal-panel--document-viewer" (click)="$event.stopPropagation()">
+  <div class="modal-layer" *ngIf="documentViewerVisible || documentViewerClosing" [class.modal-layer--closing]="documentViewerClosing" (click)="closeDocumentViewer()">
+    <div class="modal-panel modal-panel--document-viewer" [class.modal-panel--closing]="documentViewerClosing" (click)="$event.stopPropagation()">
       <section class="collections-modal">
         <header class="collections-modal__header">
           <div>
