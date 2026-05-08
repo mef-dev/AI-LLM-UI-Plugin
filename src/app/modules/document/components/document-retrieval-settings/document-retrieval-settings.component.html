@@ -1,0 +1,64 @@
+<section class="panel-card panel-card--sidebar">
+  <div class="section-heading">
+    <div>
+      <h3>3. Verify retrieval</h3>
+      <p>Search the active collection to confirm uploaded or pasted knowledge can actually be found.</p>
+    </div>
+    <span class="step-status" [class.step-status--ready]="store.hasActiveCollection">
+      {{ store.hasActiveCollection ? 'Collection ready' : 'Collection required' }}
+    </span>
+  </div>
+
+  <div class="form-grid form-grid--sidebar">
+    <label class="field field--wide">
+      <span>Query</span>
+      <textarea [(ngModel)]="store.searchQuery" [placeholder]="store.searchQueryPlaceholder"></textarea>
+      <small class="field-hint">Use a phrase you expect to appear in or match the meaning of the content you just added.</small>
+    </label>
+
+    <label class="field">
+      <span class="field-help" tabindex="0" [attr.data-tooltip]="store.fieldHelp.topK">Top K</span>
+      <input type="number" [(ngModel)]="store.topK" />
+    </label>
+
+    <label class="field">
+      <span class="field-help" tabindex="0" [attr.data-tooltip]="store.fieldHelp.minScore">Min score</span>
+      <input type="number" step="0.1" [(ngModel)]="store.minScore" />
+    </label>
+
+    <label class="field">
+      <span class="field-help" tabindex="0" [attr.data-tooltip]="store.fieldHelp.metric">Metric</span>
+      <select [(ngModel)]="store.metric">
+        <option *ngFor="let option of store.metricOptions" [value]="option">{{ option }}</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field-help" tabindex="0" [attr.data-tooltip]="store.fieldHelp.scoreMode">Score mode</span>
+      <select [(ngModel)]="store.scoreMode">
+        <option *ngFor="let option of store.scoreModeOptions" [value]="option">{{ option }}</option>
+      </select>
+    </label>
+
+    <label class="field field--toggle">
+      <input type="checkbox" [(ngModel)]="store.includeContent" />
+      <span class="field-help" tabindex="0" [attr.data-tooltip]="store.fieldHelp.includeContent">Include content</span>
+    </label>
+
+    <label class="field field--toggle">
+      <input type="checkbox" [(ngModel)]="store.includeMetadata" />
+      <span class="field-help" tabindex="0" [attr.data-tooltip]="store.fieldHelp.includeMetadata">Include metadata</span>
+    </label>
+  </div>
+
+  <div class="panel-actions">
+    <button
+      type="button"
+      class="primary-button"
+      (click)="store.searchCollection()"
+      [disabled]="store.isSearching || !store.hasActiveCollection"
+    >
+      {{ store.isSearching ? 'Searching...' : 'Run search' }}
+    </button>
+  </div>
+</section>

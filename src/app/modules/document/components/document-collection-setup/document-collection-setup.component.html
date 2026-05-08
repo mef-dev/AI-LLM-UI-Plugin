@@ -1,0 +1,106 @@
+<section class="panel-card">
+  <div class="section-heading">
+    <div>
+      <h3>1. Choose or create collection</h3>
+      <p>Start by selecting the knowledge base this content should be stored in and searched from later.</p>
+    </div>
+  </div>
+
+  <div class="form-grid">
+    <label class="field field--wide">
+      <span>Collection preset</span>
+      <div class="collection-preset-controls">
+        <select
+          [(ngModel)]="store.selectedCollectionOption"
+          (ngModelChange)="store.onCollectionPresetChange($event)"
+          [disabled]="store.collectionSelectorLoading || store.collectionPresetLoading"
+        >
+          <option [value]="store.createNewCollectionOption">Create new collection</option>
+          <option *ngFor="let collection of store.existingCollections" [value]="collection.name">
+            {{ collection.name }}
+            <ng-container *ngIf="collection.documents_count || collection.chunks_count">
+              · {{ collection.documents_count ?? 0 }} docs · {{ collection.chunks_count ?? 0 }} chunks
+            </ng-container>
+          </option>
+        </select>
+
+        <button
+          type="button"
+          class="ghost-button ghost-button--compact"
+          (click)="store.refreshCollectionOptions()"
+          [disabled]="store.collectionSelectorLoading || store.collectionPresetLoading"
+        >
+          {{ store.collectionSelectorLoading ? 'Refreshing...' : 'Refresh list' }}
+        </button>
+      </div>
+      <small class="field-hint">
+        Choose an existing collection to auto-fill the form, or keep this on create new to enter your own setup.
+      </small>
+      <small class="field-hint" *ngIf="!store.existingCollections.length && !store.collectionSelectorLoading">
+        No existing collections were found yet, so this form is ready for a brand-new knowledge base.
+      </small>
+      <small class="field-hint" *ngIf="store.selectedCollectionOption !== store.createNewCollectionOption">
+        The fields below stay editable. Keep this name to use the selected collection, or change it before creating a new one from this preset.
+      </small>
+      <small class="field-hint" *ngIf="store.collectionPresetLoading">
+        Loading the selected collection settings...
+      </small>
+    </label>
+
+    <label class="field">
+      <span>Collection name</span>
+      <input type="text" [(ngModel)]="store.collectionName" placeholder="Input collection name here" />
+      <small class="field-hint">
+        {{
+          store.selectedCollectionOption === store.createNewCollectionOption
+            ? 'Use a fresh collection name here when you want to create a new knowledge base.'
+            : 'Keep this name to continue with the selected collection, or change it to create a new one based on these settings.'
+        }}
+      </small>
+    </label>
+
+    <label class="field">
+      <span>Model</span>
+      <select [(ngModel)]="store.model">
+        <option *ngFor="let option of store.collectionModelOptions" [value]="option">{{ option }}</option>
+      </select>
+      <small class="field-hint">Embedding model used when the backend indexes document chunks for this collection.</small>
+    </label>
+
+    <label class="field field--wide">
+      <span>Description</span>
+      <input type="text" [(ngModel)]="store.collectionDescription" placeholder="Input collection description here" />
+    </label>
+
+    <label class="field">
+      <span>Chunk length</span>
+      <input type="number" [(ngModel)]="store.chunkLength" />
+    </label>
+
+    <label class="field">
+      <span>Chunk overlap</span>
+      <input type="number" [(ngModel)]="store.chunkOverlap" />
+    </label>
+
+    <label class="field">
+      <span>Provider</span>
+      <select [(ngModel)]="store.provider">
+        <option *ngFor="let option of store.providerOptions" [value]="option">{{ option }}</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="panel-actions">
+    <button type="button" class="ghost-button" (click)="store.openCollectionsModal()">
+      Manage collections
+    </button>
+    <button
+      type="button"
+      class="primary-button"
+      (click)="store.createCollection()"
+      [disabled]="store.isCreatingCollection || store.collectionPresetLoading"
+    >
+      {{ store.isCreatingCollection ? 'Creating collection...' : 'Create collection' }}
+    </button>
+  </div>
+</section>

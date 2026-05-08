@@ -2,13 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PlatformHelper } from '@natec/mef-dev-platform-connector';
 import { PluginShellComponent } from './container/plugin-shell/plugin-shell.component';
-import { ChatPageComponent } from './modules/chat/pages/chat-page/chat-page.component';
-import { DocumentPageComponent } from './modules/document/pages/document-page/document-page.component';
-import { EmbeddingsPageComponent } from './modules/embeddings/pages/embeddings-page/embeddings-page.component';
-import { LlmDbPageComponent } from './modules/llm-db/pages/llm-db-page/llm-db-page.component';
-import { LlmPageComponent } from './modules/llm/pages/llm-page/llm-page.component';
-import { ResponsesPageComponent } from './modules/responses/pages/responses-page/responses-page.component';
-import { VectorPageComponent } from './modules/vector/pages/vector-page/vector-page.component';
 
 const routes: Routes = PlatformHelper.updatePluginsRoutes([
   {
@@ -22,11 +15,11 @@ const routes: Routes = PlatformHelper.updatePluginsRoutes([
       },
       {
         path: 'chat',
-        component: ChatPageComponent
+        loadChildren: () => import('./modules/chat/chat.module').then((module) => module.ChatModule)
       },
       {
         path: 'responses',
-        component: ResponsesPageComponent
+        loadChildren: () => import('./modules/responses/responses.module').then((module) => module.ResponsesModule)
       },
       {
         path: 'llm-db',
@@ -35,19 +28,19 @@ const routes: Routes = PlatformHelper.updatePluginsRoutes([
       },
       {
         path: 'document',
-        component: DocumentPageComponent
+        loadChildren: () => import('./modules/document/document.module').then((module) => module.DocumentModule)
       },
       {
         path: 'embeddings',
-        component: EmbeddingsPageComponent
+        loadChildren: () => import('./modules/embeddings/embeddings.module').then((module) => module.EmbeddingsModule)
       },
       {
         path: 'llm',
-        component: LlmPageComponent
+        loadChildren: () => import('./modules/llm/llm.module').then((module) => module.LlmModule)
       },
       {
         path: 'vector',
-        component: VectorPageComponent
+        loadChildren: () => import('./modules/vector/vector.module').then((module) => module.VectorModule)
       },
       {
         path: '**',

@@ -1,0 +1,122 @@
+<section class="panel-card">
+  <div class="section-heading">
+    <div>
+      <h3>2. Add knowledge as text</h3>
+      <p>Paste content directly when you want the quickest ingestion path for testing and retrieval checks.</p>
+    </div>
+    <span class="step-status" [class.step-status--ready]="store.hasActiveCollection">
+      {{ store.hasActiveCollection ? 'Collection ready' : 'Collection required' }}
+    </span>
+  </div>
+
+  <div class="form-grid">
+    <label class="field">
+      <span>Title</span>
+      <input type="text" [(ngModel)]="store.documentTitle" placeholder="Getting Started Guide" />
+    </label>
+
+    <label class="field">
+      <span>Source URL</span>
+      <input type="text" [(ngModel)]="store.documentSource" placeholder="https://docs.example.com/getting-started" />
+    </label>
+
+    <label class="field field--wide">
+      <span>Content</span>
+      <textarea [(ngModel)]="store.documentContent" placeholder="Paste the text you want to store in this collection"></textarea>
+      <small class="field-hint">This is the main text that will be chunked, embedded, and made searchable.</small>
+    </label>
+
+    <label class="field">
+      <span>Tags</span>
+      <input type="text" [(ngModel)]="store.documentTags" placeholder="guide, onboarding" />
+    </label>
+
+    <label class="field field--wide">
+      <span>Metadata JSON</span>
+      <textarea
+        class="json-textarea"
+        [(ngModel)]="store.documentMetadata"
+        placeholder='{"author":"John Doe","category":"documentation"}'
+      ></textarea>
+    </label>
+  </div>
+
+  <div class="panel-actions">
+    <button
+      type="button"
+      class="primary-button"
+      (click)="store.createDocument()"
+      [disabled]="store.isCreatingDocument || !store.hasActiveCollection"
+    >
+      {{ store.isCreatingDocument ? 'Adding document...' : 'Add document to collection' }}
+    </button>
+  </div>
+</section>
+
+<section class="panel-card">
+  <div class="section-heading">
+    <div>
+      <h3>2b. Upload file</h3>
+      <p>Use this path when you want to test how the backend ingests a real file into the active collection.</p>
+    </div>
+    <span class="step-status" [class.step-status--ready]="store.hasActiveCollection">
+      {{ store.hasActiveCollection ? 'Collection ready' : 'Collection required' }}
+    </span>
+  </div>
+
+  <div class="upload-panel">
+    <label class="upload-dropzone">
+      <input type="file" (change)="store.onUploadFileSelected($event)" />
+      <span class="upload-dropzone__title">
+        {{ store.selectedUploadFileName || 'Choose a file to upload' }}
+      </span>
+      <span class="upload-dropzone__hint">
+        Upload support depends on which file formats the backend currently parses successfully.
+      </span>
+    </label>
+
+    <div class="form-grid">
+      <label class="field">
+        <span>Upload title</span>
+        <input type="text" [(ngModel)]="store.uploadTitle" placeholder="Uploaded guide" />
+      </label>
+
+      <label class="field">
+        <span>Tags</span>
+        <input type="text" [(ngModel)]="store.uploadTags" placeholder="uploaded, pdf" />
+      </label>
+
+      <label class="field field--wide">
+        <span>Upload metadata JSON</span>
+        <textarea
+          class="json-textarea"
+          [(ngModel)]="store.uploadMetadata"
+          placeholder='{"source_type":"file_upload"}'
+        ></textarea>
+      </label>
+    </div>
+  </div>
+
+  <div class="panel-actions">
+    <button
+      type="button"
+      class="primary-button"
+      (click)="store.uploadDocument()"
+      [disabled]="store.isUploadingDocument || !store.hasActiveCollection || !store.selectedUploadFile"
+    >
+      {{ store.isUploadingDocument ? 'Uploading file...' : 'Upload file to collection' }}
+    </button>
+  </div>
+</section>
+
+<section class="panel-card panel-card--next-step" *ngIf="store.createdDocumentSummary && store.hasActiveCollection">
+  <div class="section-heading">
+    <div>
+      <h3>Next step: verify retrieval</h3>
+      <p>{{ store.createdDocumentSummary }}</p>
+    </div>
+  </div>
+  <p class="next-step-note">
+    Run a search against <strong>{{ store.activeCollectionName }}</strong> in the right sidebar to confirm the newly added knowledge can be retrieved.
+  </p>
+</section>

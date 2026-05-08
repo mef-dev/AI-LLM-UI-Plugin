@@ -1,0 +1,146 @@
+<div
+  class="modal-layer"
+  *ngIf="store.collectionsModalVisible || store.collectionsModalClosing"
+  [class.modal-layer--closing]="store.collectionsModalClosing"
+  (click)="store.closeCollectionsModal()"
+>
+  <div
+    class="modal-panel modal-panel--collections"
+    [class.modal-panel--closing]="store.collectionsModalClosing"
+    (click)="$event.stopPropagation()"
+  >
+    <section class="collections-modal">
+      <header class="collections-modal__header">
+        <div>
+          <p class="summary-label">Existing collections</p>
+          <h3>Select from existing collections</h3>
+          <p>Browse existing collections, switch the active one, or update and delete them without leaving this page.</p>
+        </div>
+        <button type="button" class="icon-button" (click)="store.closeCollectionsModal()" aria-label="Close collections manager">
+          ×
+        </button>
+      </header>
+
+      <p *ngIf="store.collectionsErrorMessage" class="state-message state-message--error">{{ store.collectionsErrorMessage }}</p>
+      <p *ngIf="store.collectionModalMessage" class="state-message state-message--success">{{ store.collectionModalMessage }}</p>
+
+      <div class="collections-modal__body">
+        <aside class="collections-browser">
+          <div class="collections-browser__header">
+            <h4>Existing collections</h4>
+            <button type="button" class="ghost-button ghost-button--compact" (click)="store.loadCollections()" [disabled]="store.collectionsLoading">
+              {{ store.collectionsLoading ? 'Refreshing...' : 'Refresh' }}
+            </button>
+          </div>
+
+          <div class="collections-browser__body">
+            <p *ngIf="store.collectionsLoading" class="empty-note">Loading collections...</p>
+            <p *ngIf="!store.collectionsLoading && !store.existingCollections.length" class="empty-note">
+              No collections were returned yet.
+            </p>
+
+            <div class="collections-list" *ngIf="store.existingCollections.length">
+              <button
+                type="button"
+                class="collection-list-item"
+                *ngFor="let collection of store.existingCollections"
+                [class.collection-list-item--active]="collection.name === store.selectedManagedCollection?.name"
+                (click)="store.selectManagedCollection(collection.name)"
+              >
+                <span class="collection-list-item__name">{{ collection.name }}</span>
+                <span class="collection-list-item__meta">
+                  {{ store.getManagedCollectionDocumentsCount(collection) }} docs · {{ store.getManagedCollectionChunksCount(collection) }} chunks
+                </span>
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <section class="collections-editor">
+          <div class="collections-editor__header">
+            <div>
+              <h4>{{ store.selectedManagedCollection?.name || 'Select a collection' }}</h4>
+              <p *ngIf="store.selectedManagedCollection">
+                {{ store.selectedManagedCollection.model || 'Unknown model' }} · {{ store.selectedManagedCollection.provider || 'Unknown provider' }}
+              </p>
+            </div>
+            <button
+              *ngIf="store.selectedManagedCollection"
+              type="button"
+              class="ghost-button ghost-button--compact"
+              (click)="store.useManagedCollection(store.selectedManagedCollection.name)"
+            >
+              Use this collection
+            </button>
+          </div>
+
+          <div class="collections-editor__body">
+            <p *ngIf="store.collectionDetailsLoading" class="empty-note">Loading collection details...</p>
+
+            <div class="collections-editor__content" *ngIf="store.selectedManagedCollection && !store.collectionDetailsLoading">
+              <div class="collections-stats">
+                <article class="collection-stat">
+                  <span class="summary-label">Documents</span>
+                  <strong>{{ store.selectedManagedCollection.documents_count ?? 0 }}</strong>
+                </article>
+                <article class="collection-stat">
+                  <span class="summary-label">Chunks</span>
+                  <strong>{{ store.selectedManagedCollection.chunks_count ?? 0 }}</strong>
+                </article>
+              </div>
+
+              <div class="form-grid">
+                <label class="field field--wide">
+                  <span>Description</span>
+                  <textarea [(ngModel)]="store.managedCollectionDescription"></textarea>
+                </label>
+
+                <label class="field">
+                  <span>Chunk length</span>
+                  <input type="number" [(ngModel)]="store.managedCollectionChunkLength" />
+                </label>
+
+                <label class="field">
+                  <span>Chunk overlap</span>
+                  <input type="number" [(ngModel)]="store.managedCollectionChunkOverlap" />
+                </label>
+              </div>
+            </div>
+
+            <p *ngIf="!store.selectedManagedCollection && !store.collectionDetailsLoading" class="empty-note">
+              Pick a collection on the left to inspect or edit it.
+            </p>
+          </div>
+
+          <div class="collections-editor__footer" *ngIf="store.selectedManagedCollection && !store.collectionDetailsLoading">
+            <div class="collections-editor__actions">
+              <button
+                type="button"
+                class="ghost-button"
+                (click)="store.openDocumentBrowser(store.selectedManagedCollection.name)"
+              >
+                Edit collection
+              </button>
+              <button
+                type="button"
+                class="ghost-button ghost-button--danger"
+                (click)="store.deleteManagedCollection()"
+                [disabled]="store.collectionDeleteLoading"
+              >
+                {{ store.collectionDeleteLoading ? 'Deleting...' : 'Delete collection' }}
+              </button>
+              <button
+                type="button"
+                class="primary-button"
+                (click)="store.saveManagedCollection()"
+                [disabled]="store.collectionSaveLoading"
+              >
+                {{ store.collectionSaveLoading ? 'Saving...' : 'Save changes' }}
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+</div>
