@@ -73,17 +73,17 @@
     </label>
 
     <label class="field">
-      <span>Chunk length</span>
+      <span class="field-help" tabindex="0" [attr.data-tooltip]="store.fieldHelp.chunkLength">Chunk length</span>
       <input type="number" [(ngModel)]="store.chunkLength" />
     </label>
 
     <label class="field">
-      <span>Chunk overlap</span>
+      <span class="field-help" tabindex="0" [attr.data-tooltip]="store.fieldHelp.chunkOverlap">Chunk overlap</span>
       <input type="number" [(ngModel)]="store.chunkOverlap" />
     </label>
 
     <label class="field">
-      <span>Provider</span>
+      <span class="field-help" tabindex="0" [attr.data-tooltip]="store.fieldHelp.provider">Provider</span>
       <select [(ngModel)]="store.provider">
         <option *ngFor="let option of store.providerOptions" [value]="option">{{ option }}</option>
       </select>

@@ -12,11 +12,11 @@
     <section class="collections-modal collections-modal--browser">
       <header class="collections-modal__header">
         <div>
-          <p class="summary-label">Collection editor</p>
+          <p class="summary-label">Collection contents</p>
           <h3>{{ store.documentBrowserTitle }}</h3>
-          <p>Browse, preview, open, and delete documents in this collection.</p>
+          <p>Review documents already ingested into this collection, open one for inspection, or remove test data when needed.</p>
         </div>
-        <button type="button" class="icon-button" (click)="store.closeDocumentBrowser()" aria-label="Close collection editor">
+        <button type="button" class="icon-button" (click)="store.closeDocumentBrowser()" aria-label="Close collection contents">
           ×
         </button>
       </header>
@@ -63,7 +63,7 @@
             <div class="documents-library__body">
               <p *ngIf="store.collectionDocumentsLoading" class="empty-note">Loading documents...</p>
               <p *ngIf="!store.collectionDocumentsLoading && !store.collectionDocuments.length" class="empty-note">
-                No documents were returned for this collection yet.
+                No ingested documents were returned for this collection yet.
               </p>
 
               <button
@@ -107,12 +107,12 @@
             <div class="document-inspector__body">
               <p *ngIf="store.documentPreviewLoading" class="empty-note">Loading document preview...</p>
               <p *ngIf="!store.selectedDocument && !store.documentPreviewLoading" class="empty-note">
-                Select a document to inspect it here.
+                Select a document to review it here.
               </p>
 
               <div *ngIf="store.selectedDocument && !store.documentPreviewLoading" class="document-inspector__content">
                 <p class="document-inspector__note">
-                  Review the selected document here before opening or deleting it.
+                  Use this preview to confirm the right document was ingested before opening or deleting it.
                 </p>
 
                 <div class="result-meta-row" *ngIf="store.selectedDocument.tags?.length">

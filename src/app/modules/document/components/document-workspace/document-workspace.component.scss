@@ -109,10 +109,14 @@
 
 .collection-banner {
   display: flex;
-  align-items: center;
+  align-items: end;
   justify-content: space-between;
   gap: 16px;
   padding: 18px 22px;
+}
+
+.collection-banner__content {
+  min-width: 0;
 }
 
 .collection-banner strong {
@@ -132,6 +136,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  justify-content: end;
+  align-self: end;
 }
 
 .ghost-button {
@@ -242,5 +248,9 @@
   .collection-banner__actions,
   .section-heading {
     display: grid;
+  }
+
+  .collection-banner__actions {
+    justify-content: stretch;
   }
 }

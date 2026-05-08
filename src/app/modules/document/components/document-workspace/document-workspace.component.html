@@ -18,14 +18,13 @@
   </div>
 
   <section class="collection-banner" *ngIf="store.activeCollectionName">
-    <div>
+    <div class="collection-banner__content">
       <span class="summary-label">Active collection</span>
       <strong>{{ store.activeCollectionName }}</strong>
-      <p>All uploads and verification searches below will use this collection.</p>
+      <p>All uploads and verification searches below will use this collection. Inspect its contents only when you need to review or clean up ingested files.</p>
     </div>
     <div class="collection-banner__actions">
-      <button type="button" class="ghost-button" (click)="store.openCollectionsModal()">Manage collections</button>
-      <button type="button" class="ghost-button" (click)="store.openDocumentBrowser()">Edit collection</button>
+      <button type="button" class="ghost-button" (click)="store.inspectActiveCollection()">Inspect contents</button>
       <button type="button" class="ghost-button" (click)="store.clearSearchResults()">Clear results</button>
     </div>
   </section>

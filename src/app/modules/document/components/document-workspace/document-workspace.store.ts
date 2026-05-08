@@ -23,6 +23,7 @@ export class DocumentWorkspaceStore {
   private static readonly defaultChunkOverlap = 50;
   private static readonly defaultProvider = 'Pgvector';
   private static readonly uploadMessageDismissMs = 15000;
+  private static readonly supportedUploadExtensions = ['.txt', '.md', '.csv', '.json', '.log'];
 
   readonly createNewCollectionOption = '__create_new_collection__';
   readonly collectionModelChoices = ['BAAI/bge-m3', 'gte-base'];
@@ -30,6 +31,9 @@ export class DocumentWorkspaceStore {
   readonly metricChoices = ['cosine', 'euclidean', 'dotProduct'];
   readonly scoreModeChoices = ['similarity', 'distance'];
   readonly fieldHelp = {
+    chunkLength: 'Approximate number of characters to include in each indexed chunk before the backend splits the document again.',
+    chunkOverlap: 'How much content is repeated between neighboring chunks so context is preserved across chunk boundaries.',
+    provider: 'Vector storage backend used for this collection. Keep this aligned with the backend provider you want to query later.',
     topK: 'Maximum number of matching results to return from the retrieval request.',
     minScore: 'Minimum score threshold required before a result is shown.',
     metric: 'Distance or similarity metric used when comparing vectors during retrieval.',
@@ -99,6 +103,7 @@ export class DocumentWorkspaceStore {
   documentBrowserVisible = false;
   documentBrowserClosing = false;
   documentBrowserCollection: DocumentCollectionDetail | null = null;
+  documentBrowserCollectionApiName = '';
   documentSortBy: 'title' | 'created_at' | 'chunks_count' = 'created_at';
   documentSortOrder: 'asc' | 'desc' = 'desc';
 
@@ -141,7 +146,7 @@ export class DocumentWorkspaceStore {
     const collectionName = this.collectionName.trim();
 
     if (!collectionName) {
-      this.errorMessage = 'Collection name is required before creating a collection.';
+      this.setPageError('Collection name is required before creating a collection.');
       return;
     }
 
@@ -198,12 +203,12 @@ export class DocumentWorkspaceStore {
     const collectionName = this.activeCollectionName || this.collectionName.trim();
 
     if (!collectionName) {
-      this.errorMessage = 'Enter or create a collection first.';
+      this.setPageError('Enter or create a collection first.');
       return;
     }
 
     if (!this.documentTitle.trim() || !this.documentContent.trim()) {
-      this.errorMessage = 'Document title and content are required before adding a document.';
+      this.setPageError('Document title and content are required before adding a document.');
       return;
     }
 
@@ -236,7 +241,7 @@ export class DocumentWorkspaceStore {
       },
       error: (error: Error) => {
         this.loadingAction = null;
-        this.errorMessage = error.message;
+        this.setPageError(error.message);
       },
     });
   }
@@ -245,12 +250,12 @@ export class DocumentWorkspaceStore {
     const collectionName = this.activeCollectionName || this.collectionName.trim();
 
     if (!collectionName) {
-      this.errorMessage = 'Enter or create a collection first.';
+      this.setPageError('Enter or create a collection first.');
       return;
     }
 
     if (!this.selectedUploadFile) {
-      this.errorMessage = 'Choose a file before uploading.';
+      this.setPageError('Choose a file before uploading.');
       return;
     }
 
@@ -290,12 +295,12 @@ export class DocumentWorkspaceStore {
     const collectionName = this.activeCollectionName || this.collectionName.trim();
 
     if (!collectionName) {
-      this.errorMessage = 'Enter or create a collection before searching.';
+      this.setPageError('Enter or create a collection before searching.');
       return;
     }
 
     if (!this.searchQuery.trim()) {
-      this.errorMessage = 'Search query is required.';
+      this.setPageError('Search query is required.');
       return;
     }
 
@@ -324,7 +329,7 @@ export class DocumentWorkspaceStore {
       },
       error: (error: Error) => {
         this.loadingAction = null;
-        this.errorMessage = error.message;
+        this.setPageError(error.message);
         this.searchResults = [];
       },
     });
@@ -366,6 +371,10 @@ export class DocumentWorkspaceStore {
     return this.withCurrentOption(this.scoreModeChoices, this.scoreMode);
   }
 
+  get supportedUploadAccept(): string {
+    return DocumentWorkspaceStore.supportedUploadExtensions.join(',');
+  }
+
   refreshCollectionOptions(preferredCollectionName = this.selectedCollectionOption): void {
     this.collectionSelectorLoading = true;
 
@@ -377,7 +386,7 @@ export class DocumentWorkspaceStore {
       },
       error: (error: Error) => {
         this.collectionSelectorLoading = false;
-        this.errorMessage = error.message;
+        this.setPageError(error.message);
       },
     });
   }
@@ -398,7 +407,7 @@ export class DocumentWorkspaceStore {
       },
       error: (error: Error) => {
         this.collectionPresetLoading = false;
-        this.errorMessage = error.message;
+        this.setPageError(error.message);
       },
     });
   }
@@ -411,6 +420,7 @@ export class DocumentWorkspaceStore {
 
   openCollectionsModal(): void {
     this.collectionsModalVisible = true;
+    this.collectionsModalClosing = false;
     this.collectionsErrorMessage = '';
     this.collectionModalMessage = '';
     this.updateBackgroundScrollLock();
@@ -595,6 +605,14 @@ export class DocumentWorkspaceStore {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
 
+    if (file && !this.isSupportedUploadFile(file.name)) {
+      this.selectedUploadFile = null;
+      this.selectedUploadFileName = '';
+      input.value = '';
+      this.setPageError('Only text-like files are supported right now (.txt, .md, .csv, .json, .log).');
+      return;
+    }
+
     this.selectedUploadFile = file;
     this.selectedUploadFileName = file?.name ?? '';
 
@@ -628,7 +646,7 @@ export class DocumentWorkspaceStore {
   }
 
   selectDocument(documentId: string): void {
-    const collectionName = this.documentBrowserCollection?.name;
+    const collectionName = this.documentBrowserCollectionApiName || this.documentBrowserCollection?.name;
 
     if (!collectionName || !documentId) {
       return;
@@ -671,20 +689,43 @@ export class DocumentWorkspaceStore {
     });
   }
 
+  inspectActiveCollection(): void {
+    this.openDocumentBrowser(this.activeCollectionName || this.selectedManagedCollection?.name || '');
+  }
+
   openDocumentBrowser(collectionName = this.activeCollectionName || this.selectedManagedCollection?.name || ''): void {
     if (!collectionName) {
-      this.errorMessage = 'Choose or create a collection first.';
+      this.setPageError('Choose or create a collection first.');
       return;
     }
 
+    if (this.collectionsModalVisible || this.collectionsModalClosing) {
+      this.collectionsModalVisible = false;
+      this.collectionsModalClosing = false;
+      this.collectionsLoading = false;
+      this.collectionDetailsLoading = false;
+      this.collectionSaveLoading = false;
+      this.collectionDeleteLoading = false;
+      this.collectionsErrorMessage = '';
+      this.collectionModalMessage = '';
+    }
+
     this.documentBrowserVisible = true;
+    this.documentBrowserClosing = false;
     this.collectionDocumentsErrorMessage = '';
+    this.collectionDocumentsLoading = false;
+    this.documentPreviewLoading = false;
+    this.documentDeleteLoading = false;
+    this.collectionDocuments = [];
+    this.selectedDocument = null;
+    this.documentBrowserCollection = null;
     this.updateBackgroundScrollLock();
 
     this.documentApi.getCollection(collectionName).subscribe({
       next: (collection) => {
         this.documentBrowserCollection = collection;
-        this.loadCollectionDocuments(collection.name);
+        this.documentBrowserCollectionApiName = '';
+        this.loadCollectionDocuments(collection.name, collection.documents_count ?? 0);
       },
       error: (error: Error) => {
         this.collectionDocumentsErrorMessage = error.message;
@@ -708,12 +749,13 @@ export class DocumentWorkspaceStore {
       this.collectionDocuments = [];
       this.selectedDocument = null;
       this.documentBrowserCollection = null;
+      this.documentBrowserCollectionApiName = '';
       this.updateBackgroundScrollLock();
     });
   }
 
   deleteSelectedDocument(): void {
-    const collectionName = this.documentBrowserCollection?.name;
+    const collectionName = this.documentBrowserCollectionApiName || this.documentBrowserCollection?.name;
     const documentId = this.selectedDocument?.document_id;
     const title = this.selectedDocument?.title || 'this document';
 
@@ -808,31 +850,15 @@ export class DocumentWorkspaceStore {
     return content.length > 600 ? `${content.slice(0, 600).trim()}…` : content;
   }
 
-  private loadCollectionDocuments(collectionName: string): void {
+  private loadCollectionDocuments(collectionName: string, expectedDocumentsCount = 0): void {
     this.collectionDocumentsLoading = true;
     this.collectionDocumentsErrorMessage = '';
     this.collectionDocuments = [];
     this.selectedDocument = null;
 
-    this.documentApi
-      .listDocuments(collectionName, {
-        sortBy: this.documentSortBy,
-        sortOrder: this.documentSortOrder,
-      })
-      .subscribe({
-        next: (response) => {
-          this.collectionDocumentsLoading = false;
-          this.collectionDocuments = response.items ?? [];
+    const candidateNames = this.getCollectionApiCandidates(collectionName);
 
-          if (this.collectionDocuments[0]?.document_id) {
-            this.selectDocument(this.collectionDocuments[0].document_id);
-          }
-        },
-        error: (error: Error) => {
-          this.collectionDocumentsLoading = false;
-          this.collectionDocumentsErrorMessage = error.message;
-        },
-      });
+    this.tryLoadCollectionDocuments(candidateNames, expectedDocumentsCount);
   }
 
   private parseMetadata(): Record<string, unknown> | undefined | null {
@@ -846,13 +872,13 @@ export class DocumentWorkspaceStore {
       const parsed = JSON.parse(trimmed);
 
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        this.errorMessage = 'Document metadata must be a JSON object.';
+        this.setPageError('Document metadata must be a JSON object.');
         return null;
       }
 
       return parsed as Record<string, unknown>;
     } catch {
-      this.errorMessage = 'Document metadata must be valid JSON.';
+      this.setPageError('Document metadata must be valid JSON.');
       return null;
     }
   }
@@ -868,19 +894,82 @@ export class DocumentWorkspaceStore {
       const parsed = JSON.parse(trimmed);
 
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        this.errorMessage = 'Upload metadata must be a JSON object.';
+        this.setPageError('Upload metadata must be a JSON object.');
         return null;
       }
 
       return parsed as Record<string, unknown>;
     } catch {
-      this.errorMessage = 'Upload metadata must be valid JSON.';
+      this.setPageError('Upload metadata must be valid JSON.');
       return null;
     }
   }
 
   private sanitizeName(value: string): string {
     return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'default';
+  }
+
+  private isSupportedUploadFile(fileName: string): boolean {
+    const normalizedName = fileName.trim().toLowerCase();
+    return DocumentWorkspaceStore.supportedUploadExtensions.some((extension) => normalizedName.endsWith(extension));
+  }
+
+  private getCollectionApiCandidates(collectionName: string): string[] {
+    const trimmedName = collectionName.trim();
+    const lowercaseName = trimmedName.toLowerCase();
+    const sanitizedName = this.sanitizeName(trimmedName);
+
+    return [trimmedName, lowercaseName, sanitizedName].filter(
+      (candidate, index, values) => !!candidate && values.indexOf(candidate) === index
+    );
+  }
+
+  private tryLoadCollectionDocuments(candidateNames: string[], expectedDocumentsCount: number, index = 0): void {
+    const collectionApiName = candidateNames[index];
+
+    if (!collectionApiName) {
+      this.collectionDocumentsLoading = false;
+      this.documentBrowserCollectionApiName = '';
+      return;
+    }
+
+    this.documentApi
+      .listDocuments(collectionApiName, {
+        sortBy: this.documentSortBy,
+        sortOrder: this.documentSortOrder,
+      })
+      .subscribe({
+        next: (response) => {
+          const items = response.items ?? [];
+          const shouldRetryWithNextCandidate =
+            !items.length &&
+            expectedDocumentsCount > 0 &&
+            index < candidateNames.length - 1;
+
+          if (shouldRetryWithNextCandidate) {
+            this.tryLoadCollectionDocuments(candidateNames, expectedDocumentsCount, index + 1);
+            return;
+          }
+
+          this.collectionDocumentsLoading = false;
+          this.documentBrowserCollectionApiName = collectionApiName;
+          this.collectionDocuments = items;
+
+          if (this.collectionDocuments[0]?.document_id) {
+            this.selectDocument(this.collectionDocuments[0].document_id);
+          }
+        },
+        error: (error: Error) => {
+          if (index < candidateNames.length - 1) {
+            this.tryLoadCollectionDocuments(candidateNames, expectedDocumentsCount, index + 1);
+            return;
+          }
+
+          this.collectionDocumentsLoading = false;
+          this.documentBrowserCollectionApiName = '';
+          this.collectionDocumentsErrorMessage = error.message;
+        },
+      });
   }
 
   private startNewCollectionDraft(): void {
@@ -941,23 +1030,45 @@ export class DocumentWorkspaceStore {
     this.successMessage = '';
   }
 
+  private setPageError(message: string): void {
+    this.clearMessageTimer();
+    this.errorMessage = message;
+    this.successMessage = '';
+    this.scrollStatusIntoView();
+  }
+
   private showUploadMessage(type: 'success' | 'error', message: string): void {
     this.clearMessageTimer();
     this.errorMessage = type === 'error' ? message : '';
     this.successMessage = type === 'success' ? message : '';
-
-    window.setTimeout(() => {
-      this.statusViewport?.nativeElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    });
+    this.scrollStatusIntoView();
 
     this.messageTimerId = window.setTimeout(() => {
       this.errorMessage = '';
       this.successMessage = '';
       this.messageTimerId = null;
     }, DocumentWorkspaceStore.uploadMessageDismissMs);
+  }
+
+  private scrollStatusIntoView(): void {
+    window.setTimeout(() => {
+      const viewport =
+        this.statusViewport?.nativeElement ??
+        this.document.querySelector<HTMLElement>('.status-viewport');
+
+      if (viewport) {
+        viewport.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+        return;
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    });
   }
 
   private clearMessageTimer(): void {

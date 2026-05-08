@@ -59,6 +59,10 @@
   height: calc(100dvh - 48px);
 }
 
+.collections-modal--browser {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
 .collections-modal__header,
 .documents-library__header,
 .sort-header-button,

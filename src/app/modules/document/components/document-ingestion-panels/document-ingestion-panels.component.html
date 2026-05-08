@@ -66,12 +66,12 @@
 
   <div class="upload-panel">
     <label class="upload-dropzone">
-      <input type="file" (change)="store.onUploadFileSelected($event)" />
+      <input type="file" [attr.accept]="store.supportedUploadAccept" (change)="store.onUploadFileSelected($event)" />
       <span class="upload-dropzone__title">
         {{ store.selectedUploadFileName || 'Choose a file to upload' }}
       </span>
       <span class="upload-dropzone__hint">
-        Upload support depends on which file formats the backend currently parses successfully.
+        Supported formats: .txt, .md, .csv, .json, .log.
       </span>
     </label>
 
