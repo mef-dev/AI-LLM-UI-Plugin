@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-responses-page',
   standalone: false,
-  template: '<app-responses-workspace></app-responses-workspace>',
+  templateUrl: './responses-page.component.html',
+  styleUrls: ['./responses-page.component.scss'],
 })
 export class ResponsesPageComponent {}

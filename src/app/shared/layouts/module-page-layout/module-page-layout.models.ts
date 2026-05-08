@@ -1,14 +1,14 @@
-export type ModuleSection = {
+export type ModulePageSection = {
   title: string;
   text: string;
 };
 
-export type ModuleAction = {
+export type ModulePageAction = {
   label: string;
   description: string;
 };
 
-export type ModulePageConfig = {
+export type ModulePageLayoutConfig = {
   name: string;
   eyebrow?: string;
   badgeLabel?: string;
@@ -17,6 +17,6 @@ export type ModulePageConfig = {
   purpose?: string;
   overviewTitle?: string;
   actionsTitle?: string;
-  sections: ModuleSection[];
-  actions: ModuleAction[];
+  sections: ModulePageSection[];
+  actions: ModulePageAction[];
 };

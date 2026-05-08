@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
-import { ModulePageConfig } from '../../../../shared/models/module-page.models';
+import { ModulePageLayoutConfig } from '../../../../shared/layouts/module-page-layout/module-page-layout.models';
 
 @Component({
   selector: 'app-llm-db-page',
   standalone: false,
-  template: '<app-module-page [config]="config"></app-module-page>'
+  templateUrl: './llm-db-page.component.html',
+  styleUrls: ['./llm-db-page.component.scss'],
 })
 export class LlmDbPageComponent {
-  readonly config: ModulePageConfig = {
+  readonly config: ModulePageLayoutConfig = {
     name: 'LLM data and history',
     eyebrow: 'LLM database',
     badgeLabel: 'Planned workflow',

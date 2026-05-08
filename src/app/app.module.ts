@@ -17,13 +17,13 @@ import { catchError, map } from 'rxjs';
 import { environment } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
+import { AppRootComponent } from './container/app-root/app-root.component';
 import { PluginShellComponent } from './container/plugin-shell/plugin-shell.component';
 import { PluginSidebarComponent } from './container/plugin-sidebar/plugin-sidebar.component';
 
 @NgModule({
   declarations: [
-    AppComponent,
+    AppRootComponent,
     PluginShellComponent,
     PluginSidebarComponent,
   ],
@@ -41,7 +41,7 @@ import { PluginSidebarComponent } from './container/plugin-sidebar/plugin-sideba
       multi: true,
     },
   ],
-  bootstrap: [AppComponent],
+  bootstrap: [AppRootComponent],
 })
 export class AppModule {}
 

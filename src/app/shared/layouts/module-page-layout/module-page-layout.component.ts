@@ -1,14 +1,14 @@
 import { Component, Input } from '@angular/core';
-import { ModulePageConfig } from '../../models/module-page.models';
+import { ModulePageLayoutConfig } from './module-page-layout.models';
 
 @Component({
-  selector: 'app-module-page',
+  selector: 'app-module-page-layout',
   standalone: false,
-  templateUrl: './module-page.component.html',
-  styleUrls: ['./module-page.component.scss']
+  templateUrl: './module-page-layout.component.html',
+  styleUrls: ['./module-page-layout.component.scss']
 })
-export class ModulePageComponent {
-  @Input({ required: true }) config!: ModulePageConfig;
+export class ModulePageLayoutComponent {
+  @Input({ required: true }) config!: ModulePageLayoutConfig;
 
   get badgeToneClass(): string {
     switch (this.config.badgeTone) {

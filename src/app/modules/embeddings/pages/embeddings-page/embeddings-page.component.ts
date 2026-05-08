@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-embeddings-page',
   standalone: false,
-  template: '<app-embeddings-workspace></app-embeddings-workspace>'
+  templateUrl: './embeddings-page.component.html',
+  styleUrls: ['./embeddings-page.component.scss'],
 })
 export class EmbeddingsPageComponent {}

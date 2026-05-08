@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-llm-page',
   standalone: false,
-  template: '<app-llm-registry-workspace></app-llm-registry-workspace>'
+  templateUrl: './llm-page.component.html',
+  styleUrls: ['./llm-page.component.scss'],
 })
 export class LlmPageComponent {}

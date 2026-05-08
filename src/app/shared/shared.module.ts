@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { ModulePageComponent } from './components/module-page/module-page.component';
+import { ModulePageLayoutComponent } from './layouts/module-page-layout/module-page-layout.component';
 
 @NgModule({
-  declarations: [ModulePageComponent],
+  declarations: [ModulePageLayoutComponent],
   imports: [CommonModule],
-  exports: [CommonModule, ModulePageComponent],
+  exports: [CommonModule, ModulePageLayoutComponent],
 })
 export class SharedModule {}

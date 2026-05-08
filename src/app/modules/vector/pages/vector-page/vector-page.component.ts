@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-vector-page',
   standalone: false,
-  template: '<app-vector-workspace></app-vector-workspace>'
+  templateUrl: './vector-page.component.html',
+  styleUrls: ['./vector-page.component.scss'],
 })
 export class VectorPageComponent {}

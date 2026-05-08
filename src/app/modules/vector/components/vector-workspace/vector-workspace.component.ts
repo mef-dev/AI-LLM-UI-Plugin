@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { ModulePageConfig } from '../../../../shared/models/module-page.models';
+import { ModulePageLayoutConfig } from '../../../../shared/layouts/module-page-layout/module-page-layout.models';
 import { VectorSearchRequest, VectorTableField, VectorTableSchema } from '../../models/vector-api.models';
 import { VectorApiService } from '../../services/vector-api.service';
 
@@ -23,7 +23,7 @@ export class VectorWorkspaceComponent implements OnInit, OnDestroy {
     { value: 'semantic', label: 'Semantic search' },
     { value: 'field', label: 'Field text search' },
   ] as const;
-  readonly llmDbConfig: ModulePageConfig = {
+  readonly llmDbConfig: ModulePageLayoutConfig = {
     name: 'LLM data and history',
     eyebrow: 'LLM database',
     badgeLabel: 'Planned workflow',

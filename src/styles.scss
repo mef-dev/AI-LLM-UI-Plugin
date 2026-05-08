@@ -1,4 +1,6 @@
-@import 'node_modules/@natec/mef-dev-ui-kit/src/lib/styles/global.scss';
+@use 'sass:meta';
+
+@include meta.load-css('node_modules/@natec/mef-dev-ui-kit/src/lib/styles/global');
 
 html,
 body {
@@ -190,5 +192,5 @@ ai-llm-ui {
   display: block;
   min-height: 100vh;
 
-  @import 'node_modules/@natec/mef-dev-ui-kit/src/lib/styles/core.scss';
+  @include meta.load-css('node_modules/@natec/mef-dev-ui-kit/src/lib/styles/core');
 }
