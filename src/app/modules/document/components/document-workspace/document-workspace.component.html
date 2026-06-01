@@ -1,0 +1,85 @@
+<section class="documents-page">
+  <header class="documents-hero">
+    <div class="documents-hero__content">
+      <p class="documents-hero__eyebrow">Documents</p>
+      <div class="documents-hero__title-row">
+        <h2>Knowledge ingestion and retrieval</h2>
+        <span class="status-chip status-chip--success">Connected endpoint</span>
+      </div>
+      <p class="documents-hero__subtitle">
+        Choose a collection, add knowledge by text or file, and verify that it can be found through search.
+      </p>
+    </div>
+  </header>
+
+  <div #statusViewport class="status-viewport" *ngIf="store.errorMessage || store.successMessage">
+    <p *ngIf="store.errorMessage" class="state-message state-message--error">{{ store.errorMessage }}</p>
+    <p *ngIf="store.successMessage" class="state-message state-message--success">{{ store.successMessage }}</p>
+  </div>
+
+  <section class="collection-banner" *ngIf="store.activeCollectionName">
+    <div class="collection-banner__content">
+      <span class="summary-label">Active collection</span>
+      <strong>{{ store.activeCollectionName }}</strong>
+      <p>All uploads and verification searches below will use this collection. Inspect its contents only when you need to review or clean up ingested files.</p>
+    </div>
+    <div class="collection-banner__actions">
+      <button type="button" class="ghost-button" (click)="store.inspectActiveCollection()">Inspect contents</button>
+      <button type="button" class="ghost-button" (click)="store.clearSearchResults()">Clear results</button>
+    </div>
+  </section>
+
+  <div class="workspace-grid">
+    <div class="workspace-main">
+      <app-document-collection-setup></app-document-collection-setup>
+      <app-document-ingestion-panels></app-document-ingestion-panels>
+    </div>
+
+    <aside class="workspace-sidebar">
+      <app-document-retrieval-settings></app-document-retrieval-settings>
+    </aside>
+  </div>
+
+  <section class="panel-card" *ngIf="store.searchResults.length">
+    <div class="section-heading">
+      <div>
+        <h3>Search results</h3>
+        <p>Returned chunks from the active collection, shown here so you can verify retrieval quality quickly.</p>
+      </div>
+    </div>
+
+    <div class="results-list">
+      <article class="result-card" *ngFor="let result of store.searchResults">
+        <div class="result-card__header">
+          <div>
+            <h4>{{ result.title }}</h4>
+            <p>{{ result.documentId }}</p>
+          </div>
+          <span class="score-chip">Score {{ result.score | number:'1.2-4' }}</span>
+        </div>
+
+        <div class="result-meta-row">
+          <span class="result-chip">Chunk {{ result.chunkIndex + 1 }}</span>
+          <span class="result-chip">Chunk ID {{ result.chunkId }}</span>
+          <span class="result-chip" *ngIf="store.getDocumentMetadataValue(result, 'author') as author">
+            Author: {{ author }}
+          </span>
+          <span class="result-chip" *ngIf="store.getDocumentMetadataValue(result, 'category') as category">
+            Category: {{ category }}
+          </span>
+        </div>
+
+        <p class="result-content" *ngIf="result.content">{{ result.content }}</p>
+
+        <details class="metadata-panel" *ngIf="result.metadata">
+          <summary>View metadata JSON</summary>
+          <pre class="metadata-block">{{ result.metadata | json }}</pre>
+        </details>
+      </article>
+    </div>
+  </section>
+
+  <app-document-collections-modal></app-document-collections-modal>
+  <app-document-browser-modal></app-document-browser-modal>
+  <app-document-viewer-modal></app-document-viewer-modal>
+</section>

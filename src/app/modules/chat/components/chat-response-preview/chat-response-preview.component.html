@@ -1,0 +1,71 @@
+<section id="chat-run-diagnostics" class="response-card">
+  <div class="section-heading">
+    <div>
+      <h3>Run diagnostics</h3>
+      <p>Confirm which model ran, inspect token usage, and copy the exact request or response payload when debugging.</p>
+    </div>
+    <span *ngIf="response" class="response-badge">{{ response.object }}</span>
+    <span *ngIf="streamingEnabled && !response" class="response-badge response-badge--streaming">Streaming</span>
+  </div>
+
+  <p *ngIf="loading && !streamingEnabled" class="state-message">Generating assistant reply...</p>
+  <p *ngIf="loading && streamingEnabled" class="state-message">Streaming assistant reply from the stage endpoint...</p>
+  <p *ngIf="statusMessage" class="state-message">{{ statusMessage }}</p>
+  <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
+
+  <div *ngIf="response || streamingContent; else emptyState" class="response-content">
+    <div class="meta-grid" *ngIf="response as result">
+      <div class="meta-item">
+        <span class="meta-label">Model</span>
+        <p>{{ result.model }}</p>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Prompt tokens</span>
+        <p>{{ result.usage.prompt_tokens }}</p>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Completion tokens</span>
+        <p>{{ result.usage.completion_tokens }}</p>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Completion ID</span>
+        <p>{{ result.id }}</p>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Request mode</span>
+        <p>{{ request?.stream ? 'Streaming' : 'Single response' }}</p>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Message shape</span>
+        <p>Two-message payload: system, then user.</p>
+      </div>
+    </div>
+
+    <div class="diagnostics-note">
+      <span class="meta-label">Diagnostics</span>
+      <p>
+        Use the browser Network tab to inspect raw payloads or SSE output while the assistant result on the left stays focused on the readable answer.
+      </p>
+      <div class="diagnostics-note__actions">
+        <button
+          type="button"
+          class="copy-button"
+          [disabled]="!response"
+          (click)="copyJson(response, 'response')"
+        >
+          {{ copiedTarget === 'response' ? 'Copied response JSON' : 'Copy response JSON' }}
+        </button>
+        <button type="button" class="copy-button" (click)="copyJson(request, 'request')">
+          {{ copiedTarget === 'request' ? 'Copied request JSON' : 'Copy request JSON' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <h4>No diagnostics yet</h4>
+      <p>Run the request once to populate model metadata, token usage, and copyable JSON payloads.</p>
+    </div>
+  </ng-template>
+</section>

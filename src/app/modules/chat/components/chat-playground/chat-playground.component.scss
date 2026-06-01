@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.chat-page {
+  display: grid;
+  gap: 18px;
+}
+
+.workspace-grid {
+  display: grid;
+  align-items: start;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.55fr) minmax(340px, 400px);
+}
+
+.workspace-sidebar {
+  display: grid;
+  align-self: start;
+  gap: 14px;
+}
+
+@media (max-width: 1100px) {
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}

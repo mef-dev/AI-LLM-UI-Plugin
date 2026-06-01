@@ -1,0 +1,23 @@
+meta {
+  name: 05. POST Execute SQL Reader
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/vector/execute-reader
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "pgvector",
+      "databaseName": "{{vector_db_name}}",
+      "query": "SELECT 1 AS ok"
+  }
+}
+
+tests {
+  test("Status 200", function() { expect(res.status).to.equal(200); });
+}

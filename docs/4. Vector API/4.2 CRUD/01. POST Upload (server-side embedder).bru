@@ -1,0 +1,44 @@
+meta {
+  name: 01. POST Upload (server-side embedder)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/vector/{{vector_table_name}}/upload
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "pgvector",
+      "model": "BAAI/bge-m3",
+      "value": [
+          {
+              "title": "Authentication Guide",
+              "content": "How to configure OAuth2 authentication for the API gateway.",
+              "embedding_text": "How to configure OAuth2 authentication for the API gateway."
+          },
+          {
+              "title": "Deployment Guide",
+              "content": "Step-by-step instructions for deploying the service to Kubernetes.",
+              "embedding_text": "Step-by-step instructions for deploying the service to Kubernetes."
+          },
+          {
+              "title": "Monitoring",
+              "content": "Setting up Prometheus and Grafana dashboards for observability.",
+              "embedding_text": "Setting up Prometheus and Grafana dashboards for observability."
+          }
+      ]
+  }
+}
+
+tests {
+  test("Status 2xx", function() {
+    expect(res.status, (res.body && res.body.message) || "").to.be.oneOf([200, 201, 204]);
+  });
+  if (res.status >= 200 && res.status < 300) {
+    test("result == true", function() { expect(res.body.result).to.equal(true); });
+  }
+}

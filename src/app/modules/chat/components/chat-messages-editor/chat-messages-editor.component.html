@@ -1,0 +1,113 @@
+<section class="conversation-card">
+  <div class="section-heading">
+    <div>
+      <h3>Request Builder</h3>
+      <p>Set the system instruction and user prompt, then run one clean stage request and inspect the result below.</p>
+    </div>
+  </div>
+
+  <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
+  <p *ngIf="statusMessage" class="state-message">{{ statusMessage }}</p>
+  <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
+
+  <section
+    id="chat-system-guidance"
+    class="system-panel"
+    *ngIf="messages[0] && messages[0].role === 'system'"
+  >
+    <div class="system-panel__header">
+      <div>
+        <p class="system-panel__eyebrow">System guidance</p>
+        <p class="system-panel__caption">This becomes the first item in the outbound messages array.</p>
+      </div>
+      <div class="message-toolbar">
+        <label class="field field--compact">
+          <span class="field-label">Role</span>
+          <select [(ngModel)]="messages[0].role">
+            <option value="system">system</option>
+            <option value="user">user</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <label class="field">
+      <span class="field-label">Instruction</span>
+      <textarea class="message-textarea message-textarea--system" [(ngModel)]="messages[0].content"></textarea>
+    </label>
+  </section>
+
+  <div class="thread-header thread-header--user" *ngIf="messages[1]">
+    <div>
+      <h4>User prompt</h4>
+      <p>This becomes the second message in the request payload.</p>
+    </div>
+    <div class="message-toolbar">
+      <label class="field field--compact">
+        <span class="field-label">Role</span>
+        <select [(ngModel)]="messages[1].role">
+          <option value="system">system</option>
+          <option value="user">user</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <article id="chat-user-prompt" class="message-card message-card--user" *ngIf="messages[1]">
+    <label class="field field--content">
+      <span class="field-label">Message</span>
+      <textarea class="message-textarea" [(ngModel)]="messages[1].content"></textarea>
+    </label>
+
+    <div class="message-card__footer">
+      <span class="message-card__note">
+        The request is still normalized to the backend's two-message format when sent.
+      </span>
+    </div>
+  </article>
+
+  <section id="chat-assistant-result" class="result-panel">
+    <div class="thread-header">
+      <div>
+        <h4>Assistant result</h4>
+        <p>The latest chat output appears here while the sidebar keeps model and payload diagnostics separate.</p>
+      </div>
+      <span class="live-badge" *ngIf="loading || assistantMessage">
+        {{ loading ? 'Streaming' : assistantMessage ? 'Completed' : 'Idle' }}
+      </span>
+    </div>
+
+    <div class="live-stream-panel result-panel__output" [class.live-stream-panel--active]="loading">
+      {{
+        assistantMessage
+          || (loading
+            ? 'Waiting for streamed assistant text…'
+            : 'Run the request once to inspect the assistant reply here.')
+      }}
+    </div>
+
+    <p class="message-card__note result-panel__note">
+      Use this area as the main response view. Use the right sidebar to confirm model selection, token usage, and copy raw request or response JSON.
+    </p>
+  </section>
+
+  <div class="conversation-actions">
+    <p class="conversation-actions__hint">
+      Chat sends a minimal two-message payload to stage: first `system`, then `user`.
+    </p>
+    <div class="conversation-actions__buttons">
+      <button
+        type="button"
+        class="send-button"
+        (click)="loading ? cancel.emit() : send.emit()"
+        [attr.aria-label]="loading ? 'Stop generating' : 'Send message'"
+        [title]="loading ? 'Stop' : 'Send'"
+      >
+        <span *ngIf="!loading; else stopIcon" class="send-button__label">Send</span>
+        <ng-template #stopIcon>
+          <span class="send-button__stop" aria-hidden="true"></span>
+        </ng-template>
+      </button>
+    </div>
+  </div>
+</section>

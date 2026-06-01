@@ -1,0 +1,12 @@
+<nav class="plugin-nav" aria-label="Plugin navigation">
+  <a
+    *ngFor="let item of navigationItems"
+    class="plugin-nav__link"
+    routerLinkActive="plugin-nav__link--active"
+    [routerLinkActiveOptions]="{ exact: true }"
+    [routerLink]="item.path"
+    [attr.title]="item.hint"
+  >
+    {{ item.label }}
+  </a>
+</nav>

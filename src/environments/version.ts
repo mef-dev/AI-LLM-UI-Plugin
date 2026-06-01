@@ -1,14 +1,14 @@
 export const PLUGIN_VERSION = {
     "dirty": true,
-    "raw": "ceba54f-dirty",
-    "hash": "ceba54f",
+    "raw": "03cf9a0-dirty",
+    "hash": "03cf9a0",
     "distance": null,
     "tag": null,
     "semver": null,
-    "suffix": "ceba54f-dirty",
+    "suffix": "03cf9a0-dirty",
     "semverString": null,
-    "name": "hello-platform-plugin",
-    "version": "0.1.5",
-    "pluginMefName": "hello-platform-plugin",
+    "name": "ai-llm-ui",
+    "version": "0.3.4",
+    "pluginMefName": "ai-llm-ui",
     "main": "main.js"
 };

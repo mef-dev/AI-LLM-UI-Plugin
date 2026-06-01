@@ -1,0 +1,35 @@
+<section class="chat-page">
+  <app-chat-playground-hero (reset)="resetConversation()"></app-chat-playground-hero>
+
+  <div class="workspace-grid">
+    <app-chat-messages-editor
+      [messages]="request.messages"
+      [response]="response"
+      [errorMessage]="errorMessage"
+      [loading]="loading"
+      [statusMessage]="statusMessage"
+      [successMessage]="successMessage"
+      [streamingEnabled]="streamingEnabled"
+      [streamingContent]="streamingContent"
+      (send)="sendStreamCompletion()"
+      (cancel)="cancelActiveRequest()"
+    ></app-chat-messages-editor>
+
+    <div class="workspace-sidebar">
+      <app-chat-request-settings
+        [request]="request"
+        [availableModels]="availableModels"
+      ></app-chat-request-settings>
+
+      <app-chat-response-preview
+        [request]="request"
+        [response]="response"
+        [loading]="loading"
+        [statusMessage]="statusMessage"
+        [successMessage]="successMessage"
+        [streamingContent]="streamingContent"
+        [streamingEnabled]="streamingEnabled"
+      ></app-chat-response-preview>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,21 @@
+meta {
+  name: 03. DELETE Drop Table (raw vectors)
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{base_url}}/vector/{{vector_table_raw}}/drop
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "Provider": "pgvector"
+  }
+}
+
+tests {
+  test("Status 2xx", function() { expect(res.status).to.be.oneOf([200, 204]); });
+}

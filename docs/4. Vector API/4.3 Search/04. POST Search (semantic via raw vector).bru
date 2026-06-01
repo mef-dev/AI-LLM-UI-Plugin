@@ -1,0 +1,47 @@
+meta {
+  name: 04. POST Search (semantic via raw vector)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/vector/{{vector_table_raw}}/search
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "pgvector",
+      "select": "id, chunk, distance",
+      "vectorQueries": [
+          {
+              "vector": [0.1, 0.2, 0.3],
+              "K": "3",
+              "fields": "embedding",
+              "metric": "cosine"
+          }
+      ]
+  }
+}
+
+tests {
+  // [BUG] Cannot cast JArray to float[] — backend doesn't deserialize the
+  // raw vector array properly. Error: "Unable to cast object of type
+  // 'Newtonsoft.Json.Linq.JArray' to type 'System.Single[]'."
+  test("Status 200 [BUG: JArray to float[] cast]", function() {
+    expect(res.status, (res.body && res.body.message) || "").to.equal(200);
+  });
+  if (res.status === 200) {
+    test("has value array", function() { expect(res.body.value).to.be.an("array"); });
+    if (Array.isArray(res.body.value) && res.body.value.length > 0) {
+      test("first result has distance", function() {
+        expect(res.body.value[0]).to.have.property("distance");
+      });
+      test("first result is closest match (id == 1)", function() {
+        // [0.1,0.2,0.3] is exact match for id=1 → distance should be ~0
+        expect(String(res.body.value[0].id)).to.equal("1");
+      });
+    }
+  }
+}

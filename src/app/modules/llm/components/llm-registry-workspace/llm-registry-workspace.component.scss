@@ -1,0 +1,248 @@
+:host {
+  display: block;
+}
+
+.llm-page {
+  display: grid;
+  gap: 10px;
+}
+
+.llm-hero {
+  padding: 24px;
+  border: 1px solid rgba(27, 31, 59, 0.09);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 20px 48px rgba(27, 31, 59, 0.08);
+}
+
+.llm-hero {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  background:
+    linear-gradient(135deg, rgba(255, 249, 242, 0.96), rgba(247, 250, 255, 0.96)),
+    #fff;
+}
+
+.llm-hero__eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9b3d24;
+}
+
+.llm-hero h2,
+.section-heading h3 {
+  margin: 0;
+  color: #1b1f3b;
+}
+
+.llm-hero__subtitle {
+  margin: 12px 0 0;
+  color: #54607d;
+  line-height: 1.6;
+}
+
+.llm-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.content-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr;
+}
+
+.upload-message {
+  margin: 0;
+  color: #17663a;
+  line-height: 1.6;
+}
+
+.state-toast-layer {
+  position: relative;
+  height: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.state-toast {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(440px, calc(100vw - 72px));
+  margin: 0;
+  padding: 14px 18px;
+  border-radius: 18px;
+  line-height: 1.6;
+  border: 1px solid rgba(23, 102, 58, 0.14);
+  background: rgba(237, 251, 242, 0.92);
+  color: #17663a;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.985);
+  filter: blur(6px);
+  box-shadow: 0 18px 40px rgba(23, 102, 58, 0.08);
+}
+
+.state-toast--visible {
+  animation: state-toast-in 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.state-toast--hiding {
+  animation: state-toast-out 260ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(20, 24, 47, 0.22);
+  backdrop-filter: blur(10px);
+  animation: modal-fade 320ms ease;
+}
+
+.modal-layer--closing {
+  animation: modal-fade-out 220ms ease forwards;
+}
+
+.modal-panel {
+  width: min(1080px, calc(100vw - 48px));
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-width: none;
+  border-radius: 32px;
+  animation: modal-rise 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modal-panel--closing {
+  animation: modal-fall 220ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.modal-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-panel--narrow {
+  width: min(880px, calc(100vw - 48px));
+}
+
+.primary-button,
+.ghost-button {
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: #1b1f3b;
+  color: #fff8f2;
+}
+
+.ghost-button {
+  background: transparent;
+  border-color: rgba(27, 31, 59, 0.14);
+  color: #1b1f3b;
+}
+
+@media (max-width: 1100px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .llm-hero {
+    display: grid;
+  }
+
+  .modal-layer {
+    padding: 16px;
+  }
+
+  .modal-panel,
+  .modal-panel--narrow {
+    width: 100%;
+    max-height: calc(100dvh - 32px);
+  }
+}
+
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modal-fall {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+}
+
+@keyframes state-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.985);
+    filter: blur(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes state-toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.992);
+    filter: blur(4px);
+  }
+}

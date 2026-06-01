@@ -1,0 +1,41 @@
+meta {
+  name: 03. POST Search (semantic via embedder)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/vector/{{vector_table_name}}/search
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "pgvector",
+      "model": "BAAI/bge-m3",
+      "select": "id, title, content, distance",
+      "vectorQueries": [
+          {
+              "vector": "How do I deploy the service?",
+              "K": "5",
+              "fields": "embedding_text",
+              "metric": "cosine"
+          }
+      ]
+  }
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.status, (res.body && res.body.message) || "").to.equal(200);
+  });
+  if (res.status === 200) {
+    test("has value array", function() { expect(res.body.value).to.be.an("array"); });
+    if (Array.isArray(res.body.value) && res.body.value.length > 0) {
+      test("results have distance", function() {
+        expect(res.body.value[0]).to.have.property("distance");
+      });
+    }
+  }
+}

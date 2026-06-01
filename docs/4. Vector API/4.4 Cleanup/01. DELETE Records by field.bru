@@ -1,0 +1,23 @@
+meta {
+  name: 01. DELETE Records by field
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{base_url}}/vector/{{vector_table_raw}}/delete
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "Provider": "pgvector",
+      "DeleteField": "Id",
+      "Value": "2"
+  }
+}
+
+tests {
+  test("Status 2xx", function() { expect(res.status).to.be.oneOf([200, 204]); });
+}

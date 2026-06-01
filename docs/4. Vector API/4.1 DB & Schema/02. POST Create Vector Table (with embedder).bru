@@ -1,0 +1,65 @@
+meta {
+  name: 02. POST Create Vector Table (with embedder)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/vector/create
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "Pgvector",
+      "model": "BAAI/bge-m3",
+      "name": "{{vector_table_name}}",
+      "fields": [
+          {
+              "name": "embedding_text",
+              "type": "Vector",
+              "dimensions": 1024,
+              "vectorSearchProfile": "bruno-profile"
+          },
+          {
+              "name": "id",
+              "type": "Int64",
+              "key": true,
+              "autoIncrement": true
+          },
+          {
+              "name": "title",
+              "type": "String"
+          },
+          {
+              "name": "content",
+              "type": "String"
+          }
+      ],
+      "vectorSearch": {
+          "algorithms": [
+              {
+                  "name": "bruno-cosine-config",
+                  "kind": "hnsw",
+                  "hnswParameters": {
+                      "metric": "cosine"
+                  }
+              }
+          ],
+          "profiles": [
+              {
+                  "name": "bruno-profile",
+                  "algorithm": "bruno-cosine-config"
+              }
+          ]
+      }
+  }
+}
+
+tests {
+  test("Status 2xx", function() { expect(res.status).to.be.oneOf([200, 201, 204]); });
+  if (res.status >= 200 && res.status < 300) {
+    test("result == true", function() { expect(res.body.result).to.equal(true); });
+  }
+}

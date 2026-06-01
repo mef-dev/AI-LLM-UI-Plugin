@@ -1,0 +1,167 @@
+<section class="responses-page">
+  <header class="responses-hero">
+    <div class="responses-hero__content">
+      <p class="responses-hero__eyebrow">Responses</p>
+      <div class="responses-hero__title-row">
+        <h2>Structured responses</h2>
+        <span class="status-chip status-chip--success">Connected endpoint</span>
+      </div>
+      <p class="responses-hero__subtitle">
+        Use the `/responses` API for structured input, reasoning settings, and longer-form response workflows.
+      </p>
+    </div>
+  </header>
+
+  <p *ngIf="errorMessage" class="state-message state-message--error">{{ errorMessage }}</p>
+  <p *ngIf="warningMessage" class="state-message state-message--warning">{{ warningMessage }}</p>
+  <p *ngIf="successMessage" class="state-message state-message--success">{{ successMessage }}</p>
+
+  <div class="workspace-grid">
+    <section class="panel-card">
+      <div class="section-heading">
+        <div>
+          <h3>Structured request</h3>
+          <p>Set the validated model first, then send one developer instruction and one user prompt through the stable `/responses` flow.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label class="field field--model">
+          <span>Model</span>
+          <select [(ngModel)]="request.model">
+            <option *ngFor="let model of availableModels" [value]="model.model_name">
+              {{ model.display_name || model.model_name }} ({{ model.status }})
+            </option>
+          </select>
+          <small class="field-hint">
+            This page defaults to the validated non-streaming Responses model so you can verify the stable stage flow first.
+          </small>
+          <small class="field-hint" *ngIf="usingModelFallback">
+            No model is explicitly marked for Responses, so this page is showing all registered models.
+          </small>
+        </label>
+
+        <div class="settings-group">
+          <div class="settings-group__header">
+            <h4>Run settings</h4>
+            <p>Keep these practical so the returned output is easy to inspect.</p>
+          </div>
+
+          <label class="field field--narrow field--reasoning">
+            <span>Reasoning effort</span>
+            <select [(ngModel)]="request.reasoning.effort">
+              <option *ngFor="let effort of reasoningEfforts" [value]="effort">{{ effort | titlecase }}</option>
+            </select>
+          </label>
+
+          <label class="field field--tokens">
+            <span>Max output tokens</span>
+            <input type="number" [(ngModel)]="request.max_output_tokens" />
+            <small class="field-hint">Smaller output limits keep responses quicker and easier to review.</small>
+          </label>
+        </div>
+
+        <label class="field field--wide">
+          <span>Developer instruction</span>
+          <textarea
+            [(ngModel)]="developerInstruction"
+            placeholder="Describe how the model should behave, what tone to use, or what rules to follow"
+          ></textarea>
+          <small class="field-hint">Sets the model's behavior for this request.</small>
+        </label>
+
+        <label class="field field--wide">
+          <span>User prompt</span>
+          <textarea
+            [(ngModel)]="userPrompt"
+            placeholder="Write the request or task you want the model to answer"
+          ></textarea>
+          <small class="field-hint">The actual task sent after the developer instruction.</small>
+        </label>
+      </div>
+
+      <p class="field-hint field-hint--inline">Streaming is hidden here until the backend path is stable.</p>
+
+      <div class="panel-actions">
+        <button type="button" class="ghost-button" (click)="reset()">Reset</button>
+        <button
+          type="button"
+          class="primary-button"
+          (click)="sendResponse()"
+          [disabled]="loading || !request.model || !canSendResponse"
+        >
+          {{ loading ? 'Sending request...' : 'Run /responses request' }}
+        </button>
+      </div>
+    </section>
+
+    <aside class="workspace-sidebar">
+      <section class="panel-card panel-card--sidebar">
+        <div class="section-heading">
+          <div>
+            <h3>Response preview</h3>
+            <p>Read the returned text first, then confirm the status, model, and token usage below.</p>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="!response && !streamingContent && !loading">
+          <h4>No response yet</h4>
+          <p>Run a structured request to inspect the returned output and metadata.</p>
+        </div>
+
+        <p *ngIf="loading" class="loading-message">
+          Generating response...
+        </p>
+
+        <ng-container *ngIf="response || streamingContent || loading">
+          <div class="meta-grid meta-grid--summary">
+            <div class="meta-item">
+              <span class="summary-label">Selected model</span>
+              <p>{{ selectedModelLabel }}</p>
+            </div>
+            <div class="meta-item">
+              <span class="summary-label">Reasoning</span>
+              <p>{{ request.reasoning.effort }}</p>
+            </div>
+            <div class="meta-item">
+              <span class="summary-label">Output limit</span>
+              <p>{{ request.max_output_tokens }}</p>
+            </div>
+          </div>
+
+          <div class="output-panel">
+            <span class="summary-label">Output text</span>
+            <pre>{{ previewOutputText || 'Waiting for streamed text…' }}</pre>
+          </div>
+
+          <div class="meta-grid">
+            <div class="meta-item">
+              <span class="summary-label">Request mode</span>
+              <p>{{ requestModeLabel }}</p>
+            </div>
+            <div class="meta-item">
+              <span class="summary-label">Model</span>
+              <p>{{ response?.model || request.model }}</p>
+            </div>
+            <div class="meta-item">
+              <span class="summary-label">Status</span>
+              <p>{{ responseStatus }}</p>
+            </div>
+            <div class="meta-item">
+              <span class="summary-label">Mode</span>
+              <p>{{ request.stream ? 'streaming' : 'single response' }}</p>
+            </div>
+            <div class="meta-item">
+              <span class="summary-label">Input tokens</span>
+              <p>{{ response?.usage?.input_tokens ?? 0 }}</p>
+            </div>
+            <div class="meta-item">
+              <span class="summary-label">Output tokens</span>
+              <p>{{ response?.usage?.output_tokens ?? 0 }}</p>
+            </div>
+          </div>
+        </ng-container>
+      </section>
+    </aside>
+  </div>
+</section>

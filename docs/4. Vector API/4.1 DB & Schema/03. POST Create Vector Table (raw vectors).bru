@@ -1,0 +1,59 @@
+meta {
+  name: 03. POST Create Vector Table (raw vectors)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/vector/create
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "provider": "Pgvector",
+      "name": "{{vector_table_raw}}",
+      "fields": [
+          {
+              "name": "id",
+              "type": "String",
+              "key": true
+          },
+          {
+              "name": "chunk",
+              "type": "String"
+          },
+          {
+              "name": "embedding",
+              "type": "Vector",
+              "dimensions": 3,
+              "vectorSearchProfile": "bruno-raw-profile"
+          }
+      ],
+      "vectorSearch": {
+          "algorithms": [
+              {
+                  "name": "bruno-raw-cosine-config",
+                  "kind": "hnsw",
+                  "hnswParameters": {
+                      "metric": "cosine"
+                  }
+              }
+          ],
+          "profiles": [
+              {
+                  "name": "bruno-raw-profile",
+                  "algorithm": "bruno-raw-cosine-config"
+              }
+          ]
+      }
+  }
+}
+
+tests {
+  test("Status 2xx", function() { expect(res.status).to.be.oneOf([200, 201, 204]); });
+  if (res.status >= 200 && res.status < 300) {
+    test("result == true", function() { expect(res.body.result).to.equal(true); });
+  }
+}

@@ -1,0 +1,33 @@
+<div
+  class="modal-layer"
+  *ngIf="store.documentViewerVisible || store.documentViewerClosing"
+  [class.modal-layer--closing]="store.documentViewerClosing"
+  (click)="store.closeDocumentViewer()"
+>
+  <div
+    class="modal-panel modal-panel--document-viewer"
+    [class.modal-panel--closing]="store.documentViewerClosing"
+    (click)="$event.stopPropagation()"
+  >
+    <section class="collections-modal">
+      <header class="collections-modal__header">
+        <div>
+          <p class="summary-label">Document viewer</p>
+          <h3>{{ store.selectedDocument?.title || 'Document' }}</h3>
+          <p>{{ store.selectedDocument?.source || 'Opened from the selected collection document preview.' }}</p>
+        </div>
+        <button type="button" class="icon-button" (click)="store.closeDocumentViewer()" aria-label="Close document viewer">
+          ×
+        </button>
+      </header>
+
+      <div class="document-viewer-content" *ngIf="store.selectedDocument">
+        <div class="result-meta-row" *ngIf="store.selectedDocument.tags?.length">
+          <span class="result-chip" *ngFor="let tag of store.selectedDocument.tags">{{ tag }}</span>
+        </div>
+
+        <pre class="document-viewer-text">{{ store.selectedDocument.content }}</pre>
+      </div>
+    </section>
+  </div>
+</div>

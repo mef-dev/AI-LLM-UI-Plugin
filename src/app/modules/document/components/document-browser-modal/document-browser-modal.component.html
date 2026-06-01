@@ -1,0 +1,138 @@
+<div
+  class="modal-layer"
+  *ngIf="store.documentBrowserVisible || store.documentBrowserClosing"
+  [class.modal-layer--closing]="store.documentBrowserClosing"
+  (click)="store.closeDocumentBrowser()"
+>
+  <div
+    class="modal-panel modal-panel--document-browser"
+    [class.modal-panel--closing]="store.documentBrowserClosing"
+    (click)="$event.stopPropagation()"
+  >
+    <section class="collections-modal collections-modal--browser">
+      <header class="collections-modal__header">
+        <div>
+          <p class="summary-label">Collection contents</p>
+          <h3>{{ store.documentBrowserTitle }}</h3>
+          <p>Review documents already ingested into this collection, open one for inspection, or remove test data when needed.</p>
+        </div>
+        <button type="button" class="icon-button" (click)="store.closeDocumentBrowser()" aria-label="Close collection contents">
+          ×
+        </button>
+      </header>
+
+      <p *ngIf="store.collectionDocumentsErrorMessage" class="state-message state-message--error">
+        {{ store.collectionDocumentsErrorMessage }}
+      </p>
+
+      <div class="documents-browser-shell">
+        <div class="documents-browser-workspace">
+          <section class="documents-library documents-library--list">
+            <div class="documents-library__header">
+              <div class="documents-list-header">
+                <button
+                  type="button"
+                  class="sort-header-button"
+                  [class.sort-header-button--active]="store.isDocumentSortActiveByTitle"
+                  (click)="store.setDocumentSort('title')"
+                >
+                  <span>Name</span>
+                  <span class="sort-indicator">{{ store.getDocumentSortIndicator('title') }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="sort-header-button"
+                  [class.sort-header-button--active]="store.isDocumentSortActiveByCreated"
+                  (click)="store.setDocumentSort('created_at')"
+                >
+                  <span>Date Modified</span>
+                  <span class="sort-indicator">{{ store.getDocumentSortIndicator('created_at') }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="sort-header-button"
+                  [class.sort-header-button--active]="store.isDocumentSortActiveByChunks"
+                  (click)="store.setDocumentSort('chunks_count')"
+                >
+                  <span>Chunks</span>
+                  <span class="sort-indicator">{{ store.getDocumentSortIndicator('chunks_count') }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="documents-library__body">
+              <p *ngIf="store.collectionDocumentsLoading" class="empty-note">Loading documents...</p>
+              <p *ngIf="!store.collectionDocumentsLoading && !store.collectionDocuments.length" class="empty-note">
+                No ingested documents were returned for this collection yet.
+              </p>
+
+              <button
+                type="button"
+                class="document-row"
+                *ngFor="let document of store.collectionDocuments"
+                [class.document-row--active]="store.isDocumentSelected(document)"
+                (click)="store.selectDocument(document.document_id)"
+              >
+                <span class="document-row__name">
+                  <span class="document-row__icon">≣</span>
+                  <span>{{ document.title }}</span>
+                </span>
+                <span class="document-row__date">{{ document.created_at ? (document.created_at | date:'mediumDate') : '—' }}</span>
+                <span class="document-row__kind">{{ document.chunks_count ?? 0 }} chunks</span>
+              </button>
+            </div>
+          </section>
+
+          <aside class="document-inspector">
+            <div class="document-inspector__header">
+              <div>
+                <h4>{{ store.selectedDocument?.title || 'Select a document' }}</h4>
+                <p *ngIf="store.selectedDocument">{{ store.selectedDocument.source || 'No source provided' }}</p>
+              </div>
+              <div class="document-inspector__actions" *ngIf="store.selectedDocument">
+                <button type="button" class="ghost-button ghost-button--compact" (click)="store.openDocumentViewer()">
+                  Open
+                </button>
+                <button
+                  type="button"
+                  class="ghost-button ghost-button--compact ghost-button--danger"
+                  (click)="store.deleteSelectedDocument()"
+                  [disabled]="store.documentDeleteLoading"
+                >
+                  {{ store.documentDeleteLoading ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </div>
+
+            <div class="document-inspector__body">
+              <p *ngIf="store.documentPreviewLoading" class="empty-note">Loading document preview...</p>
+              <p *ngIf="!store.selectedDocument && !store.documentPreviewLoading" class="empty-note">
+                Select a document to review it here.
+              </p>
+
+              <div *ngIf="store.selectedDocument && !store.documentPreviewLoading" class="document-inspector__content">
+                <p class="document-inspector__note">
+                  Use this preview to confirm the right document was ingested before opening or deleting it.
+                </p>
+
+                <div class="result-meta-row" *ngIf="store.selectedDocument.tags?.length">
+                  <span class="result-chip" *ngFor="let tag of store.selectedDocument.tags">{{ tag }}</span>
+                </div>
+
+                <div class="document-preview-card">
+                  <span class="summary-label">Preview</span>
+                  <pre>{{ store.getSelectedDocumentPreview() }}</pre>
+                </div>
+
+                <details class="metadata-panel" *ngIf="store.selectedDocument.metadata">
+                  <summary>View metadata JSON</summary>
+                  <pre class="metadata-block">{{ store.selectedDocument.metadata | json }}</pre>
+                </details>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

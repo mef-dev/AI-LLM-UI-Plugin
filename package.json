@@ -1,13 +1,14 @@
 {
-  "name": "hello-platform-plugin",
-  "version": "0.1.5",
-  "pluginMefName": "hello-platform-plugin",
+  "name": "ai-llm-ui",
+  "version": "0.3.4",
+  "pluginMefName": "ai-llm-ui",
   "scripts": {
     "start": "ng serve",
+    "build": "ng build --configuration production --output-hashing none --single-bundle",
     "generate-version-file": "npx generate-version-file",
     "publish": "npx mef-dev-publish",
-    "build:plugin": "npm run generate-version-file && ng build --configuration production --output-hashing none --single-bundle",
-    "publish-kuber": "npm run publish apiUrl=https://api.mef.dev"
+    "build:plugin": "npm run generate-version-file && npm run build",
+    "publish-kuber": "npm run publish apiUrl=https://stage-api.mef.dev"
   },
   "private": true,
   "dependencies": {
@@ -24,6 +25,7 @@
     "@natec/mef-dev-ui-kit": "^20.1.27",
     "bootstrap": "^5.3.8",
     "font-awesome": "^4.7.0",
+    "form-data": "^4.0.5",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "^0.15.1"
