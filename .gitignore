@@ -44,3 +44,6 @@ Thumbs.db
 
 # Local reports, exports, and presentation material
 /reports
+
+# Local environment overrides with credentials (never commit secrets)
+/src/environments/environment.local.ts

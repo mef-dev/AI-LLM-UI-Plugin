@@ -4,6 +4,7 @@
   "pluginMefName": "ai-llm-ui",
   "scripts": {
     "start": "ng serve",
+    "start:local": "ng serve --configuration local",
     "build": "ng build --configuration production --output-hashing none --single-bundle",
     "generate-version-file": "npx generate-version-file",
     "publish": "npx mef-dev-publish",

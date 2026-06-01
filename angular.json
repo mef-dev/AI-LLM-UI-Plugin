@@ -60,6 +60,14 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
+            },
+            "local": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -72,6 +80,9 @@
             },
             "development": {
               "buildTarget": "ai-llm-ui:build:development"
+            },
+            "local": {
+              "buildTarget": "ai-llm-ui:build:development,local"
             }
           },
           "defaultConfiguration": "development"
