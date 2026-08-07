@@ -1,9 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { PlatformHelper } from '@natec/mef-dev-platform-connector';
 import { PluginShellComponent } from './container/plugin-shell/plugin-shell.component';
 
-const routes: Routes = PlatformHelper.updatePluginsRoutes([
+// Routes are declared directly; the platform base path comes from APP_BASE_HREF
+// in app.module.ts (PlatformHelper.updatePluginsRoutes is deprecated since
+// @natec/mef-dev-platform-connector ^16.4.8).
+const routes: Routes = [
   {
     path: '',
     component: PluginShellComponent,
@@ -48,7 +50,7 @@ const routes: Routes = PlatformHelper.updatePluginsRoutes([
       }
     ]
   }
-]);
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
